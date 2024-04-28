@@ -1,6 +1,7 @@
 package org.example;
 
 import java.io.*;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,6 +50,10 @@ public class Customer {
 
     public void setAccounts(Map<String, Account> accounts) {
         this.accounts = accounts;
+    }
+
+    public Collection<Account> getAccountsList() {
+        return accounts.values();
     }
 }
 

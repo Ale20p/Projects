@@ -33,3 +33,8 @@ abstract class Account {
     }
 }
 
+interface IAccountService {
+    void createAccount(Customer customer, Account account);
+    void deleteAccount(String accountNumber);
+    Account getAccount(String accountNumber);
+}

@@ -1,14 +1,24 @@
 package org.example;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class BankManager {
     private String managerId;
     private String name;
     private CustomerManager customerManager;
+    private List<Transaction> pendingTransactions; // List to hold pending transactions for review
 
     public BankManager(String managerId, String name, CustomerManager customerManager) {
         this.managerId = managerId;
         this.name = name;
         this.customerManager = customerManager;
+    }
+
+    public BankManager(String managerId, String name) {
+        this.managerId = managerId;
+        this.name = name;
+        this.pendingTransactions = new ArrayList<>();
     }
 
     public void approveLargeWithdrawal(String customerId, double amount) {
@@ -48,6 +58,16 @@ public class BankManager {
 
     public void setCustomerManager(CustomerManager customerManager) {
         this.customerManager = customerManager;
+    }
+
+    // Method to add a transaction to the pending list
+    public void addPendingTransaction(Transaction transaction) {
+        pendingTransactions.add(transaction);
+    }
+
+    // Method to retrieve the list of pending transactions
+    public List<Transaction> getPendingTransactions() {
+        return pendingTransactions;
     }
 }
 
