@@ -16,10 +16,15 @@ class SavingsAccount extends Account {
 
     @Override
     public void withdraw(double amount) throws InsufficientFundsException {
-        if (this.balance - amount < MINIMUM_BALANCE) {
-            throw new InsufficientFundsException("Insufficient balance.");
+        if (amount <= 0) {
+            System.out.println("Withdraw amount must be positive.");
+            return;
         }
-        setBalance(getBalance() - amount);
+        if (this.balance - amount < MINIMUM_BALANCE) {
+            throw new InsufficientFundsException("Withdrawal would put balance below the minimum required balance of " + MINIMUM_BALANCE);
+        }
+        this.balance -= amount;
+        System.out.println("Withdrawn: " + amount + " New Balance: " + this.balance);
     }
 
     public void addInterest() {
