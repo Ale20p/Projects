@@ -3,7 +3,6 @@ package org.example;
 abstract class Account {
     protected String accountNumber;
     protected double balance;
-    protected final static double MIN_BALANCE = 100.0;
 
     public Account(String accNum, double initDeposit) {
         this.accountNumber = accNum;
@@ -12,6 +11,7 @@ abstract class Account {
 
     public abstract void deposit(double amount);
     public abstract void withdraw(double amount) throws InsufficientFundsException;
+
     public double checkBalance() {
         return balance;
     }

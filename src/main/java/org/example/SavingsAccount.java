@@ -1,6 +1,7 @@
 package org.example;
 
 class SavingsAccount extends Account {
+    private static final double MINIMUM_BALANCE = 50.00;
     private double interestRate;
 
     public SavingsAccount(String accNum, double initDeposit, double rate) {
@@ -10,14 +11,15 @@ class SavingsAccount extends Account {
 
     @Override
     public void deposit(double amount) {
-        this.balance += amount;
+        setBalance(getBalance() + amount);
     }
 
     @Override
     public void withdraw(double amount) throws InsufficientFundsException {
-        if (this.balance - amount < MIN_BALANCE)
+        if (this.balance - amount < MINIMUM_BALANCE) {
             throw new InsufficientFundsException("Insufficient balance.");
-        this.balance -= amount;
+        }
+        setBalance(getBalance() - amount);
     }
 
     public void addInterest() {
