@@ -5,13 +5,14 @@ import java.util.List;
 
 public class BankManager {
     private String managerId;
+    private String password;  // Add password field
     private String name;
-    private CustomerManager customerManager;  // Reference to CustomerManager
-    private TransactionManager transactionManager;  // Reference to TransactionManager
+    private CustomerManager customerManager;
+    private TransactionManager transactionManager;
 
-    // Constructor that takes CustomerManager and TransactionManager
-    public BankManager(String managerId, String name, CustomerManager customerManager, TransactionManager transactionManager) {
+    public BankManager(String managerId, String password, String name, CustomerManager customerManager, TransactionManager transactionManager) {
         this.managerId = managerId;
+        this.password = password;
         this.name = name;
         this.customerManager = customerManager;
         this.transactionManager = transactionManager;
@@ -63,4 +64,9 @@ public class BankManager {
     public void setName(String name) {
         this.name = name;
     }
+
+    public boolean authenticateManager(String managerId, String password) {
+        return this.managerId.equals(managerId) && this.password.equals(password); // Assuming password field exists
+    }
+
 }

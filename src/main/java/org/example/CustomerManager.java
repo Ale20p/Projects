@@ -50,4 +50,10 @@ public class CustomerManager {
     public List<Customer> listAllCustomers() {
         return new ArrayList<>(customers.values());
     }
+
+    public boolean authenticateCustomer(String customerId, String password) {
+        Customer customer = customers.get(customerId);
+        return customer != null && customer.getPassword().equals(password);
+    }
+
 }

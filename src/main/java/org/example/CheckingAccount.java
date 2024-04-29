@@ -2,6 +2,7 @@ package org.example;
 
 class CheckingAccount extends Account {
     private static double monthlyFee = 10.0;
+    private static final double MIN_BALANCE = 100.00;
 
     public CheckingAccount(String accNum, double initDeposit) {
         super(accNum, initDeposit);
