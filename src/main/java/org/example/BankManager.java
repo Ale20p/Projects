@@ -6,36 +6,48 @@ import java.util.List;
 public class BankManager {
     private String managerId;
     private String name;
-    private CustomerManager customerManager;
-    private List<Transaction> pendingTransactions; // List to hold pending transactions for review
+    private CustomerManager customerManager;  // Reference to CustomerManager
+    private TransactionManager transactionManager;  // Reference to TransactionManager
 
-    public BankManager(String managerId, String name, CustomerManager customerManager) {
+    // Constructor that takes CustomerManager and TransactionManager
+    public BankManager(String managerId, String name, CustomerManager customerManager, TransactionManager transactionManager) {
         this.managerId = managerId;
         this.name = name;
         this.customerManager = customerManager;
+        this.transactionManager = transactionManager;
     }
 
-    public BankManager(String managerId, String name) {
-        this.managerId = managerId;
-        this.name = name;
-        this.pendingTransactions = new ArrayList<>();
-    }
-
-    public void approveLargeWithdrawal(String customerId, double amount) {
-        Customer customer = customerManager.getCustomer(customerId);
-        if (customer != null && canApproveWithdrawal(customer, amount)) {
-            System.out.println("Withdrawal approved for customer " + customerId);
-            // Additional logic to process the approval
-        } else {
-            System.out.println("Withdrawal denied for customer " + customerId);
+    // Method to review and approve large transactions
+    public void reviewLargeTransactions() {
+        List<Transaction> pendingTransactions = transactionManager.getPendingTransactions();
+        for (Transaction transaction : pendingTransactions) {
+            if (transaction.getAmount() > 10000) {  // Assuming $10,000 is the threshold for large transactions
+                transaction.setApproved(true);
+                System.out.println("Transaction approved: " + transaction.getTransactionId());
+            }
         }
     }
 
-    private boolean canApproveWithdrawal(Customer customer, double amount) {
-        // Define logic to determine if the withdrawal can be approved
-        return true; // Simplified
+    // Method to process all transactions
+    public void processAllTransactions() {
+        transactionManager.processTransactions();
     }
 
+    // Methods to manage customer profiles
+    public void addCustomerProfile(Customer customer) {
+        customerManager.addCustomer(customer);
+        System.out.println("New customer profile added: " + customer.getName());
+    }
+
+    public void updateCustomerInfo(String customerId, String newName) {
+        if (customerManager.updateCustomerInfo(customerId, newName)) {
+            System.out.println("Customer information updated: " + newName);
+        } else {
+            System.out.println("Customer update failed for ID: " + customerId);
+        }
+    }
+
+    // Getters and Setters
     public String getManagerId() {
         return managerId;
     }
@@ -51,23 +63,4 @@ public class BankManager {
     public void setName(String name) {
         this.name = name;
     }
-
-    public CustomerManager getCustomerManager() {
-        return customerManager;
-    }
-
-    public void setCustomerManager(CustomerManager customerManager) {
-        this.customerManager = customerManager;
-    }
-
-    // Method to add a transaction to the pending list
-    public void addPendingTransaction(Transaction transaction) {
-        pendingTransactions.add(transaction);
-    }
-
-    // Method to retrieve the list of pending transactions
-    public List<Transaction> getPendingTransactions() {
-        return pendingTransactions;
-    }
 }
-

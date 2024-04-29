@@ -1,88 +1,47 @@
 package org.example;
 
-import java.util.Date;
-import java.util.List;
-
-public class Transaction implements TransactionOperations {
+public class Transaction {
     private String transactionId;
     private double amount;
-    private Account account;
-    private Date transactionDate;
+    private Account account;  // Assume each transaction is linked to an Account
+    private boolean isProcessed;
+    private boolean isApproved;
 
     public Transaction(String transactionId, double amount, Account account) {
         this.transactionId = transactionId;
         this.amount = amount;
         this.account = account;
-        this.transactionDate = new Date(); // Current date and time
+        this.isProcessed = false;
+        this.isApproved = false;
     }
 
-    @Override
-    public void execute() throws TransactionException {
-        try {
-            account.withdraw(amount); // Assume it's a withdrawal for simplicity
-        } catch (InsufficientFundsException e) {
-            throw new TransactionException("Failed to execute transaction: " + e.getMessage());
+    public void execute() throws Exception {
+        if (!isApproved) {
+            throw new Exception("Transaction not approved.");
         }
-    }
-
-    @Override
-    public void reverse() throws TransactionException {
-        // Implementation for reversing a transaction
-    }
-
-    public static int findTransactionByAmount(Transaction[] transactions, double amount) {
-        int index = binarySearch(transactions, amount, 0, transactions.length - 1);
-        return index; // Returns -1 if not found
-    }
-
-    private static int binarySearch(Transaction[] arr, double target, int low, int high) {
-        while (low <= high) {
-            int mid = low + (high - low) / 2;
-            double midVal = arr[mid].getAmount();
-            if (midVal < target) {
-                low = mid + 1;
-            } else if (midVal > target) {
-                high = mid - 1;
-            } else {
-                return mid; // target found
-            }
-        }
-        return -1; // target not found
+        account.withdraw(amount);  // Assuming this is a withdrawal for simplicity
+        isProcessed = true;
     }
 
     public String getTransactionId() {
         return transactionId;
     }
 
-    public void setTransactionId(String transactionId) {
-        this.transactionId = transactionId;
-    }
-
     public double getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
-        this.amount = amount;
+    public boolean isProcessed() {
+        return isProcessed;
     }
 
-    public Account getAccount() {
-        return account;
+    public void setApproved(boolean isApproved) {
+        this.isApproved = isApproved;
     }
 
-    public void setAccount(Account account) {
-        this.account = account;
-    }
-}
-
-class TransactionException extends Exception {
-    public TransactionException(String message) {
-        super(message);
+    public boolean isApproved() {
+        return isApproved;
     }
 }
 
-interface ITransactionService {
-    void processTransaction(Transaction transaction) throws TransactionException;
-    List<Transaction> getTransactionsForAccount(String accountNumber);
-}
 
