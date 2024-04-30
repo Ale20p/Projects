@@ -1,12 +1,11 @@
 package org.example;
 
 class SavingsAccount extends Account {
-    private static final double MINIMUM_BALANCE = 50.00;
+    private static final double MINIMUM_BALANCE = 100.00;
     private double interestRate;
 
-    public SavingsAccount(String accNum, double initDeposit, double rate) {
+    public SavingsAccount(String accNum, double initDeposit) {
         super(accNum, initDeposit);
-        this.interestRate = rate;
     }
 
     @Override
