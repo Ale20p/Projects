@@ -1,10 +1,6 @@
 package org.example;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
 public class CustomerManager {
     private Map<String, Customer> customers = new HashMap<>();
@@ -21,19 +17,6 @@ public class CustomerManager {
         } else {
             System.out.println("Customer not found.");
         }
-    }
-
-    public Customer getCustomer(String customerID) {
-        return customers.get(customerID);
-    }
-
-    public Map<String, Customer> getAllCustomers() {
-        return new HashMap<>(customers);
-    }
-
-    public boolean authenticateCustomer(String customerId, String password) {
-        Customer customer = customers.get(customerId);
-        return customer != null && customer.getPassword().equals(password);
     }
 
     public void deleteAccount(String customerId, String accountNumber) {
@@ -54,19 +37,38 @@ public class CustomerManager {
         }
     }
 
-    public List<String> generateCustomerReports() {
-        List<String> reports = new ArrayList<>();
-        for (Customer customer : customers.values()) {
+    public Customer getCustomer(String customerID) {
+        return customers.get(customerID);
+    }
+
+    public Map<String, Customer> getAllCustomers() {
+        return new HashMap<>(customers);
+    }
+
+    public boolean authenticateCustomer(String customerId, String password) {
+        Customer customer = customers.get(customerId);
+        return customer != null && customer.getPassword().equals(password);
+    }
+
+    public String generateCustomerReport(String customerId) {
+        Customer customer = customers.get(customerId);
+        if (customer != null) {
             StringBuilder report = new StringBuilder();
             report.append("Customer ID: ").append(customer.getCustomerID()).append("\n");
             report.append("Name: ").append(customer.getName()).append("\n");
-            report.append("Accounts:\n");
+            report.append("Accounts and Transactions:\n");
             for (Account account : customer.getAccountsList()) {
                 report.append("\tAccount Number: ").append(account.getAccountNumber())
                         .append(", Balance: $").append(String.format("%.2f", account.getBalance())).append("\n");
+                for (Transaction transaction : account.getTransactions()) {
+                    report.append("\t\tTransaction ID: ").append(transaction.getTransactionId())
+                            .append(", Type: ").append(transaction.getType())
+                            .append(", Amount: $").append(String.format("%.2f", transaction.getAmount()))
+                            .append(", Approved: ").append(transaction.isApproved() ? "Yes" : "No").append("\n");
+                }
             }
-            reports.add(report.toString());
+            return report.toString();
         }
-        return reports;
+        return "Customer not found.";
     }
 }

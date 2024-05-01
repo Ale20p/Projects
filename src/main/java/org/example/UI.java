@@ -200,7 +200,7 @@ class ManagerUI implements UI {
             System.out.println("3. Add Account to Customer");
             System.out.println("4. Delete Customer");
             System.out.println("5. Delete Account");
-            System.out.println("6. Generate Customer Reports");
+            System.out.println("6. Generate Report for a Specific Customer");
             System.out.println("0. Exit");
             System.out.print("Choose an action: ");
             action = scanner.nextLine();
@@ -222,7 +222,7 @@ class ManagerUI implements UI {
                     deleteAccount();
                     break;
                 case "6":
-                    generateReports();
+                    generateSpecificCustomerReport();
                     break;
                 case "0":
                     System.out.println("Exiting manager dashboard...");
@@ -232,6 +232,13 @@ class ManagerUI implements UI {
                     break;
             }
         } while (!"0".equals(action));
+    }
+
+    private void generateSpecificCustomerReport() {
+        System.out.println("Enter Customer ID to generate report:");
+        String customerId = scanner.nextLine();
+        String report = customerManager.generateCustomerReport(customerId);
+        System.out.println(report);
     }
 
     private void approveTransactions() {
@@ -297,13 +304,5 @@ class ManagerUI implements UI {
         System.out.println("Enter Account Number to delete:");
         String accountNumber = scanner.nextLine();
         customerManager.deleteAccount(customerId, accountNumber);
-    }
-
-    private void generateReports() {
-        List<String> reports = customerManager.generateCustomerReports();
-        System.out.println("Customer Reports:");
-        for (String report : reports) {
-            System.out.println(report);
-        }
     }
 }
