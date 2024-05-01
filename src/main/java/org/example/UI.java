@@ -178,7 +178,6 @@ class CustomerUI implements UI {
 
 
 
-
 class ManagerUI implements UI {
     private BankManager bankManager;
     private TransactionManager transactionManager;
@@ -193,28 +192,30 @@ class ManagerUI implements UI {
     @Override
     public void displayDashboard() {
         System.out.println("Manager Dashboard: " + bankManager.getName());
-        System.out.println("Pending Transactions for Review:");
         List<Transaction> pendingTransactions = transactionManager.getPendingTransactions();
-        for (Transaction transaction : pendingTransactions) {
-            System.out.println("Transaction ID: " + transaction.getTransactionId() + ", Amount: $" + transaction.getAmount());
+        if (pendingTransactions.isEmpty()) {
+            System.out.println("No pending transactions to review.");
+            return;
         }
-        System.out.println("Available Actions:");
-        System.out.println("1. Approve All Transactions");
-        System.out.println("0. Return to Main Menu");
-        System.out.println("Please select an action:");
 
-        int action = scanner.nextInt();
-        if (action == 1) {
+        System.out.println("Pending Transactions for Review:");
+        for (Transaction transaction : pendingTransactions) {
+            System.out.println("Transaction ID: " + transaction.getTransactionId() + ", Amount: $" + transaction.getAmount() + ", Type: " + transaction.getType());
+        }
+
+        System.out.println("Enter the Transaction ID to approve or type 'all' to approve all:");
+        String input = scanner.nextLine();
+        if ("all".equalsIgnoreCase(input)) {
             for (Transaction transaction : pendingTransactions) {
-//                transaction.setApproved(true);
+                transactionManager.approveTransaction(transaction.getTransactionId());
                 System.out.println("Transaction " + transaction.getTransactionId() + " approved.");
             }
-        } else if (action == 0) {
-            return;  // Return to main menu
         } else {
-            System.out.println("Invalid action. Please try again.");
+            transactionManager.approveTransaction(input);
+            System.out.println("Transaction " + input + " approved.");
         }
     }
 }
+
 
 

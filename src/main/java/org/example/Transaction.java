@@ -9,12 +9,28 @@ public class Transaction {
     private boolean isApproved;
 
     public Transaction(String type, double amount, Account account) {
-        this.transactionId = java.util.UUID.randomUUID().toString();  // Generate unique ID
+        this.transactionId = java.util.UUID.randomUUID().toString();
         this.type = type;
         this.amount = amount;
         this.account = account;
-        this.isProcessed = true;  // Direct transactions are immediately processed
-        this.isApproved = true;  // Assume approval for direct transactions
+        this.isProcessed = false;  // Transactions need approval
+        this.isApproved = false;  // Default to not approved
+    }
+
+    public void approveTransaction() {
+        this.isApproved = true;
+    }
+
+    public boolean isProcessed() {
+        return isProcessed;
+    }
+
+    public void setProcessed(boolean processed) {
+        isProcessed = processed;
+    }
+
+    public boolean isApproved() {
+        return isApproved;
     }
 
     public String getTransactionId() {
@@ -31,13 +47,5 @@ public class Transaction {
 
     public Account getAccount() {
         return account;
-    }
-
-    public boolean isProcessed() {
-        return isProcessed;
-    }
-
-    public boolean isApproved() {
-        return isApproved;
     }
 }
