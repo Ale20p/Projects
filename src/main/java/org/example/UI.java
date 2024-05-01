@@ -176,34 +176,77 @@ class CustomerUI implements UI {
 }
 
 
+import java.util.Scanner;
 
-
-class ManagerUI implements UI {
+public class ManagerUI implements UI {
     private BankManager bankManager;
     private TransactionManager transactionManager;
+    private CustomerManager customerManager;
     private Scanner scanner;
 
-    public ManagerUI(BankManager bankManager, TransactionManager transactionManager, Scanner scanner) {
+    public ManagerUI(BankManager bankManager, TransactionManager transactionManager, CustomerManager customerManager, Scanner scanner) {
         this.bankManager = bankManager;
         this.transactionManager = transactionManager;
+        this.customerManager = customerManager;
         this.scanner = scanner;
     }
 
     @Override
     public void displayDashboard() {
         System.out.println("Manager Dashboard: " + bankManager.getName());
+        String action;
+        do {
+            System.out.println("\nAvailable Actions:");
+            System.out.println("1. Approve Transactions");
+            System.out.println("2. Add Customer");
+            System.out.println("3. Add Account to Customer");
+            System.out.println("4. Delete Customer");
+            System.out.println("5. Delete Account");
+            System.out.println("6. Generate Customer Reports");
+            System.out.println("0. Exit");
+            System.out.print("Choose an action: ");
+            action = scanner.nextLine();
+
+            switch (action) {
+                case "1":
+                    approveTransactions();
+                    break;
+                case "2":
+                    addCustomer();
+                    break;
+                case "3":
+                    addAccountToCustomer();
+                    break;
+                case "4":
+                    deleteCustomer();
+                    break;
+                case "5":
+                    deleteAccount();
+                    break;
+                case "6":
+                    generateReports();
+                    break;
+                case "0":
+                    System.out.println("Exiting manager dashboard...");
+                    break;
+                default:
+                    System.out.println("Invalid action. Please try again.");
+                    break;
+            }
+        } while (!"0".equals(action));
+    }
+
+    private void approveTransactions() {
         List<Transaction> pendingTransactions = transactionManager.getPendingTransactions();
         if (pendingTransactions.isEmpty()) {
-            System.out.println("No pending transactions to review.");
+            System.out.println("No pending transactions to approve.");
             return;
         }
-
-        System.out.println("Pending Transactions for Review:");
+        System.out.println("Pending Transactions:");
         for (Transaction transaction : pendingTransactions) {
-            System.out.println("Transaction ID: " + transaction.getTransactionId() + ", Amount: $" + transaction.getAmount() + ", Type: " + transaction.getType());
+            System.out.println(transaction.getTransactionId() + " - $" + transaction.getAmount() + " - " + transaction.getType());
         }
-
-        System.out.println("Enter the Transaction ID to approve or type 'all' to approve all:");
+        System.out.println("Enter transaction ID to approve or 'all' to approve all:");
         String input = scanner.nextLine();
         if ("all".equalsIgnoreCase(input)) {
             for (Transaction transaction : pendingTransactions) {
@@ -215,7 +258,54 @@ class ManagerUI implements UI {
             System.out.println("Transaction " + input + " approved.");
         }
     }
+
+    private void addCustomer() {
+        System.out.println("Enter Customer ID:");
+        String id = scanner.nextLine();
+        System.out.println("Enter Customer Name:");
+        String name = scanner.nextLine();
+        System.out.println("Enter Customer Password:");
+        String password = scanner.nextLine();
+        Customer newCustomer = new Customer(id, name, password);
+        customerManager.addCustomer(newCustomer);
+    }
+
+    private void addAccountToCustomer() {
+        System.out.println("Enter Customer ID:");
+        String customerId = scanner.nextLine();
+        Customer customer = customerManager.getCustomer(customerId);
+        if (customer != null) {
+            System.out.println("Enter Account Number:");
+            String accountNumber = scanner.nextLine();
+            System.out.println("Enter Initial Balance:");
+            double initialBalance = Double.parseDouble(scanner.nextLine());
+            Account newAccount = new SavingsAccount(accountNumber, initialBalance);  // Assuming all new accounts are SavingsAccounts
+            customer.addAccount(newAccount);
+            System.out.println("Account added successfully to customer " + customerId);
+        } else {
+            System.out.println("Customer not found.");
+        }
+    }
+
+    private void deleteCustomer() {
+        System.out.println("Enter Customer ID to delete:");
+        String id = scanner.nextLine();
+        customerManager.deleteCustomer(id);
+    }
+
+    private void deleteAccount() {
+        System.out.println("Enter Customer ID:");
+        String customerId = scanner.nextLine();
+        System.out.println("Enter Account Number to delete:");
+        String accountNumber = scanner.nextLine();
+        customerManager.deleteAccount(customerId, accountNumber);
+    }
+
+    private void generateReports() {
+        List<String> reports = customerManager.generateCustomerReports();
+        System.out.println("Customer Reports:");
+        for (String report : reports) {
+            System.out.println(report);
+        }
+    }
 }
-
-
-

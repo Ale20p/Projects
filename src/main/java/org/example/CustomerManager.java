@@ -6,49 +6,24 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class CustomerManager {
-    private Map<String, Customer> customers;
+    private Map<String, Customer> customers = new HashMap<>();
 
-    public CustomerManager() {
-        this.customers = new HashMap<>();
-    }
-
-    // Add a new customer to the system
     public void addCustomer(Customer customer) {
         customers.put(customer.getCustomerID(), customer);
         System.out.println("Customer added: " + customer.getName());
     }
 
-    // Retrieve a customer by their ID
+    public void deleteCustomer(String customerId) {
+        if (customers.containsKey(customerId)) {
+            customers.remove(customerId);
+            System.out.println("Customer deleted successfully.");
+        } else {
+            System.out.println("Customer not found.");
+        }
+    }
+
     public Customer getCustomer(String customerID) {
         return customers.get(customerID);
-    }
-
-    // Update customer information
-    public boolean updateCustomerInfo(String customerID, String newName) {
-        Customer customer = customers.get(customerID);
-        if (customer != null) {
-            customer.setName(newName);
-            System.out.println("Customer info updated for " + customerID + ": new name " + newName);
-            return true;
-        } else {
-            System.out.println("Customer not found for ID: " + customerID);
-            return false;
-        }
-    }
-
-    // Delete a customer from the system
-    public void deleteCustomer(String customerID) {
-        if (customers.containsKey(customerID)) {
-            customers.remove(customerID);
-            System.out.println("Customer deleted: " + customerID);
-        } else {
-            System.out.println("Customer not found: " + customerID);
-        }
-    }
-
-    // List all customers
-    public List<Customer> listAllCustomers() {
-        return new ArrayList<>(customers.values());
     }
 
     public boolean authenticateCustomer(String customerId, String password) {
@@ -56,4 +31,29 @@ public class CustomerManager {
         return customer != null && customer.getPassword().equals(password);
     }
 
+    public Map<String, Customer> getAllCustomers() {
+        return new HashMap<>(customers);
+    }
+
+    public List<String> generateCustomerReports() {
+        List<String> reports = new ArrayList<>();
+        for (Customer customer : customers.values()) {
+            StringBuilder report = new StringBuilder();
+            report.append("Customer ID: ").append(customer.getCustomerID()).append("\n");
+            report.append("Name: ").append(customer.getName()).append("\n");
+            report.append("Accounts:\n");
+            for (Account account : customer.getAccountsList()) {
+                report.append("\tAccount Number: ").append(account.getAccountNumber())
+                        .append(", Balance: $").append(String.format("%.2f", account.getBalance())).append("\n");
+                for (Transaction transaction : account.getTransactions()) {
+                    report.append("\t\tTransaction ID: ").append(transaction.getTransactionId())
+                            .append(", Type: ").append(transaction.getType())
+                            .append(", Amount: $").append(String.format("%.2f", transaction.getAmount()))
+                            .append(", Approved: ").append(transaction.isApproved() ? "Yes" : "No").append("\n");
+                }
+            }
+            reports.add(report.toString());
+        }
+        return reports;
+    }
 }
