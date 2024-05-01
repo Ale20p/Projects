@@ -1,19 +1,21 @@
 package org.example;
 
-import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Customer {
     private String customerID;
     private String name;
-    private String password;  // Password field
+    private String password;
     private List<Account> accounts;
+    private List<Loan> loans;
 
     public Customer(String customerID, String name, String password) {
         this.customerID = customerID;
         this.name = name;
         this.password = password;
         this.accounts = new ArrayList<>();
+        this.loans = new ArrayList<>();
     }
 
     public String getCustomerID() {
@@ -38,5 +40,13 @@ public class Customer {
 
     public void addAccount(Account account) {
         accounts.add(account);
+    }
+
+    public void addLoan(Loan loan) {
+        loans.add(loan);
+    }
+
+    public List<Loan> getLoans() {
+        return loans;
     }
 }

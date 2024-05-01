@@ -23,7 +23,7 @@ public class BankManager {
         List<Transaction> pendingTransactions = transactionManager.getPendingTransactions();
         for (Transaction transaction : pendingTransactions) {
             if (transaction.getAmount() > 10000) {  // Assuming $10,000 is the threshold for large transactions
-                transaction.setApproved(true);
+//                transaction.setApproved(true);
                 System.out.println("Transaction approved: " + transaction.getTransactionId());
             }
         }
@@ -31,7 +31,7 @@ public class BankManager {
 
     // Method to process all transactions
     public void processAllTransactions() {
-        transactionManager.processTransactions();
+//        transactionManager.processTransactions();
     }
 
     // Methods to manage customer profiles

@@ -1,19 +1,24 @@
 package org.example;
 
+import java.util.List;
+import java.util.ArrayList;
+
 public abstract class Account {
     protected String accountNumber;
     protected double balance;
+    protected List<Transaction> transactions;  // Store transactions for this account
 
     public Account(String accountNumber, double initialBalance) {
         this.accountNumber = accountNumber;
         this.balance = initialBalance;
+        this.transactions = new ArrayList<>();
     }
 
-    // Method to deposit money into the account
     public void deposit(double amount) {
         if (amount > 0) {
-            this.balance += amount;
-            System.out.println("Deposited: " + amount + " New Balance: " + this.balance);
+            this.balance += amount;  // Directly update the balance
+            transactions.add(new Transaction("Deposit", amount, this));  // Log transaction
+            System.out.println("Deposited: " + amount + ". New balance: " + this.balance);
         } else {
             System.out.println("Deposit amount must be positive.");
         }
@@ -21,34 +26,15 @@ public abstract class Account {
 
     public abstract void withdraw(double amount) throws InsufficientFundsException;
 
-    public double checkBalance() {
-        return this.balance;
-    }
-
-    public String getAccountNumber() {
-        return accountNumber;
-    }
-
-    public void setAccountNumber(String accountNumber) {
-        this.accountNumber = accountNumber;
+    public List<Transaction> getTransactions() {
+        return transactions;
     }
 
     public double getBalance() {
         return balance;
     }
 
-    public void setBalance(double balance) {
-        this.balance = balance;
+    public String getAccountNumber() {
+        return accountNumber;
     }
-
-    // Utility method for printing the account details
-    public void printAccountDetails() {
-        System.out.println("Account Number: " + this.accountNumber + " Balance: " + this.balance);
-    }
-}
-
-interface IAccountService {
-    void createAccount(Customer customer, Account account);
-    void deleteAccount(String accountNumber);
-    Account getAccount(String accountNumber);
 }

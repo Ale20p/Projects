@@ -2,8 +2,6 @@ package org.example;
 
 import java.util.Scanner;
 
-import java.util.Scanner;
-
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -11,46 +9,76 @@ public class Main {
         TransactionManager transactionManager = new TransactionManager();
         BankManager bankManager = new BankManager("001", "manager_password", "Jane Doe", customerManager, transactionManager);
 
-        // Assume we're adding a customer with a default account for simplicity
-        Customer customer = new Customer("123", "John Doe", "customer_password");
-        Account newAccount = new SavingsAccount("acc123", 1000.00);
-        customer.addAccount(newAccount);
-        customerManager.addCustomer(customer);
+        // Setup initial data for testing
+        setupInitialData(customerManager);
 
+        System.out.println("Welcome to the Online Banking Management System!");
         while (true) {
-            System.out.println("Type '1' for Customer, '2' for Bank Manager, '0' to Exit:");
-            String userType = scanner.nextLine();
+            System.out.println("\nPlease choose an option:");
+            System.out.println("1: Login as Customer");
+            System.out.println("2: Login as Bank Manager");
+            System.out.println("0: Exit System");
 
-            if (userType.equals("0")) {
-                break;
+            String choice = scanner.nextLine();
+            if ("0".equals(choice)) {
+                break; // Exit the loop and finish the program
             }
 
-            System.out.println("Please enter your ID:");
-            String userId = scanner.nextLine();
-            System.out.println("Enter password:");
-            String password = scanner.nextLine();
-
-            if (userType.equals("1")) {
-                if (customerManager.authenticateCustomer(userId, password)) {
-                    Customer authenticatedCustomer = customerManager.getCustomer(userId);
-                    CustomerUI customerUI = new CustomerUI(authenticatedCustomer, scanner);
-                    customerUI.displayDashboard();
-                } else {
-                    System.out.println("Invalid credentials for customer.");
-                }
-            } else if (userType.equals("2")) {
-                if (bankManager.authenticateManager(userId, password)) {
-                    ManagerUI managerUI = new ManagerUI(bankManager, transactionManager, scanner);
-                    managerUI.displayDashboard();
-                } else {
-                    System.out.println("Invalid credentials for manager.");
-                }
-            } else {
-                System.out.println("Invalid option, please choose again.");
+            switch (choice) {
+                case "1":
+                    handleCustomerLogin(scanner, customerManager);
+                    break;
+                case "2":
+                    handleManagerLogin(scanner, bankManager, transactionManager);
+                    break;
+                default:
+                    System.out.println("Invalid option selected. Please try again.");
             }
         }
 
         scanner.close();
         System.out.println("Thank you for using the Online Banking Management System.");
+    }
+
+    private static void handleCustomerLogin(Scanner scanner, CustomerManager customerManager) {
+        System.out.println("Enter your Customer ID:");
+        String customerId = scanner.nextLine();
+        System.out.println("Enter your password:");
+        String password = scanner.nextLine();
+
+        if (customerManager.authenticateCustomer(customerId, password)) {
+            Customer customer = customerManager.getCustomer(customerId);
+            CustomerUI customerUI = new CustomerUI(customer, scanner);
+            customerUI.displayDashboard();
+        } else {
+            System.out.println("Authentication failed. Check your credentials and try again.");
+        }
+    }
+
+    private static void handleManagerLogin(Scanner scanner, BankManager bankManager, TransactionManager transactionManager) {
+        System.out.println("Enter Manager ID:");
+        String managerId = scanner.nextLine();
+        System.out.println("Enter your password:");
+        String password = scanner.nextLine();
+
+        if (bankManager.authenticateManager(managerId, password)) {
+            ManagerUI managerUI = new ManagerUI(bankManager, transactionManager, scanner);
+            managerUI.displayDashboard();
+        } else {
+            System.out.println("Authentication failed. Check your credentials and try again.");
+        }
+    }
+
+    private static void setupInitialData(CustomerManager customerManager) {
+        Customer customer1 = new Customer("101", "John Doe", "pass123");
+        Account account1 = new SavingsAccount("101-001", 1000.00);
+        customer1.addAccount(account1);
+
+        Customer customer2 = new Customer("102", "Jane Doe", "pass456");
+        Account account2 = new SavingsAccount("102-001", 2500.00);
+        customer2.addAccount(account2);
+
+        customerManager.addCustomer(customer1);
+        customerManager.addCustomer(customer2);
     }
 }
