@@ -2,6 +2,7 @@ package org.example;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -26,13 +27,31 @@ public class CustomerManager {
         return customers.get(customerID);
     }
 
+    public Map<String, Customer> getAllCustomers() {
+        return new HashMap<>(customers);
+    }
+
     public boolean authenticateCustomer(String customerId, String password) {
         Customer customer = customers.get(customerId);
         return customer != null && customer.getPassword().equals(password);
     }
 
-    public Map<String, Customer> getAllCustomers() {
-        return new HashMap<>(customers);
+    public void deleteAccount(String customerId, String accountNumber) {
+        Customer customer = getCustomer(customerId);
+        if (customer != null) {
+            Iterator<Account> it = customer.getAccountsList().iterator();
+            while (it.hasNext()) {
+                Account account = it.next();
+                if (account.getAccountNumber().equals(accountNumber)) {
+                    it.remove();
+                    System.out.println("Account " + accountNumber + " deleted successfully from customer " + customerId);
+                    return;
+                }
+            }
+            System.out.println("Account not found.");
+        } else {
+            System.out.println("Customer not found.");
+        }
     }
 
     public List<String> generateCustomerReports() {
@@ -45,12 +64,6 @@ public class CustomerManager {
             for (Account account : customer.getAccountsList()) {
                 report.append("\tAccount Number: ").append(account.getAccountNumber())
                         .append(", Balance: $").append(String.format("%.2f", account.getBalance())).append("\n");
-                for (Transaction transaction : account.getTransactions()) {
-                    report.append("\t\tTransaction ID: ").append(transaction.getTransactionId())
-                            .append(", Type: ").append(transaction.getType())
-                            .append(", Amount: $").append(String.format("%.2f", transaction.getAmount()))
-                            .append(", Approved: ").append(transaction.isApproved() ? "Yes" : "No").append("\n");
-                }
             }
             reports.add(report.toString());
         }

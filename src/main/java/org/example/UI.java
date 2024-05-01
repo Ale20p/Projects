@@ -176,9 +176,7 @@ class CustomerUI implements UI {
 }
 
 
-import java.util.Scanner;
-
-public class ManagerUI implements UI {
+class ManagerUI implements UI {
     private BankManager bankManager;
     private TransactionManager transactionManager;
     private CustomerManager customerManager;
