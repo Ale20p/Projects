@@ -7,6 +7,6 @@ public class DataStorage {
 
     public Object loadObject(String id) {
         // Logic to load an object from the database or file
-        return null; // Simplified
+        return null;
     }
 }

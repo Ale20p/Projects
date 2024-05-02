@@ -38,3 +38,9 @@ public abstract class Account {
         return accountNumber;
     }
 }
+
+class InsufficientFundsException extends Exception {
+    public InsufficientFundsException(String message) {
+        super(message);
+    }
+}

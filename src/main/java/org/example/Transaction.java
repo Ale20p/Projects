@@ -44,8 +44,4 @@ public class Transaction {
     public double getAmount() {
         return amount;
     }
-
-    public Account getAccount() {
-        return account;
-    }
 }

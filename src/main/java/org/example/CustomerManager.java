@@ -41,10 +41,6 @@ public class CustomerManager {
         return customers.get(customerID);
     }
 
-    public Map<String, Customer> getAllCustomers() {
-        return new HashMap<>(customers);
-    }
-
     public boolean authenticateCustomer(String customerId, String password) {
         Customer customer = customers.get(customerId);
         return customer != null && customer.getPassword().equals(password);

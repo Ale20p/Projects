@@ -1,11 +1,8 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class BankManager {
     private String managerId;
-    private String password;  // Add password field
+    private String password;
     private String name;
     private CustomerManager customerManager;
     private TransactionManager transactionManager;
@@ -16,11 +13,6 @@ public class BankManager {
         this.name = name;
         this.customerManager = customerManager;
         this.transactionManager = transactionManager;
-    }
-
-    // Getters and Setters
-    public String getManagerId() {
-        return managerId;
     }
 
     public String getName() {

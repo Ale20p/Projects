@@ -1,25 +1,23 @@
 package org.example;
 
-class CheckingAccount extends Account {
-    private static double monthlyFee = 10.0;
-    private static final double MIN_BALANCE = 100.00;
+public class CheckingAccount extends Account {
 
-    public CheckingAccount(String accNum, double initDeposit) {
-        super(accNum, initDeposit);
-    }
-
-    @Override
-    public void deposit(double amount) {
-        this.balance += amount;
+    public CheckingAccount(String accountNumber, double initialBalance) {
+        super(accountNumber, initialBalance);
     }
 
     @Override
     public void withdraw(double amount) throws InsufficientFundsException {
-        if (balance - amount < MIN_BALANCE) throw new InsufficientFundsException("Insufficient balance.");
+        if (amount <= 0) {
+            System.out.println("Withdrawal amount must be positive.");
+            return;
+        }
+        if (this.balance - amount < 0) {
+            throw new InsufficientFundsException("Insufficient funds for the withdrawal.");
+        }
         this.balance -= amount;
-    }
-
-    public void applyMonthlyFee() {
-        this.balance -= monthlyFee;
+        transactions.add(new Transaction("Withdrawal", amount, this));
+        System.out.println("Withdrawn: " + amount + ". New balance: " + this.balance);
     }
 }
+

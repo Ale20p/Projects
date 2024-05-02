@@ -2,7 +2,6 @@ package org.example;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Optional;
 
 public class TransactionManager {
     private List<Transaction> transactions;

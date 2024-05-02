@@ -22,8 +22,4 @@ public class Loan {
     public boolean isApproved() {
         return isApproved;
     }
-
-    public void setApproved(boolean approved) {
-        isApproved = approved;
-    }
 }

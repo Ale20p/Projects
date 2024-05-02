@@ -2,17 +2,15 @@ package org.example;
 
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public interface UI {
     void displayDashboard();
 }
 
-
 class CustomerUI implements UI {
     private Customer customer;
     private Scanner scanner;
-    private Account selectedAccount;  // To hold the selected account
+    private Account selectedAccount;  // To hold the selected account for session-based operations
 
     public CustomerUI(Customer customer, Scanner scanner) {
         this.customer = customer;
@@ -27,14 +25,15 @@ class CustomerUI implements UI {
             return;
         }
 
-        if (!selectAccount(false)) {  // Let the customer select the account at the start for other operations
+        selectedAccount = selectAccount();
+        if (selectedAccount == null) {
             System.out.println("No valid account selected or available. Exiting dashboard.");
             return;
         }
 
         int action;
         do {
-            System.out.println("Selected Account Number: " + selectedAccount.getAccountNumber() + ", Balance: $" + selectedAccount.getBalance());
+            System.out.println("Selected Account Number: " + selectedAccount.getAccountNumber() + " - Balance: $" + String.format("%.2f", selectedAccount.getBalance()));
             System.out.println("Available Actions:");
             System.out.println("1. Deposit Funds");
             System.out.println("2. Withdraw Funds");
@@ -44,7 +43,6 @@ class CustomerUI implements UI {
             System.out.println("6. View My Loans");
             System.out.println("0. Return to Main Menu");
             System.out.println("Please select an action:");
-
             action = scanner.nextInt();
             scanner.nextLine(); // Clear buffer after numeric input
 
@@ -56,10 +54,6 @@ class CustomerUI implements UI {
                     performWithdrawal();
                     break;
                 case 3:
-                    if (!selectAccount(true)) {  // Select account for transfer, ensuring it's different
-                        System.out.println("Transfer canceled or invalid account selection.");
-                        break;
-                    }
                     performTransfer();
                     break;
                 case 4:
@@ -72,7 +66,8 @@ class CustomerUI implements UI {
                     viewLoans();
                     break;
                 case 0:
-                    return; // Return to main menu
+                    System.out.println("Returning to main menu...");
+                    return;
                 default:
                     System.out.println("Invalid action. Please try again.");
                     break;
@@ -80,61 +75,73 @@ class CustomerUI implements UI {
         } while (action != 0);
     }
 
-    private boolean selectAccount(boolean forTransfer) {
+    private Account selectAccount() {
         List<Account> accounts = customer.getAccountsList();
         if (accounts.isEmpty()) {
             System.out.println("No accounts available.");
-            return false;
+            return null;
         }
 
         System.out.println("Select an account by number:");
         for (int i = 0; i < accounts.size(); i++) {
-            if (!forTransfer || accounts.get(i) != selectedAccount) {  // Exclude the selected account for transfer
-                System.out.println((i + 1) + ". Account Number: " + accounts.get(i).getAccountNumber() + ", Balance: $" + accounts.get(i).getBalance());
-            }
+            Account account = accounts.get(i);
+            System.out.println((i + 1) + ". Account Number: " + account.getAccountNumber() + " - Balance: $" + String.format("%.2f", account.getBalance()));
         }
 
         int accountIndex = scanner.nextInt() - 1;
-        scanner.nextLine(); // Clear buffer
+        scanner.nextLine();  // Clear the newline
         if (accountIndex >= 0 && accountIndex < accounts.size()) {
-            selectedAccount = accounts.get(accountIndex);
-            return true;
+            return accounts.get(accountIndex);
         } else {
             System.out.println("Invalid account selection.");
-            return false;
+            return null;
         }
     }
 
     private void performDeposit() {
         System.out.println("Enter the amount to deposit:");
         double amount = scanner.nextDouble();
+        scanner.nextLine(); // Clear the newline
         selectedAccount.deposit(amount);
+        System.out.println("Deposited $" + String.format("%.2f", amount) + " into account " + selectedAccount.getAccountNumber());
     }
 
     private void performWithdrawal() {
         System.out.println("Enter the amount to withdraw:");
         double amount = scanner.nextDouble();
+        scanner.nextLine(); // Clear the newline
         try {
             selectedAccount.withdraw(amount);
+            System.out.println("Withdrawn $" + String.format("%.2f", amount) + " from account " + selectedAccount.getAccountNumber());
         } catch (InsufficientFundsException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Failed to withdraw: " + e.getMessage());
         }
     }
 
     private void performTransfer() {
+        System.out.println("Select the destination account for transfer:");
+        Account destinationAccount = selectAccount();
+        if (destinationAccount == null || destinationAccount == selectedAccount) {
+            System.out.println("Invalid destination account selection or same as source account.");
+            return;
+        }
+
         System.out.println("Enter the amount to transfer:");
         double amount = scanner.nextDouble();
-        try {
-            if (selectedAccount.getBalance() >= amount) {
+        scanner.nextLine(); // Clear the newline
+
+        if (selectedAccount.getBalance() >= amount) {
+            try {
                 selectedAccount.withdraw(amount);
-                Account destinationAccount = selectedAccount; // The second selection is stored in the same reference
                 destinationAccount.deposit(amount);
-                System.out.println("Transferred $" + amount + " from account " + selectedAccount.getAccountNumber() + " to " + destinationAccount.getAccountNumber());
-            } else {
-                System.out.println("Insufficient funds for this transfer.");
+                System.out.println("Transferred $" + String.format("%.2f", amount) + " from account " + selectedAccount.getAccountNumber() + " to account " + destinationAccount.getAccountNumber());
+            } catch (InsufficientFundsException e) {
+                System.out.println("Failed to transfer: " + e.getMessage());
+                // In case of failure, rollback the withdrawal
+                selectedAccount.deposit(amount);
             }
-        } catch (InsufficientFundsException e) {
-            System.out.println("Failed to transfer: " + e.getMessage());
+        } else {
+            System.out.println("Insufficient funds for this transfer.");
         }
     }
 
@@ -143,10 +150,9 @@ class CustomerUI implements UI {
         if (transactions.isEmpty()) {
             System.out.println("No transactions to display.");
         } else {
-            System.out.println("Transaction history:");
+            System.out.println("Transaction history for Account " + selectedAccount.getAccountNumber() + ":");
             for (Transaction transaction : transactions) {
-                System.out.printf("Type: %s, Amount: $%.2f, Approved: %s\n",
-                        transaction.getType(), transaction.getAmount(), transaction.isApproved() ? "Yes" : "No");
+                System.out.printf("Type: %s, Amount: $%.2f, Approved: %s\n", transaction.getType(), transaction.getAmount(), transaction.isApproved() ? "Yes" : "No");
             }
         }
     }
@@ -156,24 +162,25 @@ class CustomerUI implements UI {
         double amount = scanner.nextDouble();
         System.out.println("Enter the interest rate (e.g., 5.5 for 5.5%):");
         double interestRate = scanner.nextDouble();
+        scanner.nextLine(); // Clear the newline
         Loan loan = new Loan(amount, interestRate);
         customer.addLoan(loan);
-        System.out.println("Loan application submitted for $" + amount + " at " + interestRate + "% interest.");
+        System.out.println("Loan application submitted for $" + String.format("%.2f", amount) + " at " + interestRate + "% interest.");
     }
 
     private void viewLoans() {
         List<Loan> loans = customer.getLoans();
         if (loans.isEmpty()) {
             System.out.println("You have no loans.");
-            return;
-        }
-        System.out.println("Your loans:");
-        for (Loan loan : loans) {
-            System.out.printf("Amount: $%.2f, Interest Rate: %.2f%%, Approved: %s\n",
-                    loan.getLoanAmount(), loan.getInterestRate(), loan.isApproved() ? "Yes" : "No");
+        } else {
+            System.out.println("Your loans:");
+            for (Loan loan : loans) {
+                System.out.printf("Amount: $%.2f, Interest Rate: %.2f%%, Approved: %s\n", loan.getLoanAmount(), loan.getInterestRate(), loan.isApproved() ? "Yes" : "No");
+            }
         }
     }
 }
+
 
 
 class ManagerUI implements UI {
@@ -280,17 +287,26 @@ class ManagerUI implements UI {
         String customerId = scanner.nextLine();
         Customer customer = customerManager.getCustomer(customerId);
         if (customer != null) {
+            System.out.println("Choose account type (1 for Savings, 2 for Checking):");
+            String accountType = scanner.nextLine();
             System.out.println("Enter Account Number:");
             String accountNumber = scanner.nextLine();
             System.out.println("Enter Initial Balance:");
             double initialBalance = Double.parseDouble(scanner.nextLine());
-            Account newAccount = new SavingsAccount(accountNumber, initialBalance);  // Assuming all new accounts are SavingsAccounts
+
+            Account newAccount;
+            if ("2".equals(accountType)) {
+                newAccount = new CheckingAccount(accountNumber, initialBalance);
+            } else {
+                newAccount = new SavingsAccount(accountNumber, initialBalance);
+            }
             customer.addAccount(newAccount);
             System.out.println("Account added successfully to customer " + customerId);
         } else {
             System.out.println("Customer not found.");
         }
     }
+
 
     private void deleteCustomer() {
         System.out.println("Enter Customer ID to delete:");

@@ -11,7 +11,6 @@ public class Main {
         TransactionManager transactionManager = new TransactionManager();
         setupInitialData(customerManager, transactionManager);
 
-        // Assuming manager credentials are set here. Update as necessary.
         BankManager bankManager = new BankManager("001", "manager_password", "Jane Doe", customerManager, transactionManager);
 
         System.out.println("Welcome to the Online Banking Management System!");
@@ -59,8 +58,10 @@ public class Main {
     private static void setupInitialData(CustomerManager customerManager, TransactionManager transactionManager) {
         // Sample data for testing
         Customer customer1 = new Customer("101", "John Doe", "pass123");
-        Account account1 = new SavingsAccount("101-001", 1500.00);
-        customer1.addAccount(account1);
+        Account account1_1 = new SavingsAccount("101-001", 1500.00);
+        Account account1_2 = new CheckingAccount("101-002", 4000.00);
+        customer1.addAccount(account1_1);
+        customer1.addAccount(account1_2);
 
         Customer customer2 = new Customer("102", "Jane Smith", "pass456");
         Account account2 = new SavingsAccount("102-001", 2500.00);
@@ -69,15 +70,15 @@ public class Main {
         customerManager.addCustomer(customer1);
         customerManager.addCustomer(customer2);
 
-        // Assume adding some transactions for testing
-        Transaction tx1 = new Transaction("Deposit", 500, account1);
+        // Added some transactions for testing
+        Transaction tx1 = new Transaction("Deposit", 500, account1_1);
         transactionManager.addTransaction(tx1);
-        account1.deposit(500); // Reflects deposit in account balance
+        account1_1.deposit(500);
 
         Transaction tx2 = new Transaction("Withdrawal", 200, account2);
         transactionManager.addTransaction(tx2);
         try {
-            account2.withdraw(200); // Reflects withdrawal in account balance
+            account2.withdraw(200);
         } catch (InsufficientFundsException e) {
             System.out.println(e.getMessage());
         }
