@@ -13,14 +13,28 @@ public class Transaction {
         this.type = type;
         this.amount = amount;
         this.account = account;
-        this.isProcessed = false;  // Transactions need approval
-        this.isApproved = false;  // Default to not approved
+        this.isProcessed = false;  // Transactions start as not processed
+        this.isApproved = false;  // Transactions over $5000 are not approved by default
     }
 
+    // Method to mark the transaction as approved and processed
     public void approveTransaction() {
         this.isApproved = true;
+        this.isProcessed = true;
+        applyTransaction();
     }
 
+    // Applies the transaction after approval
+    private void applyTransaction() {
+        if ("Deposit".equals(type)) {
+            account.setBalance(account.getBalance() + amount);
+        } else if ("Withdrawal".equals(type)) {
+            account.setBalance(account.getBalance() - amount);
+        }
+        System.out.println("Transaction processed: " + type + " of $" + amount);
+    }
+
+    // Getters and setters
     public boolean isProcessed() {
         return isProcessed;
     }
@@ -33,6 +47,10 @@ public class Transaction {
         return isApproved;
     }
 
+    public void setApproved(boolean approved) {
+        isApproved = approved;
+    }
+
     public String getTransactionId() {
         return transactionId;
     }
@@ -43,5 +61,9 @@ public class Transaction {
 
     public double getAmount() {
         return amount;
+    }
+
+    public Account getAccount() {
+        return account;
     }
 }

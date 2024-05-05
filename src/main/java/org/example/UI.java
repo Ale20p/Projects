@@ -25,6 +25,7 @@ class CustomerUI implements UI {
             return;
         }
 
+        // Allow the customer to select the account at the start for other operations
         selectedAccount = selectAccount();
         if (selectedAccount == null) {
             System.out.println("No valid account selected or available. Exiting dashboard.");
@@ -103,7 +104,6 @@ class CustomerUI implements UI {
         double amount = scanner.nextDouble();
         scanner.nextLine(); // Clear the newline
         selectedAccount.deposit(amount);
-        System.out.println("Deposited $" + String.format("%.2f", amount) + " into account " + selectedAccount.getAccountNumber());
     }
 
     private void performWithdrawal() {
@@ -112,7 +112,6 @@ class CustomerUI implements UI {
         scanner.nextLine(); // Clear the newline
         try {
             selectedAccount.withdraw(amount);
-            System.out.println("Withdrawn $" + String.format("%.2f", amount) + " from account " + selectedAccount.getAccountNumber());
         } catch (InsufficientFundsException e) {
             System.out.println("Failed to withdraw: " + e.getMessage());
         }
@@ -134,11 +133,9 @@ class CustomerUI implements UI {
             try {
                 selectedAccount.withdraw(amount);
                 destinationAccount.deposit(amount);
-                System.out.println("Transferred $" + String.format("%.2f", amount) + " from account " + selectedAccount.getAccountNumber() + " to account " + destinationAccount.getAccountNumber());
             } catch (InsufficientFundsException e) {
                 System.out.println("Failed to transfer: " + e.getMessage());
-                // In case of failure, rollback the withdrawal
-                selectedAccount.deposit(amount);
+                // Optionally, rollback the withdrawal if necessary, though this would be handled in the Account class
             }
         } else {
             System.out.println("Insufficient funds for this transfer.");
@@ -180,6 +177,7 @@ class CustomerUI implements UI {
         }
     }
 }
+
 
 
 
