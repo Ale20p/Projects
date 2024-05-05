@@ -8,9 +8,15 @@ public class Loan {
     public Loan(double loanAmount, double interestRate) {
         this.loanAmount = loanAmount;
         this.interestRate = interestRate;
-        this.isApproved = false;
+        this.isApproved = false;  // Initially, loans are not approved
     }
 
+    // Method to approve the loan
+    public void approveLoan() {
+        this.isApproved = true;
+    }
+
+    // Getters for loan details
     public double getLoanAmount() {
         return loanAmount;
     }
@@ -23,3 +29,4 @@ public class Loan {
         return isApproved;
     }
 }
+

@@ -1,9 +1,16 @@
 package org.example;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class CustomerManager {
     private Map<String, Customer> customers = new HashMap<>();
+
+    public CustomerManager() {
+        this.customers = new HashMap<>();
+    }
 
     public void addCustomer(Customer customer) {
         customers.put(customer.getCustomerID(), customer);
@@ -11,27 +18,8 @@ public class CustomerManager {
     }
 
     public void deleteCustomer(String customerId) {
-        if (customers.containsKey(customerId)) {
-            customers.remove(customerId);
+        if (customers.remove(customerId) != null) {
             System.out.println("Customer deleted successfully.");
-        } else {
-            System.out.println("Customer not found.");
-        }
-    }
-
-    public void deleteAccount(String customerId, String accountNumber) {
-        Customer customer = getCustomer(customerId);
-        if (customer != null) {
-            Iterator<Account> it = customer.getAccountsList().iterator();
-            while (it.hasNext()) {
-                Account account = it.next();
-                if (account.getAccountNumber().equals(accountNumber)) {
-                    it.remove();
-                    System.out.println("Account " + accountNumber + " deleted successfully from customer " + customerId);
-                    return;
-                }
-            }
-            System.out.println("Account not found.");
         } else {
             System.out.println("Customer not found.");
         }
@@ -47,7 +35,7 @@ public class CustomerManager {
     }
 
     public String generateCustomerReport(String customerId) {
-        Customer customer = customers.get(customerId);
+        Customer customer = getCustomer(customerId);
         if (customer != null) {
             StringBuilder report = new StringBuilder();
             report.append("Customer ID: ").append(customer.getCustomerID()).append("\n");
@@ -66,5 +54,17 @@ public class CustomerManager {
             return report.toString();
         }
         return "Customer not found.";
+    }
+
+    public List<Loan> getPendingLoans() {
+        List<Loan> pendingLoans = new ArrayList<>();
+        for (Customer customer : customers.values()) {
+            for (Loan loan : customer.getLoans()) {
+                if (!loan.isApproved()) {
+                    pendingLoans.add(loan);
+                }
+            }
+        }
+        return pendingLoans;
     }
 }
