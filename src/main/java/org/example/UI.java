@@ -34,7 +34,7 @@ class CustomerUI implements UI {
 
         int action;
         do {
-            System.out.println("Selected Account Number: " + selectedAccount.getAccountNumber() + " - Balance: $" + String.format("%.2f", selectedAccount.getBalance()));
+            System.out.println("Selected Account Number: " + selectedAccount.getAccountNumber() + " - " + selectedAccount.getAccountType() + " - Balance: $" + String.format("%.2f", selectedAccount.getBalance()));
             System.out.println("Available Actions:");
             System.out.println("1. Deposit Funds");
             System.out.println("2. Withdraw Funds");
@@ -86,7 +86,7 @@ class CustomerUI implements UI {
         System.out.println("Select an account by number:");
         for (int i = 0; i < accounts.size(); i++) {
             Account account = accounts.get(i);
-            System.out.println((i + 1) + ". Account Number: " + account.getAccountNumber() + " - Balance: $" + String.format("%.2f", account.getBalance()));
+            System.out.println((i + 1) + ". Account Number: " + account.getAccountNumber() + " - " + account.getAccountType() + " - Balance: $" + String.format("%.2f", account.getBalance()));
         }
 
         int accountIndex = scanner.nextInt() - 1;
@@ -177,6 +177,7 @@ class CustomerUI implements UI {
         }
     }
 }
+
 
 class ManagerUI implements UI {
     private BankManager bankManager;

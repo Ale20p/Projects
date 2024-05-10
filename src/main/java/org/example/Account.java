@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class Account {
     protected String accountNumber;
     protected double balance;
@@ -17,20 +20,16 @@ public abstract class Account {
         this.transactions = new ArrayList<>();
     }
 
+    // Abstract method to return the account type as a String
+    public abstract String getAccountType();
+
     public void deposit(double amount) {
-        if (amount <= 0) {
-            System.out.println("Deposit amount must be positive.");
-            return;
-        }
-        if (amount > 5000) {
-            // Add to pending transactions requiring approval
-            Transaction transaction = new Transaction("Deposit", amount, this);
-            transactions.add(transaction);
-            System.out.println("Deposit of " + amount + " is pending approval.");
-        } else {
-            this.balance += amount;
-            transactions.add(new Transaction("Deposit", amount, this));
+        if (amount > 0) {
+            this.balance += amount;  // Directly update the balance
+            transactions.add(new Transaction("Deposit", amount, this));  // Log transaction
             System.out.println("Deposited: " + amount + ". New balance: " + this.balance);
+        } else {
+            System.out.println("Deposit amount must be positive.");
         }
     }
 
@@ -52,6 +51,7 @@ public abstract class Account {
         this.balance = balance;
     }
 }
+
 
 
 class InsufficientFundsException extends Exception {
