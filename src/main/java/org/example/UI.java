@@ -259,12 +259,13 @@ class ManagerUI implements UI {
             String response = scanner.nextLine();
             if ("yes".equalsIgnoreCase(response)) {
                 loan.approveLoan();
-                // Assuming the customer is retrieved here, or modify the architecture to allow linking loans to customers directly
                 Customer customer = customerManager.getCustomerByLoan(loan);
                 if (customer != null) {
                     Account account = customer.getAccountsList().get(0);  // Assuming money goes to the first account or enhance this logic
                     account.deposit(loan.getLoanAmount());
                     System.out.println("Loan approved and funds deposited to account " + account.getAccountNumber());
+                } else {
+                    System.out.println("Failed to find customer for the loan.");
                 }
             }
         }

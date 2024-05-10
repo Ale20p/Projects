@@ -1,12 +1,12 @@
 package org.example;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 public class CustomerManager {
-    private Map<String, Customer> customers = new HashMap<>();
+    private Map<String, Customer> customers;
 
     public CustomerManager() {
         this.customers = new HashMap<>();
@@ -66,5 +66,15 @@ public class CustomerManager {
             }
         }
         return pendingLoans;
+    }
+
+    // New method to find a customer by a specific loan
+    public Customer getCustomerByLoan(Loan loan) {
+        for (Customer customer : customers.values()) {
+            if (customer.getLoans().contains(loan)) {
+                return customer;
+            }
+        }
+        return null;  // Return null if no customer is found with the given loan
     }
 }
