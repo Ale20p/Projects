@@ -1,0 +1,3 @@
+transactionID,accountNumber,type,amount,date,isApproved
+TX1001,101-001,Deposit,500.00,2023-10-01,true
+TX1002,101-002,Withdrawal,200.00,2023-10-02,false
