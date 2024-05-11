@@ -3,8 +3,8 @@ package org.example;
 public class CheckingAccount extends Account {
     private static final double OVERDRAFT_LIMIT = -500.00; // Example overdraft limit
 
-    public CheckingAccount(String accountNumber, double initialBalance) {
-        super(accountNumber, initialBalance);
+    public CheckingAccount(String accountNumber, String customerID, double initialBalance) {
+        super(accountNumber, customerID, initialBalance);
     }
 
     @Override

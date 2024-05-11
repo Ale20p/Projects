@@ -3,8 +3,8 @@ package org.example;
 public class SavingsAccount extends Account {
     private static final double MINIMUM_BALANCE = 100.00; // Minimum balance required
 
-    public SavingsAccount(String accountNumber, double initialBalance) {
-        super(accountNumber, initialBalance);
+    public SavingsAccount(String accountNumber, String customerID, double initialBalance) {
+        super(accountNumber, customerID, initialBalance);
     }
 
     @Override

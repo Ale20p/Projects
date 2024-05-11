@@ -11,11 +11,13 @@ import java.util.List;
 
 public abstract class Account {
     protected String accountNumber;
+    protected String customerID;
     protected double balance;
     protected List<Transaction> transactions;  // Store transactions for this account
 
-    public Account(String accountNumber, double initialBalance) {
+    public Account(String accountNumber, String customerID, double initialBalance) {
         this.accountNumber = accountNumber;
+        this.customerID = customerID;
         this.balance = initialBalance;
         this.transactions = new ArrayList<>();
     }
@@ -49,6 +51,14 @@ public abstract class Account {
 
     public void setBalance(double balance) {
         this.balance = balance;
+    }
+
+    public String getCustomerID() {
+        return customerID;
+    }
+
+    public void setCustomerID(String customerID) {
+        this.customerID = customerID;
     }
 }
 

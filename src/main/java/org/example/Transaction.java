@@ -1,15 +1,16 @@
 package org.example;
 
 public class Transaction {
-    private String transactionId;
-    private String type;
-    private double amount;
-    private Account account;
+    private final String transactionId;  // Make transactionId immutable
+    private final String type;
+    private final double amount;
+    private final Account account;
     private boolean isProcessed;
     private boolean isApproved;
 
-    public Transaction(String type, double amount, Account account) {
-        this.transactionId = java.util.UUID.randomUUID().toString();
+    // Updated constructor that includes transactionId
+    public Transaction(String transactionId, String type, double amount, Account account) {
+        this.transactionId = transactionId;
         this.type = type;
         this.amount = amount;
         this.account = account;
@@ -35,22 +36,6 @@ public class Transaction {
     }
 
     // Getters and setters
-    public boolean isProcessed() {
-        return isProcessed;
-    }
-
-    public void setProcessed(boolean processed) {
-        isProcessed = processed;
-    }
-
-    public boolean isApproved() {
-        return isApproved;
-    }
-
-    public void setApproved(boolean approved) {
-        isApproved = approved;
-    }
-
     public String getTransactionId() {
         return transactionId;
     }
@@ -65,5 +50,21 @@ public class Transaction {
 
     public Account getAccount() {
         return account;
+    }
+
+    public boolean isProcessed() {
+        return isProcessed;
+    }
+
+    public void setProcessed(boolean processed) {
+        isProcessed = processed;
+    }
+
+    public boolean isApproved() {
+        return isApproved;
+    }
+
+    public void setApproved(boolean approved) {
+        isApproved = approved;
     }
 }

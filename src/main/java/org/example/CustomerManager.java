@@ -1,80 +1,80 @@
 package org.example;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.util.*;
 
 public class CustomerManager {
-    private Map<String, Customer> customers;
+    private Map<String, Customer> customers = new HashMap<>();
+    private static final String CUSTOMER_FILE = "customers.csv";
 
     public CustomerManager() {
-        this.customers = new HashMap<>();
+        try {
+            loadCustomers();
+        } catch (IOException e) {
+            System.err.println("Error loading customers: " + e.getMessage());
+        }
+    }
+
+    private void loadCustomers() throws IOException {
+        List<String[]> data = CSVUtility.readCSV(CUSTOMER_FILE);
+        for (String[] line : data) {
+            if (line.length >= 3) {  // Ensure there are enough elements in the line
+                Customer customer = new Customer(line[0], line[1], line[2]); // Assuming format: customerID, name, password
+                customers.put(customer.getCustomerID(), customer);
+            }
+        }
+    }
+
+    public void saveCustomers() throws IOException {
+        List<String[]> data = new ArrayList<>();
+        for (Customer customer : customers.values()) {
+            data.add(new String[]{customer.getCustomerID(), customer.getName(), customer.getPassword()});
+        }
+        CSVUtility.writeCSV(CUSTOMER_FILE, data, false); // Overwrite the existing file
     }
 
     public void addCustomer(Customer customer) {
-        customers.put(customer.getCustomerID(), customer);
-        System.out.println("Customer added: " + customer.getName());
-    }
-
-    public void deleteCustomer(String customerId) {
-        if (customers.remove(customerId) != null) {
-            System.out.println("Customer deleted successfully.");
-        } else {
-            System.out.println("Customer not found.");
-        }
-    }
-
-    public Customer getCustomer(String customerID) {
-        return customers.get(customerID);
-    }
-
-    public boolean authenticateCustomer(String customerId, String password) {
-        Customer customer = customers.get(customerId);
-        return customer != null && customer.getPassword().equals(password);
-    }
-
-    public String generateCustomerReport(String customerId) {
-        Customer customer = getCustomer(customerId);
-        if (customer != null) {
-            StringBuilder report = new StringBuilder();
-            report.append("Customer ID: ").append(customer.getCustomerID()).append("\n");
-            report.append("Name: ").append(customer.getName()).append("\n");
-            report.append("Accounts and Transactions:\n");
-            for (Account account : customer.getAccountsList()) {
-                report.append("\tAccount Number: ").append(account.getAccountNumber())
-                        .append(", Balance: $").append(String.format("%.2f", account.getBalance())).append("\n");
-                for (Transaction transaction : account.getTransactions()) {
-                    report.append("\t\tTransaction ID: ").append(transaction.getTransactionId())
-                            .append(", Type: ").append(transaction.getType())
-                            .append(", Amount: $").append(String.format("%.2f", transaction.getAmount()))
-                            .append(", Approved: ").append(transaction.isApproved() ? "Yes" : "No").append("\n");
-                }
-            }
-            return report.toString();
-        }
-        return "Customer not found.";
-    }
-
-    public List<Loan> getPendingLoans() {
-        List<Loan> pendingLoans = new ArrayList<>();
-        for (Customer customer : customers.values()) {
-            for (Loan loan : customer.getLoans()) {
-                if (!loan.isApproved()) {
-                    pendingLoans.add(loan);
-                }
+        if (!customers.containsKey(customer.getCustomerID())) {
+            customers.put(customer.getCustomerID(), customer);
+            try {
+                saveCustomers();
+            } catch (IOException e) {
+                System.err.println("Error saving customers: " + e.getMessage());
             }
         }
-        return pendingLoans;
     }
 
-    // New method to find a customer by a specific loan
-    public Customer getCustomerByLoan(Loan loan) {
-        for (Customer customer : customers.values()) {
-            if (customer.getLoans().contains(loan)) {
-                return customer;
+    public Customer getCustomer(String customerId) {
+        return customers.get(customerId);
+    }
+
+    public boolean deleteCustomer(String customerId) {
+        if (customers.containsKey(customerId)) {
+            customers.remove(customerId);
+            try {
+                saveCustomers();
+            } catch (IOException e) {
+                System.err.println("Error saving customers: " + e.getMessage());
+                return false;
             }
+            return true;
         }
-        return null;  // Return null if no customer is found with the given loan
+        return false;
+    }
+
+    public boolean updateCustomer(String customerId, String newName, String newPassword) {
+        if (customers.containsKey(customerId)) {
+            Customer customer = customers.get(customerId);
+            customer.setName(newName);
+            customer.setPassword(newPassword);
+            try {
+                saveCustomers();
+            } catch (IOException e) {
+                System.err.println("Error updating customers: " + e.getMessage());
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 }

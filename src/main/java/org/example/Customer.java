@@ -18,6 +18,14 @@ public class Customer {
         this.loans = new ArrayList<>();
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public String getCustomerID() {
         return customerID;
     }
