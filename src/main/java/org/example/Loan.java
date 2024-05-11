@@ -28,5 +28,17 @@ public class Loan {
     public boolean isApproved() {
         return isApproved;
     }
+
+    public void setLoanAmount(double loanAmount) {
+        this.loanAmount = loanAmount;
+    }
+
+    public void setInterestRate(double interestRate) {
+        this.interestRate = interestRate;
+    }
+
+    public void setApproved(boolean approved) {
+        isApproved = approved;
+    }
 }
 

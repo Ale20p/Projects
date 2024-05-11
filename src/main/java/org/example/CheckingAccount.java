@@ -1,5 +1,7 @@
 package org.example;
 
+import java.util.UUID;
+
 public class CheckingAccount extends Account {
     private static final double OVERDRAFT_LIMIT = -500.00; // Example overdraft limit
 
@@ -21,9 +23,10 @@ public class CheckingAccount extends Account {
             throw new InsufficientFundsException("Overdraft limit exceeded.");
         }
         this.balance -= amount;
-        this.transactions.add(new Transaction("Withdrawal", amount, this));
+        this.transactions.add(new Transaction(UUID.randomUUID().toString(), "Withdrawal", amount, this));  // Log transaction
         System.out.println("Withdrawn: " + amount + ". New balance: " + this.balance);
     }
 }
+
 
 

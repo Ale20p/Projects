@@ -1,5 +1,7 @@
 package org.example;
 
+import java.util.UUID;
+
 public class SavingsAccount extends Account {
     private static final double MINIMUM_BALANCE = 100.00; // Minimum balance required
 
@@ -21,7 +23,7 @@ public class SavingsAccount extends Account {
             throw new InsufficientFundsException("Insufficient funds: Withdrawal would put balance below minimum required.");
         }
         this.balance -= amount;
-        this.transactions.add(new Transaction("Withdrawal", amount, this));
+        this.transactions.add(new Transaction(UUID.randomUUID().toString(), "Withdrawal", amount, this));  // Log transaction
         System.out.println("Withdrawn: " + amount + ". New balance: " + this.balance);
     }
 }

@@ -2,6 +2,7 @@ package org.example;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CustomerManager {
     private Map<String, Customer> customers = new HashMap<>();
@@ -53,11 +54,11 @@ public class CustomerManager {
             customers.remove(customerId);
             try {
                 saveCustomers();
+                return true;
             } catch (IOException e) {
-                System.err.println("Error saving customers: " + e.getMessage());
+                System.err.println("Error deleting customer: " + e.getMessage());
                 return false;
             }
-            return true;
         }
         return false;
     }
@@ -69,12 +70,49 @@ public class CustomerManager {
             customer.setPassword(newPassword);
             try {
                 saveCustomers();
+                return true;
             } catch (IOException e) {
-                System.err.println("Error updating customers: " + e.getMessage());
+                System.err.println("Error updating customer: " + e.getMessage());
                 return false;
             }
-            return true;
         }
         return false;
+    }
+
+    // Additional methods for handling pending loans and generating reports
+
+    public List<Loan> getPendingLoans() {
+        return customers.values().stream()
+                .flatMap(customer -> customer.getLoans().stream())
+                .filter(loan -> !loan.isApproved())
+                .collect(Collectors.toList());
+    }
+
+    public Customer getCustomerByLoan(Loan loan) {
+        return customers.values().stream()
+                .filter(customer -> customer.getLoans().contains(loan))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public String generateCustomerReport(String customerId) {
+        Customer customer = getCustomer(customerId);
+        if (customer == null) {
+            return "No customer found with ID: " + customerId;
+        }
+        StringBuilder report = new StringBuilder();
+        report.append("Customer Report for ").append(customer.getName()).append(":\n");
+        report.append("Accounts:\n");
+        for (Account account : customer.getAccountsList()) {
+            report.append(account.getAccountType()).append(" - ").append(account.getAccountNumber())
+                    .append(": Balance $").append(account.getBalance()).append("\n");
+        }
+        report.append("Loans:\n");
+        for (Loan loan : customer.getLoans()) {
+            report.append("Loan Amount: $").append(loan.getLoanAmount())
+                    .append(", Rate: ").append(loan.getInterestRate())
+                    .append("%, Approved: ").append(loan.isApproved() ? "Yes" : "No").append("\n");
+        }
+        return report.toString();
     }
 }

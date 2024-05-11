@@ -1,13 +1,8 @@
 package org.example;
 
-import java.util.List;
-import java.util.ArrayList;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
 
 public abstract class Account {
     protected String accountNumber;
@@ -28,7 +23,7 @@ public abstract class Account {
     public void deposit(double amount) {
         if (amount > 0) {
             this.balance += amount;  // Directly update the balance
-            transactions.add(new Transaction("Deposit", amount, this));  // Log transaction
+            transactions.add(new Transaction(UUID.randomUUID().toString(), "Deposit", amount, this));  // Log transaction
             System.out.println("Deposited: " + amount + ". New balance: " + this.balance);
         } else {
             System.out.println("Deposit amount must be positive.");
@@ -61,8 +56,6 @@ public abstract class Account {
         this.customerID = customerID;
     }
 }
-
-
 
 class InsufficientFundsException extends Exception {
     public InsufficientFundsException(String message) {

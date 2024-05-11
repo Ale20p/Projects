@@ -2,12 +2,15 @@ package org.example;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TransactionManager {
     private List<Transaction> transactions = new ArrayList<>();
     private static final String TRANSACTION_FILE = "transactions.csv";
+    private AccountManager accountManager;  // Reference to AccountManager to access accounts
 
-    public TransactionManager() {
+    public TransactionManager(AccountManager accountManager) {
+        this.accountManager = accountManager;  // Initialize with an instance of AccountManager
         try {
             loadTransactions();
         } catch (IOException e) {
@@ -19,7 +22,7 @@ public class TransactionManager {
         List<String[]> data = CSVUtility.readCSV(TRANSACTION_FILE);
         for (String[] line : data) {
             if (line.length >= 6) {  // Assuming format: transactionId, type, amount, accountNumber, isProcessed, isApproved
-                Account account = findAccount(line[3]);  // This method needs to be implemented to find an account by accountNumber
+                Account account = findAccount(line[3]);
                 if (account != null) {
                     Transaction transaction = new Transaction(line[0], line[1], Double.parseDouble(line[2]), account);
                     transaction.setProcessed(Boolean.parseBoolean(line[4]));
@@ -65,15 +68,19 @@ public class TransactionManager {
         return false;
     }
 
+    public List<Transaction> getPendingTransactions() {
+        return transactions.stream()
+                .filter(transaction -> !transaction.isApproved())
+                .collect(Collectors.toList());
+    }
+
     public List<Transaction> getAllTransactions() {
         return transactions;
     }
 
     private Account findAccount(String accountNumber) {
-        // Implementation needed to return the Account object from an AccountManager or repository
-        // This requires access to the AccountManager class or a similar repository that holds accounts
-        return null;
+        return accountManager.getAccount(accountNumber);  // Correct usage of the instance
     }
 
-    // Additional methods to handle other transaction operations can be added as needed
+    // Additional methods for handling other transaction operations can be added as needed
 }
