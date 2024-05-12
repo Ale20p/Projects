@@ -1,14 +1,15 @@
 package org.example;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class Customer {
     private String customerID;
     private String name;
     private String password;
-    private List<Account> accounts;
-    private List<Loan> loans;
+    private List<Account> accounts; // List to hold customer accounts
+    private List<Loan> loans; // List to manage loans associated with the customer
 
     public Customer(String customerID, String name, String password) {
         this.customerID = customerID;
@@ -18,14 +19,27 @@ public class Customer {
         this.loans = new ArrayList<>();
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void addAccount(Account account) {
+        accounts.add(account);
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public boolean deleteAccount(String accountNumber) {
+        Iterator<Account> it = accounts.iterator();
+        while (it.hasNext()) {
+            Account account = it.next();
+            if (account.getAccountNumber().equals(accountNumber)) {
+                it.remove();
+                return true; // Account found and removed
+            }
+        }
+        return false; // No account found with the given account number
     }
 
+    public void addLoan(Loan loan) {
+        loans.add(loan);
+    }
+
+    // Getters and setters
     public String getCustomerID() {
         return customerID;
     }
@@ -34,20 +48,20 @@ public class Customer {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getPassword() {
         return password;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public List<Account> getAccountsList() {
         return accounts;
-    }
-
-    public void addAccount(Account account) {
-        accounts.add(account);
-    }
-
-    public void addLoan(Loan loan) {
-        loans.add(loan);
     }
 
     public List<Loan> getLoans() {

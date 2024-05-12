@@ -2,14 +2,14 @@ package org.example;
 
 import java.util.Scanner;
 
-import java.util.Scanner;
-
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        AccountManager accountManager = new AccountManager();
-        CustomerManager customerManager = new CustomerManager();
-        TransactionManager transactionManager = new TransactionManager(accountManager);
+        AccountManager accountManager = new AccountManager();  // Assume this is correctly set up to manage accounts
+        CustomerManager customerManager = new CustomerManager();  // Assume this is set up for managing customers
+        TransactionManager transactionManager = new TransactionManager(accountManager);  // Ensure TransactionManager can interact with AccountManager
+
+        // Set up a bank manager with necessary dependencies
         BankManager bankManager = new BankManager("001", "manager_password", "Jane Doe", customerManager, transactionManager);
 
         System.out.println("Welcome to the Online Banking Management System!");
@@ -26,7 +26,7 @@ public class Main {
                     handleCustomerLogin(scanner, customerManager);
                     break;
                 case "2":
-                    handleManagerLogin(scanner, bankManager);
+                    handleManagerLogin(scanner, bankManager, transactionManager);
                     break;
                 default:
                     System.out.println("Invalid option, please choose again.");
@@ -50,15 +50,15 @@ public class Main {
         }
     }
 
-    private static void handleManagerLogin(Scanner scanner, BankManager bankManager) {
+    private static void handleManagerLogin(Scanner scanner, BankManager bankManager, TransactionManager transactionManager) {
         System.out.println("Enter Manager ID:");
         String managerId = scanner.nextLine();
         System.out.println("Enter password:");
         String password = scanner.nextLine();
 
         if (bankManager.authenticateManager(managerId, password)) {
-//            ManagerUI managerUI = new ManagerUI(bankManager, scanner);
-//            managerUI.displayDashboard();
+            ManagerUI managerUI = new ManagerUI(bankManager, transactionManager, bankManager.getCustomerManager(), scanner);
+            managerUI.displayDashboard();
         } else {
             System.out.println("Invalid credentials for manager. Please try again.");
         }

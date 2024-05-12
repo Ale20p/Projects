@@ -15,12 +15,25 @@ public class BankManager {
         this.transactionManager = transactionManager;
     }
 
+    // Authenticates the manager with given credentials
+    public boolean authenticateManager(String managerId, String password) {
+        return this.managerId.equals(managerId) && this.password.equals(password);
+    }
+
+    // Getter for CustomerManager
+    public CustomerManager getCustomerManager() {
+        return customerManager;
+    }
+
+    // Getter for TransactionManager
+    public TransactionManager getTransactionManager() {
+        return transactionManager;
+    }
+
+    // Getter for the manager's name
     public String getName() {
         return name;
     }
 
-    public boolean authenticateManager(String managerId, String password) {
-        return this.managerId.equals(managerId) && this.password.equals(password); // Assuming password field exists
-    }
-
+    // Additional methods can be added to support other functionalities as needed
 }

@@ -2,6 +2,7 @@ package org.example;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.UUID;
 
 public interface UI {
     void displayDashboard();
@@ -202,11 +203,11 @@ class ManagerUI implements UI {
             System.out.println("3. Add Customer");
             System.out.println("4. Delete Customer");
             System.out.println("5. Generate Customer Report");
+            System.out.println("6. Add Customer Account");
+            System.out.println("7. Delete Customer Account");
             System.out.println("0. Exit");
             System.out.println("Choose an action:");
-            action = scanner.nextInt();
-            scanner.nextLine();
-
+            action = Integer.parseInt(scanner.nextLine());
             switch (action) {
                 case 1:
                     approveTransactions();
@@ -222,6 +223,12 @@ class ManagerUI implements UI {
                     break;
                 case 5:
                     generateCustomerReport();
+                    break;
+                case 6:
+                    addCustomerAccount();
+                    break;
+                case 7:
+                    deleteCustomerAccount();
                     break;
                 case 0:
                     System.out.println("Exiting manager dashboard...");
@@ -281,12 +288,18 @@ class ManagerUI implements UI {
         String password = scanner.nextLine();
         Customer newCustomer = new Customer(id, name, password);
         customerManager.addCustomer(newCustomer);
+        System.out.println("Customer added successfully.");
     }
 
     private void deleteCustomer() {
         System.out.println("Enter Customer ID to delete:");
         String customerId = scanner.nextLine();
-        customerManager.deleteCustomer(customerId);
+        boolean success = customerManager.deleteCustomer(customerId);
+        if (success) {
+            System.out.println("Customer successfully deleted.");
+        } else {
+            System.out.println("Failed to delete customer.");
+        }
     }
 
     private void generateCustomerReport() {
@@ -294,5 +307,42 @@ class ManagerUI implements UI {
         String customerId = scanner.nextLine();
         String report = customerManager.generateCustomerReport(customerId);
         System.out.println(report);
+    }
+
+    private void addCustomerAccount() {
+        System.out.println("Enter Customer ID:");
+        String customerId = scanner.nextLine();
+        Customer customer = customerManager.getCustomer(customerId);
+        if (customer == null) {
+            System.out.println("No such customer found.");
+            return;
+        }
+        System.out.println("Enter account type (Savings/Checking):");
+        String type = scanner.nextLine();
+        System.out.println("Enter initial balance:");
+        double balance = Double.parseDouble(scanner.nextLine());
+        Account account = type.equalsIgnoreCase("Savings") ?
+                new SavingsAccount(UUID.randomUUID().toString(), customerId, balance) :
+                new CheckingAccount(UUID.randomUUID().toString(), customerId, balance);
+        customer.addAccount(account);
+        System.out.println("Account added successfully.");
+    }
+
+    private void deleteCustomerAccount() {
+        System.out.println("Enter Customer ID:");
+        String customerId = scanner.nextLine();
+        Customer customer = customerManager.getCustomer(customerId);
+        if (customer == null) {
+            System.out.println("No such customer found.");
+            return;
+        }
+        System.out.println("Enter Account Number to delete:");
+        String accountNumber = scanner.nextLine();
+        boolean removed = customer.deleteAccount(accountNumber);
+        if (removed) {
+            System.out.println("Account deleted successfully.");
+        } else {
+            System.out.println("Failed to delete account.");
+        }
     }
 }
