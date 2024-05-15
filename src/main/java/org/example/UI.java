@@ -161,8 +161,6 @@ class CustomerUI implements UI {
 }
 
 
-
-
 class ManagerUI implements UI {
     private BankManager bankManager;
     private TransactionManager transactionManager;
@@ -255,6 +253,11 @@ class ManagerUI implements UI {
                     Account account = customer.getAccountsList().get(0);  // Assuming money goes to the first account or enhance this logic
                     account.deposit(loan.getLoanAmount());
                     System.out.println("Loan approved and funds deposited to account " + account.getAccountNumber());
+                    try {
+                        customerManager.saveAccounts();  // Save the updated account information to file
+                    } catch (IOException e) {
+                        System.err.println("Error saving accounts: " + e.getMessage());
+                    }
                 } else {
                     System.out.println("Failed to find customer for the loan.");
                 }
@@ -308,6 +311,11 @@ class ManagerUI implements UI {
                 new SavingsAccount(UUID.randomUUID().toString(), customerId, balance) :
                 new CheckingAccount(UUID.randomUUID().toString(), customerId, balance);
         customer.addAccount(account);
+        try {
+            customerManager.saveAccounts();  // Save the updated account information to file
+        } catch (IOException e) {
+            System.err.println("Error saving accounts: " + e.getMessage());
+        }
         System.out.println("Account added successfully.");
     }
 
@@ -323,6 +331,11 @@ class ManagerUI implements UI {
         String accountNumber = scanner.nextLine();
         boolean removed = customer.deleteAccount(accountNumber);
         if (removed) {
+            try {
+                customerManager.saveAccounts();  // Save the updated account information to file
+            } catch (IOException e) {
+                System.err.println("Error saving accounts: " + e.getMessage());
+            }
             System.out.println("Account deleted successfully.");
         } else {
             System.out.println("Failed to delete account.");
