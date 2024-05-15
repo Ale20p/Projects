@@ -11,11 +11,13 @@ public class CustomerManager {
     private Map<String, Customer> customers = new HashMap<>();
     private static final String CUSTOMER_FILE = "customers.csv";
     private static final String ACCOUNTS_FILE = "accounts.csv";
+    private static final String LOANS_FILE = "loans.csv";
 
     public CustomerManager() {
         try {
             loadCustomers();
             loadAccounts();
+            loadLoans();
         } catch (IOException e) {
             System.err.println("Error loading data: " + e.getMessage());
         }
@@ -54,6 +56,27 @@ public class CustomerManager {
         }
     }
 
+    private void loadLoans() throws IOException {
+        List<String[]> data = CSVUtility.readCSV(LOANS_FILE);
+        for (String[] line : data) {
+            if (line.length >= 5) {  // Ensure there are enough elements in the line
+                String customerId = line[0];
+                double loanAmount = Double.parseDouble(line[1]);
+                double interestRate = Double.parseDouble(line[2]);
+                boolean isApproved = Boolean.parseBoolean(line[3]);
+                boolean isPaidOff = Boolean.parseBoolean(line[4]);
+
+                Customer customer = customers.get(customerId);
+                if (customer != null) {
+                    Loan loan = new Loan(loanAmount, interestRate);
+                    loan.setApproved(isApproved);
+                    loan.setPaidOff(isPaidOff);
+                    customer.addLoan(loan);
+                }
+            }
+        }
+    }
+
     public void saveCustomers() throws IOException {
         List<String[]> data = new ArrayList<>();
         for (Customer customer : customers.values()) {
@@ -61,6 +84,7 @@ public class CustomerManager {
         }
         CSVUtility.writeCSV(CUSTOMER_FILE, data, false); // Overwrite the existing file
         saveAccounts();
+        saveLoans();
     }
 
     public void saveAccounts() throws IOException {
@@ -73,6 +97,19 @@ public class CustomerManager {
             }
         }
         CSVUtility.writeCSV(ACCOUNTS_FILE, data, false); // Overwrite the existing file
+    }
+
+    public void saveLoans() throws IOException {
+        List<String[]> data = new ArrayList<>();
+        for (Customer customer : customers.values()) {
+            for (Loan loan : customer.getLoans()) {
+                data.add(new String[]{
+                        customer.getCustomerID(), String.valueOf(loan.getLoanAmount()), String.valueOf(loan.getInterestRate()),
+                        String.valueOf(loan.isApproved()), String.valueOf(loan.isPaidOff())
+                });
+            }
+        }
+        CSVUtility.writeCSV(LOANS_FILE, data, false); // Overwrite the existing file
     }
 
     public void addCustomer(Customer customer) {
@@ -136,7 +173,8 @@ public class CustomerManager {
         for (Loan loan : customer.getLoans()) {
             report.append("Loan Amount: $").append(loan.getLoanAmount())
                     .append(", Rate: ").append(loan.getInterestRate())
-                    .append("%, Approved: ").append(loan.isApproved() ? "Yes" : "No").append("\n");
+                    .append("%, Approved: ").append(loan.isApproved() ? "Yes" : "No")
+                    .append(", Paid Off: ").append(loan.isPaidOff() ? "Yes" : "No").append("\n");
         }
         return report.toString();
     }

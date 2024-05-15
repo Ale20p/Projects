@@ -32,6 +32,7 @@ class CustomerUI implements UI {
             System.out.println("5. Deposit Money");
             System.out.println("6. Withdraw Money");
             System.out.println("7. Open New Account");
+            System.out.println("8. Pay Off Loan");
             System.out.println("0. Logout");
             System.out.println("Choose an action:");
             action = Integer.parseInt(scanner.nextLine());
@@ -56,6 +57,9 @@ class CustomerUI implements UI {
                     break;
                 case 7:
                     openNewAccount();
+                    break;
+                case 8:
+                    payOffLoan();
                     break;
                 case 0:
                     System.out.println("Logging out...");
@@ -92,12 +96,17 @@ class CustomerUI implements UI {
         Loan loan = new Loan(amount, interestRate);
         customer.addLoan(loan);
         System.out.println("Loan application submitted.");
+        try {
+            customerManager.saveLoans();  // Save loans whenever a new loan is created
+        } catch (IOException e) {
+            System.err.println("Error saving loans: " + e.getMessage());
+        }
     }
 
     private void viewLoans() {
         System.out.println("Loans:");
         for (Loan loan : customer.getLoans()) {
-            System.out.println("Loan Amount: $" + loan.getLoanAmount() + ", Interest Rate: " + loan.getInterestRate() + "%, Approved: " + (loan.isApproved() ? "Yes" : "No"));
+            System.out.println("Loan Amount: $" + loan.getLoanAmount() + ", Interest Rate: " + loan.getInterestRate() + "%, Approved: " + (loan.isApproved() ? "Yes" : "No") + ", Paid Off: " + (loan.isPaidOff() ? "Yes" : "No"));
         }
     }
 
@@ -150,6 +159,27 @@ class CustomerUI implements UI {
         System.out.println("Account opened successfully.");
     }
 
+    private void payOffLoan() {
+        System.out.println("Loans:");
+        int loanIndex = 1;
+        for (Loan loan : customer.getLoans()) {
+            System.out.println(loanIndex++ + ". Loan Amount: $" + loan.getLoanAmount() + ", Interest Rate: " + loan.getInterestRate() + "%, Approved: " + (loan.isApproved() ? "Yes" : "No") + ", Paid Off: " + (loan.isPaidOff() ? "Yes" : "No"));
+        }
+        System.out.println("Enter the number of the loan you want to pay off:");
+        int choice = Integer.parseInt(scanner.nextLine());
+        if (choice > 0 && choice <= customer.getLoans().size()) {
+            Loan loan = customer.getLoans().get(choice - 1);
+            loan.payOffLoan();
+            try {
+                customerManager.saveLoans();  // Save loans whenever a loan is paid off
+            } catch (IOException e) {
+                System.err.println("Error saving loans: " + e.getMessage());
+            }
+        } else {
+            System.out.println("Invalid choice. No loan paid off.");
+        }
+    }
+
     private Account getAccountByNumber(String accountNumber) {
         for (Account account : customer.getAccountsList()) {
             if (account.getAccountNumber().equals(accountNumber)) {
@@ -159,6 +189,8 @@ class CustomerUI implements UI {
         return null;
     }
 }
+
+
 
 
 class ManagerUI implements UI {
@@ -254,9 +286,10 @@ class ManagerUI implements UI {
                     account.deposit(loan.getLoanAmount());
                     System.out.println("Loan approved and funds deposited to account " + account.getAccountNumber());
                     try {
+                        customerManager.saveLoans();  // Save the updated loan information to file
                         customerManager.saveAccounts();  // Save the updated account information to file
                     } catch (IOException e) {
-                        System.err.println("Error saving accounts: " + e.getMessage());
+                        System.err.println("Error saving loans or accounts: " + e.getMessage());
                     }
                 } else {
                     System.out.println("Failed to find customer for the loan.");
