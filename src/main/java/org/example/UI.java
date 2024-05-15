@@ -11,7 +11,6 @@ public interface UI {
 class CustomerUI implements UI {
     private Customer customer;
     private Scanner scanner;
-    private Account selectedAccount;  // To hold the selected account for session-based operations
 
     public CustomerUI(Customer customer, Scanner scanner) {
         this.customer = customer;
@@ -20,55 +19,43 @@ class CustomerUI implements UI {
 
     @Override
     public void displayDashboard() {
-        System.out.println("Welcome, " + customer.getName());
-        if (customer.getAccountsList().isEmpty()) {
-            System.out.println("No accounts available. Please contact your bank manager.");
-            return;
-        }
-
-        // Allow the customer to select the account at the start for other operations
-        selectedAccount = selectAccount();
-        if (selectedAccount == null) {
-            System.out.println("No valid account selected or available. Exiting dashboard.");
-            return;
-        }
-
         int action;
         do {
-            System.out.println("Selected Account Number: " + selectedAccount.getAccountNumber() + " - " + selectedAccount.getAccountType() + " - Balance: $" + String.format("%.2f", selectedAccount.getBalance()));
-            System.out.println("Available Actions:");
-            System.out.println("1. Deposit Funds");
-            System.out.println("2. Withdraw Funds");
-            System.out.println("3. Transfer Funds");
-            System.out.println("4. View Transactions");
-            System.out.println("5. Apply for a Loan");
-            System.out.println("6. View My Loans");
-            System.out.println("0. Return to Main Menu");
-            System.out.println("Please select an action:");
-            action = scanner.nextInt();
-            scanner.nextLine(); // Clear buffer after numeric input
-
+            System.out.println("Customer Dashboard: " + customer.getName());
+            System.out.println("1. View Accounts");
+            System.out.println("2. View Transactions");
+            System.out.println("3. Apply for Loan");
+            System.out.println("4. View Loans");
+            System.out.println("5. Deposit Money");
+            System.out.println("6. Withdraw Money");
+            System.out.println("7. Open New Account");
+            System.out.println("0. Logout");
+            System.out.println("Choose an action:");
+            action = Integer.parseInt(scanner.nextLine());
             switch (action) {
                 case 1:
-                    performDeposit();
+                    viewAccounts();
                     break;
                 case 2:
-                    performWithdrawal();
-                    break;
-                case 3:
-                    performTransfer();
-                    break;
-                case 4:
                     viewTransactions();
                     break;
-                case 5:
+                case 3:
                     applyForLoan();
                     break;
-                case 6:
+                case 4:
                     viewLoans();
                     break;
+                case 5:
+                    depositMoney();
+                    break;
+                case 6:
+                    withdrawMoney();
+                    break;
+                case 7:
+                    openNewAccount();
+                    break;
                 case 0:
-                    System.out.println("Returning to main menu...");
+                    System.out.println("Logging out...");
                     return;
                 default:
                     System.out.println("Invalid action. Please try again.");
@@ -77,107 +64,94 @@ class CustomerUI implements UI {
         } while (action != 0);
     }
 
-    private Account selectAccount() {
-        List<Account> accounts = customer.getAccountsList();
-        if (accounts.isEmpty()) {
-            System.out.println("No accounts available.");
-            return null;
-        }
-
-        System.out.println("Select an account by number:");
-        for (int i = 0; i < accounts.size(); i++) {
-            Account account = accounts.get(i);
-            System.out.println((i + 1) + ". Account Number: " + account.getAccountNumber() + " - " + account.getAccountType() + " - Balance: $" + String.format("%.2f", account.getBalance()));
-        }
-
-        int accountIndex = scanner.nextInt() - 1;
-        scanner.nextLine();  // Clear the newline
-        if (accountIndex >= 0 && accountIndex < accounts.size()) {
-            return accounts.get(accountIndex);
-        } else {
-            System.out.println("Invalid account selection.");
-            return null;
-        }
-    }
-
-    private void performDeposit() {
-        System.out.println("Enter the amount to deposit:");
-        double amount = scanner.nextDouble();
-        scanner.nextLine(); // Clear the newline
-        selectedAccount.deposit(amount);
-    }
-
-    private void performWithdrawal() {
-        System.out.println("Enter the amount to withdraw:");
-        double amount = scanner.nextDouble();
-        scanner.nextLine(); // Clear the newline
-        try {
-            selectedAccount.withdraw(amount);
-        } catch (InsufficientFundsException e) {
-            System.out.println("Failed to withdraw: " + e.getMessage());
-        }
-    }
-
-    private void performTransfer() {
-        System.out.println("Select the destination account for transfer:");
-        Account destinationAccount = selectAccount();
-        if (destinationAccount == null || destinationAccount == selectedAccount) {
-            System.out.println("Invalid destination account selection or same as source account.");
-            return;
-        }
-
-        System.out.println("Enter the amount to transfer:");
-        double amount = scanner.nextDouble();
-        scanner.nextLine(); // Clear the newline
-
-        if (selectedAccount.getBalance() >= amount) {
-            try {
-                selectedAccount.withdraw(amount);
-                destinationAccount.deposit(amount);
-            } catch (InsufficientFundsException e) {
-                System.out.println("Failed to transfer: " + e.getMessage());
-                // Optionally, rollback the withdrawal if necessary, though this would be handled in the Account class
-            }
-        } else {
-            System.out.println("Insufficient funds for this transfer.");
+    private void viewAccounts() {
+        System.out.println("Accounts:");
+        for (Account account : customer.getAccountsList()) {
+            System.out.println(account.getAccountType() + " - " + account.getAccountNumber() + ": Balance $" + account.getBalance());
         }
     }
 
     private void viewTransactions() {
-        List<Transaction> transactions = selectedAccount.getTransactions();
-        if (transactions.isEmpty()) {
-            System.out.println("No transactions to display.");
-        } else {
-            System.out.println("Transaction history for Account " + selectedAccount.getAccountNumber() + ":");
-            for (Transaction transaction : transactions) {
-                System.out.printf("Type: %s, Amount: $%.2f, Approved: %s\n", transaction.getType(), transaction.getAmount(), transaction.isApproved() ? "Yes" : "No");
+        System.out.println("Transactions:");
+        for (Account account : customer.getAccountsList()) {
+            System.out.println("Account: " + account.getAccountNumber());
+            for (Transaction transaction : account.getTransactions()) {
+                System.out.println(transaction.getType() + ": $" + transaction.getAmount());
             }
         }
     }
 
     private void applyForLoan() {
-        System.out.println("Enter the loan amount:");
-        double amount = scanner.nextDouble();
-        System.out.println("Enter the interest rate (e.g., 5.5 for 5.5%):");
-        double interestRate = scanner.nextDouble();
-        scanner.nextLine(); // Clear the newline
+        System.out.println("Enter loan amount:");
+        double amount = Double.parseDouble(scanner.nextLine());
+        System.out.println("Enter interest rate:");
+        double interestRate = Double.parseDouble(scanner.nextLine());
         Loan loan = new Loan(amount, interestRate);
         customer.addLoan(loan);
-        System.out.println("Loan application submitted for $" + String.format("%.2f", amount) + " at " + interestRate + "% interest.");
+        System.out.println("Loan application submitted.");
     }
 
     private void viewLoans() {
-        List<Loan> loans = customer.getLoans();
-        if (loans.isEmpty()) {
-            System.out.println("You have no loans.");
-        } else {
-            System.out.println("Your loans:");
-            for (Loan loan : loans) {
-                System.out.printf("Amount: $%.2f, Interest Rate: %.2f%%, Approved: %s\n", loan.getLoanAmount(), loan.getInterestRate(), loan.isApproved() ? "Yes" : "No");
-            }
+        System.out.println("Loans:");
+        for (Loan loan : customer.getLoans()) {
+            System.out.println("Loan Amount: $" + loan.getLoanAmount() + ", Interest Rate: " + loan.getInterestRate() + "%, Approved: " + (loan.isApproved() ? "Yes" : "No"));
         }
     }
+
+    private void depositMoney() {
+        System.out.println("Enter account number:");
+        String accountNumber = scanner.nextLine();
+        Account account = getAccountByNumber(accountNumber);
+        if (account != null) {
+            System.out.println("Enter amount to deposit:");
+            double amount = Double.parseDouble(scanner.nextLine());
+            account.deposit(amount);
+            System.out.println("Deposit successful. New balance: $" + account.getBalance());
+        } else {
+            System.out.println("Account not found.");
+        }
+    }
+
+    private void withdrawMoney() {
+        System.out.println("Enter account number:");
+        String accountNumber = scanner.nextLine();
+        Account account = getAccountByNumber(accountNumber);
+        if (account != null) {
+            System.out.println("Enter amount to withdraw:");
+            double amount = Double.parseDouble(scanner.nextLine());
+            try {
+                account.withdraw(amount);
+                System.out.println("Withdrawal successful. New balance: $" + account.getBalance());
+            } catch (InsufficientFundsException e) {
+                System.out.println("Insufficient funds for withdrawal.");
+            }
+        } else {
+            System.out.println("Account not found.");
+        }
+    }
+
+    private void openNewAccount() {
+        System.out.println("Enter account type (Savings/Checking):");
+        String type = scanner.nextLine();
+        System.out.println("Enter initial balance:");
+        double balance = Double.parseDouble(scanner.nextLine());
+        Account account = type.equalsIgnoreCase("Savings") ?
+                new SavingsAccount(UUID.randomUUID().toString(), customer.getCustomerID(), balance) :
+                new CheckingAccount(UUID.randomUUID().toString(), customer.getCustomerID(), balance);
+        customer.addAccount(account);
+        System.out.println("Account opened successfully.");
+    }
+
+    private Account getAccountByNumber(String accountNumber) {
+        for (Account account : customer.getAccountsList()) {
+            if (account.getAccountNumber().equals(accountNumber)) {
+                return account;
+            }
+        }
+        return null;
+    }
 }
+
 
 
 class ManagerUI implements UI {
