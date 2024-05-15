@@ -1,5 +1,6 @@
 package org.example;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
@@ -11,10 +12,12 @@ public interface UI {
 class CustomerUI implements UI {
     private Customer customer;
     private Scanner scanner;
+    private CustomerManager customerManager;  // Reference to customer manager to save changes
 
-    public CustomerUI(Customer customer, Scanner scanner) {
+    public CustomerUI(Customer customer, Scanner scanner, CustomerManager customerManager) {
         this.customer = customer;
         this.scanner = scanner;
+        this.customerManager = customerManager;
     }
 
     @Override
@@ -139,6 +142,11 @@ class CustomerUI implements UI {
                 new SavingsAccount(UUID.randomUUID().toString(), customer.getCustomerID(), balance) :
                 new CheckingAccount(UUID.randomUUID().toString(), customer.getCustomerID(), balance);
         customer.addAccount(account);
+        try {
+            customerManager.saveAccounts();  // Save accounts whenever a new one is created
+        } catch (IOException e) {
+            System.err.println("Error saving accounts: " + e.getMessage());
+        }
         System.out.println("Account opened successfully.");
     }
 
@@ -151,6 +159,7 @@ class CustomerUI implements UI {
         return null;
     }
 }
+
 
 
 

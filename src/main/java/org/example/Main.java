@@ -68,7 +68,7 @@ public class Main {
 
         Customer customer = customerManager.getCustomer(customerId);
         if (customer != null && customer.getPassword().equals(password)) {
-            CustomerUI customerUI = new CustomerUI(customer, scanner);
+            CustomerUI customerUI = new CustomerUI(customer, scanner, customerManager);
             customerUI.displayDashboard();
         } else {
             System.out.println("Invalid credentials for customer. Please try again.");

@@ -10,12 +10,14 @@ import java.util.stream.Collectors;
 public class CustomerManager {
     private Map<String, Customer> customers = new HashMap<>();
     private static final String CUSTOMER_FILE = "customers.csv";
+    private static final String ACCOUNTS_FILE = "accounts.csv";
 
     public CustomerManager() {
         try {
             loadCustomers();
+            loadAccounts();
         } catch (IOException e) {
-            System.err.println("Error loading customers: " + e.getMessage());
+            System.err.println("Error loading data: " + e.getMessage());
         }
     }
 
@@ -29,12 +31,48 @@ public class CustomerManager {
         }
     }
 
+    private void loadAccounts() throws IOException {
+        List<String[]> data = CSVUtility.readCSV(ACCOUNTS_FILE);
+        for (String[] line : data) {
+            if (line.length >= 4) {  // Ensure there are enough elements in the line
+                String accountType = line[0];
+                String accountNumber = line[1];
+                String customerId = line[2];
+                double balance = Double.parseDouble(line[3]);
+
+                Customer customer = customers.get(customerId);
+                if (customer != null) {
+                    Account account;
+                    if ("Savings".equalsIgnoreCase(accountType)) {
+                        account = new SavingsAccount(accountNumber, customerId, balance);
+                    } else {
+                        account = new CheckingAccount(accountNumber, customerId, balance);
+                    }
+                    customer.addAccount(account);
+                }
+            }
+        }
+    }
+
     public void saveCustomers() throws IOException {
         List<String[]> data = new ArrayList<>();
         for (Customer customer : customers.values()) {
             data.add(new String[]{customer.getCustomerID(), customer.getName(), customer.getPassword()});
         }
         CSVUtility.writeCSV(CUSTOMER_FILE, data, false); // Overwrite the existing file
+        saveAccounts();
+    }
+
+    public void saveAccounts() throws IOException {
+        List<String[]> data = new ArrayList<>();
+        for (Customer customer : customers.values()) {
+            for (Account account : customer.getAccountsList()) {
+                data.add(new String[]{
+                        account.getAccountType(), account.getAccountNumber(), customer.getCustomerID(), String.valueOf(account.getBalance())
+                });
+            }
+        }
+        CSVUtility.writeCSV(ACCOUNTS_FILE, data, false); // Overwrite the existing file
     }
 
     public void addCustomer(Customer customer) {
