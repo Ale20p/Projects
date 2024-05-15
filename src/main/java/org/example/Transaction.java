@@ -1,38 +1,18 @@
 package org.example;
 
 public class Transaction {
-    private final String transactionId;  // Make transactionId immutable
-    private final String type;
-    private final double amount;
-    private final Account account;
-    private boolean isProcessed;
-    private boolean isApproved;
+    private String transactionId;
+    private String type;
+    private double amount;
+    private String accountNumber;
+    private String status;  // New field to track transaction status
 
-    // Updated constructor that includes transactionId
-    public Transaction(String transactionId, String type, double amount, Account account) {
+    public Transaction(String transactionId, String type, double amount, String accountNumber, String status) {
         this.transactionId = transactionId;
         this.type = type;
         this.amount = amount;
-        this.account = account;
-        this.isProcessed = false;  // Transactions start as not processed
-        this.isApproved = false;  // Transactions over $5000 are not approved by default
-    }
-
-    // Method to mark the transaction as approved and processed
-    public void approveTransaction() {
-        this.isApproved = true;
-        this.isProcessed = true;
-        applyTransaction();
-    }
-
-    // Applies the transaction after approval
-    private void applyTransaction() {
-        if ("Deposit".equals(type)) {
-            account.setBalance(account.getBalance() + amount);
-        } else if ("Withdrawal".equals(type)) {
-            account.setBalance(account.getBalance() - amount);
-        }
-        System.out.println("Transaction processed: " + type + " of $" + amount);
+        this.accountNumber = accountNumber;
+        this.status = status;
     }
 
     // Getters and setters
@@ -40,31 +20,39 @@ public class Transaction {
         return transactionId;
     }
 
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
+    }
+
     public String getType() {
         return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public double getAmount() {
         return amount;
     }
 
-    public Account getAccount() {
-        return account;
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
 
-    public boolean isProcessed() {
-        return isProcessed;
+    public String getAccountNumber() {
+        return accountNumber;
     }
 
-    public void setProcessed(boolean processed) {
-        isProcessed = processed;
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
     }
 
-    public boolean isApproved() {
-        return isApproved;
+    public String getStatus() {
+        return status;
     }
 
-    public void setApproved(boolean approved) {
-        isApproved = approved;
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

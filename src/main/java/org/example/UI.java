@@ -12,12 +12,14 @@ public interface UI {
 class CustomerUI implements UI {
     private Customer customer;
     private Scanner scanner;
-    private CustomerManager customerManager;  // Reference to customer manager to save changes
+    private CustomerManager customerManager;
+    private TransactionManager transactionManager;
 
-    public CustomerUI(Customer customer, Scanner scanner, CustomerManager customerManager) {
+    public CustomerUI(Customer customer, Scanner scanner, CustomerManager customerManager, TransactionManager transactionManager) {
         this.customer = customer;
         this.scanner = scanner;
         this.customerManager = customerManager;
+        this.transactionManager = transactionManager;
     }
 
     @Override
@@ -33,6 +35,7 @@ class CustomerUI implements UI {
             System.out.println("6. Withdraw Money");
             System.out.println("7. Open New Account");
             System.out.println("8. Pay Off Loan");
+            System.out.println("9. Transfer Money");
             System.out.println("0. Logout");
             System.out.println("Choose an action:");
             action = Integer.parseInt(scanner.nextLine());
@@ -60,6 +63,9 @@ class CustomerUI implements UI {
                     break;
                 case 8:
                     payOffLoan();
+                    break;
+                case 9:
+                    performTransfer();
                     break;
                 case 0:
                     System.out.println("Logging out...");
@@ -111,34 +117,30 @@ class CustomerUI implements UI {
     }
 
     private void depositMoney() {
-        System.out.println("Enter account number:");
-        String accountNumber = scanner.nextLine();
-        Account account = getAccountByNumber(accountNumber);
+        Account account = selectAccount();
         if (account != null) {
             System.out.println("Enter amount to deposit:");
             double amount = Double.parseDouble(scanner.nextLine());
             account.deposit(amount);
-            System.out.println("Deposit successful. New balance: $" + account.getBalance());
+            System.out.println("Deposit processed.");
         } else {
-            System.out.println("Account not found.");
+            System.out.println("No account selected.");
         }
     }
 
     private void withdrawMoney() {
-        System.out.println("Enter account number:");
-        String accountNumber = scanner.nextLine();
-        Account account = getAccountByNumber(accountNumber);
+        Account account = selectAccount();
         if (account != null) {
             System.out.println("Enter amount to withdraw:");
             double amount = Double.parseDouble(scanner.nextLine());
             try {
                 account.withdraw(amount);
-                System.out.println("Withdrawal successful. New balance: $" + account.getBalance());
+                System.out.println("Withdrawal processed.");
             } catch (InsufficientFundsException e) {
                 System.out.println("Insufficient funds for withdrawal.");
             }
         } else {
-            System.out.println("Account not found.");
+            System.out.println("No account selected.");
         }
     }
 
@@ -148,8 +150,8 @@ class CustomerUI implements UI {
         System.out.println("Enter initial balance:");
         double balance = Double.parseDouble(scanner.nextLine());
         Account account = type.equalsIgnoreCase("Savings") ?
-                new SavingsAccount(UUID.randomUUID().toString(), customer.getCustomerID(), balance) :
-                new CheckingAccount(UUID.randomUUID().toString(), customer.getCustomerID(), balance);
+                new SavingsAccount(UUID.randomUUID().toString(), customer.getCustomerID(), balance, transactionManager) :
+                new CheckingAccount(UUID.randomUUID().toString(), customer.getCustomerID(), balance, transactionManager);
         customer.addAccount(account);
         try {
             customerManager.saveAccounts();  // Save accounts whenever a new one is created
@@ -180,16 +182,56 @@ class CustomerUI implements UI {
         }
     }
 
-    private Account getAccountByNumber(String accountNumber) {
-        for (Account account : customer.getAccountsList()) {
-            if (account.getAccountNumber().equals(accountNumber)) {
-                return account;
-            }
+    private void performTransfer() {
+        System.out.println("Select source account:");
+        Account sourceAccount = selectAccount();
+        if (sourceAccount == null) {
+            System.out.println("No source account selected.");
+            return;
         }
-        return null;
+
+        System.out.println("Select destination account:");
+        Account destinationAccount = selectAccount();
+        if (destinationAccount == null) {
+            System.out.println("No destination account selected.");
+            return;
+        }
+
+        if (sourceAccount.equals(destinationAccount)) {
+            System.out.println("Cannot transfer to the same account.");
+            return;
+        }
+
+        System.out.println("Enter amount to transfer:");
+        double amount = Double.parseDouble(scanner.nextLine());
+        try {
+            sourceAccount.transfer(amount, destinationAccount);
+            System.out.println("Transfer processed.");
+        } catch (InsufficientFundsException e) {
+            System.out.println("Insufficient funds for transfer.");
+        }
+    }
+
+    private Account selectAccount() {
+        List<Account> accounts = customer.getAccountsList();
+        if (accounts.isEmpty()) {
+            System.out.println("No accounts available.");
+            return null;
+        }
+        System.out.println("Select an account:");
+        for (int i = 0; i < accounts.size(); i++) {
+            Account account = accounts.get(i);
+            System.out.println((i + 1) + ". " + account.getAccountType() + " - " + account.getAccountNumber() + ": Balance $" + account.getBalance());
+        }
+        int choice = Integer.parseInt(scanner.nextLine());
+        if (choice > 0 && choice <= accounts.size()) {
+            return accounts.get(choice - 1);
+        } else {
+            System.out.println("Invalid choice.");
+            return null;
+        }
     }
 }
-
 
 
 
@@ -265,6 +307,7 @@ class ManagerUI implements UI {
             String response = scanner.nextLine();
             if ("yes".equalsIgnoreCase(response)) {
                 transactionManager.approveTransaction(transaction.getTransactionId());
+                System.out.println("Transaction approved.");
             }
         }
     }
@@ -343,8 +386,8 @@ class ManagerUI implements UI {
         System.out.println("Enter initial balance:");
         double balance = Double.parseDouble(scanner.nextLine());
         Account account = type.equalsIgnoreCase("Savings") ?
-                new SavingsAccount(UUID.randomUUID().toString(), customerId, balance) :
-                new CheckingAccount(UUID.randomUUID().toString(), customerId, balance);
+                new SavingsAccount(UUID.randomUUID().toString(), customerId, balance, transactionManager) :
+                new CheckingAccount(UUID.randomUUID().toString(), customerId, balance, transactionManager);
         customer.addAccount(account);
         try {
             customerManager.saveAccounts();  // Save the updated account information to file
@@ -377,3 +420,6 @@ class ManagerUI implements UI {
         }
     }
 }
+
+
+

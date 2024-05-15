@@ -1,31 +1,15 @@
 package org.example;
 
-import java.util.UUID;
-
 public class SavingsAccount extends Account {
-    private static final double MINIMUM_BALANCE = 100.00; // Minimum balance required
-
-    public SavingsAccount(String accountNumber, String customerID, double initialBalance) {
-        super(accountNumber, customerID, initialBalance);
-    }
-
-    @Override
-    public String getAccountType() {
-        return "Savings";
+    public SavingsAccount(String accountNumber, String customerID, double balance, TransactionManager transactionManager) {
+        super(accountNumber, customerID, balance, transactionManager);
     }
 
     @Override
     public void withdraw(double amount) throws InsufficientFundsException {
-        if (amount <= 0) {
-            throw new InsufficientFundsException("Withdrawal amount must be positive.");
+        if (getBalance() < amount) {
+            throw new InsufficientFundsException("Insufficient funds for withdrawal.");
         }
-        if (this.balance - amount < MINIMUM_BALANCE) {
-            throw new InsufficientFundsException("Insufficient funds: Withdrawal would put balance below minimum required.");
-        }
-        this.balance -= amount;
-        this.transactions.add(new Transaction(UUID.randomUUID().toString(), "Withdrawal", amount, this));  // Log transaction
-        System.out.println("Withdrawn: " + amount + ". New balance: " + this.balance);
+        super.withdraw(amount); // Call the parent class withdraw method
     }
 }
-
-
