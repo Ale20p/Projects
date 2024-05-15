@@ -1,7 +1,10 @@
 package org.example;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CustomerManager {
@@ -57,22 +60,6 @@ public class CustomerManager {
                 return true;
             } catch (IOException e) {
                 System.err.println("Error deleting customer: " + e.getMessage());
-                return false;
-            }
-        }
-        return false;
-    }
-
-    public boolean updateCustomer(String customerId, String newName, String newPassword) {
-        if (customers.containsKey(customerId)) {
-            Customer customer = customers.get(customerId);
-            customer.setName(newName);
-            customer.setPassword(newPassword);
-            try {
-                saveCustomers();
-                return true;
-            } catch (IOException e) {
-                System.err.println("Error updating customer: " + e.getMessage());
                 return false;
             }
         }

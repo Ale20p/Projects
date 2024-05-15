@@ -23,7 +23,7 @@ public class Main {
                     scanner.close();
                     return;
                 case "1":
-                    handleCustomerLogin(scanner, customerManager);
+                    handleCustomer(scanner, customerManager);
                     break;
                 case "2":
                     handleManagerLogin(scanner, bankManager, transactionManager);
@@ -33,6 +33,31 @@ public class Main {
                     break;
             }
         }
+    }
+
+    private static void handleCustomer(Scanner scanner, CustomerManager customerManager) {
+        System.out.println("Are you a new customer? (yes/no)");
+        String response = scanner.nextLine();
+        if ("yes".equalsIgnoreCase(response)) {
+            registerNewCustomer(scanner, customerManager);
+        } else {
+            handleCustomerLogin(scanner, customerManager);
+        }
+    }
+
+    private static void registerNewCustomer(Scanner scanner, CustomerManager customerManager) {
+        System.out.println("Registering new customer.");
+        System.out.println("Enter Customer ID:");
+        String id = scanner.nextLine();
+        System.out.println("Enter Customer Name:");
+        String name = scanner.nextLine();
+        System.out.println("Enter Customer Password:");
+        String password = scanner.nextLine();
+
+        Customer newCustomer = new Customer(id, name, password);
+        customerManager.addCustomer(newCustomer);
+
+        System.out.println("Customer registered successfully.");
     }
 
     private static void handleCustomerLogin(Scanner scanner, CustomerManager customerManager) {
