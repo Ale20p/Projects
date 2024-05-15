@@ -26,8 +26,8 @@ public class CustomerManager {
     private void loadCustomers() throws IOException {
         List<String[]> data = CSVUtility.readCSV(CUSTOMER_FILE);
         for (String[] line : data) {
-            if (line.length >= 3) {  // Ensure there are enough elements in the line
-                Customer customer = new Customer(line[0], line[1], line[2]); // Assuming format: customerID, name, password
+            if (line.length >= 4) {  // Ensure there are enough elements in the line
+                Customer customer = new Customer(line[0], line[1], line[2], line[3]); // Assuming format: customerID, name, password, email
                 customers.put(customer.getCustomerID(), customer);
             }
         }
@@ -80,7 +80,7 @@ public class CustomerManager {
     public void saveCustomers() throws IOException {
         List<String[]> data = new ArrayList<>();
         for (Customer customer : customers.values()) {
-            data.add(new String[]{customer.getCustomerID(), customer.getName(), customer.getPassword()});
+            data.add(new String[]{customer.getCustomerID(), customer.getName(), customer.getPassword(), customer.getEmail()});
         }
         CSVUtility.writeCSV(CUSTOMER_FILE, data, false); // Overwrite the existing file
         saveAccounts();
@@ -125,6 +125,13 @@ public class CustomerManager {
 
     public Customer getCustomer(String customerId) {
         return customers.get(customerId);
+    }
+
+    public Customer getCustomerByEmail(String email) {
+        return customers.values().stream()
+                .filter(customer -> customer.getEmail().equalsIgnoreCase(email))
+                .findFirst()
+                .orElse(null);
     }
 
     public boolean deleteCustomer(String customerId) {

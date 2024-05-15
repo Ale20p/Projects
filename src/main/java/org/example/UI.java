@@ -305,7 +305,9 @@ class ManagerUI implements UI {
         String name = scanner.nextLine();
         System.out.println("Enter Customer Password:");
         String password = scanner.nextLine();
-        Customer newCustomer = new Customer(id, name, password);
+        System.out.println("Enter Customer Email:");
+        String email = scanner.nextLine();
+        Customer newCustomer = new Customer(id, name, password, email);
         customerManager.addCustomer(newCustomer);
         System.out.println("Customer added successfully.");
     }

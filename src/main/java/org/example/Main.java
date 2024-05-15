@@ -13,7 +13,6 @@ public class Main {
         BankManager bankManager = new BankManager("001", "manager_password", "Jane Doe", customerManager, transactionManager);
 
         System.out.println("Welcome to the Online Banking Management System!");
-
         while (true) {
             System.out.println("Type '1' for Customer, '2' for Bank Manager, '0' to Exit:");
             String userType = scanner.nextLine();
@@ -53,20 +52,19 @@ public class Main {
         String name = scanner.nextLine();
         System.out.println("Enter Customer Password:");
         String password = scanner.nextLine();
-
-        Customer newCustomer = new Customer(id, name, password);
+        System.out.println("Enter Customer Email:");
+        String email = scanner.nextLine();
+        Customer newCustomer = new Customer(id, name, password, email);
         customerManager.addCustomer(newCustomer);
-
         System.out.println("Customer registered successfully.");
     }
 
     private static void handleCustomerLogin(Scanner scanner, CustomerManager customerManager) {
-        System.out.println("Enter Customer ID:");
-        String customerId = scanner.nextLine();
+        System.out.println("Enter Customer Email:");
+        String email = scanner.nextLine();
         System.out.println("Enter password:");
         String password = scanner.nextLine();
-
-        Customer customer = customerManager.getCustomer(customerId);
+        Customer customer = customerManager.getCustomerByEmail(email);
         if (customer != null && customer.getPassword().equals(password)) {
             CustomerUI customerUI = new CustomerUI(customer, scanner, customerManager);
             customerUI.displayDashboard();
@@ -80,7 +78,6 @@ public class Main {
         String managerId = scanner.nextLine();
         System.out.println("Enter password:");
         String password = scanner.nextLine();
-
         if (bankManager.authenticateManager(managerId, password)) {
             ManagerUI managerUI = new ManagerUI(bankManager, transactionManager, bankManager.getCustomerManager(), scanner);
             managerUI.displayDashboard();

@@ -8,13 +8,15 @@ public class Customer {
     private String customerID;
     private String name;
     private String password;
+    private String email;  // New email field
     private List<Account> accounts; // List to hold customer accounts
     private List<Loan> loans; // List to manage loans associated with the customer
 
-    public Customer(String customerID, String name, String password) {
+    public Customer(String customerID, String name, String password, String email) {
         this.customerID = customerID;
         this.name = name;
         this.password = password;
+        this.email = email;
         this.accounts = new ArrayList<>();
         this.loans = new ArrayList<>();
     }
@@ -58,6 +60,14 @@ public class Customer {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public List<Account> getAccountsList() {
