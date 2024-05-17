@@ -28,8 +28,9 @@ public class AccountManager {
         }
     }
 
-    private void loadAccounts() throws IOException {
+    public void loadAccounts() throws IOException {
         List<String[]> data = CSVUtility.readCSV("accounts.csv");
+        accounts.clear(); // Clear the current map before reloading
         for (String[] line : data) {
             if (line.length >= 4) {
                 String accountNumber = line[0];
@@ -55,6 +56,7 @@ public class AccountManager {
             data.add(new String[]{account.getAccountNumber(), account.getCustomerID(), String.valueOf(account.getBalance()), account.getAccountType()});
         }
         CSVUtility.writeCSV("accounts.csv", data, false);
+        loadAccounts(); // Reload accounts after saving
     }
 
     public Account getAccount(String accountNumber) {

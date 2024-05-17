@@ -6,15 +6,23 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        AccountManager accountManager = new AccountManager(null); // Temporarily pass null
-        TransactionManager transactionManager = new TransactionManager(accountManager);
-        accountManager.setTransactionManager(transactionManager); // Set the correct transaction manager
+        // Initialize AccountManager with null temporarily
+        AccountManager accountManager = new AccountManager(null);
 
+        // Initialize TransactionManager with AccountManager
+        TransactionManager transactionManager = new TransactionManager(accountManager);
+
+        // Set the correct TransactionManager in AccountManager
+        accountManager.setTransactionManager(transactionManager);
+
+        // Initialize CustomerManager with TransactionManager
         CustomerManager customerManager = new CustomerManager(transactionManager);
 
+        // Initialize BankManager with required managers
         BankManager bankManager = new BankManager("001", "manager_password", "Jane Doe", customerManager, transactionManager);
 
         System.out.println("Welcome to the Online Banking Management System!");
+
         while (true) {
             System.out.println("Type '1' for Customer, '2' for Bank Manager, '0' to Exit:");
             String userType = scanner.nextLine();

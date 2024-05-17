@@ -21,6 +21,7 @@ public class TransactionManager {
 
     private void loadTransactions() throws IOException {
         List<String[]> data = CSVUtility.readCSV(TRANSACTIONS_FILE);
+        transactions.clear(); // Clear the current list before reloading
         for (String[] line : data) {
             if (line.length >= 5) {
                 Transaction transaction = new Transaction(line[0], line[1], Double.parseDouble(line[2]), line[3], line[4]);
@@ -38,6 +39,7 @@ public class TransactionManager {
             });
         }
         CSVUtility.writeCSV(TRANSACTIONS_FILE, data, false);
+        loadTransactions(); // Reload transactions after saving
     }
 
     public void logTransaction(Transaction transaction) {
@@ -73,8 +75,7 @@ public class TransactionManager {
                         } catch (InsufficientFundsException e) {
                             System.err.println("Insufficient funds for withdrawal: " + e.getMessage());
                         }
-                    } else if ("Transfer".equalsIgnoreCase(transaction.getType())) {
-                        // Handle transfer by parsing the destination account from transaction description
+                    } else if (transaction.getType().startsWith("Transfer")) {
                         String[] parts = transaction.getType().split(" ");
                         String destinationAccountNumber = parts.length > 1 ? parts[1] : null;
                         if (destinationAccountNumber != null) {
@@ -95,6 +96,7 @@ public class TransactionManager {
         try {
             saveTransactions();
             accountManager.saveAccounts();
+            accountManager.loadAccounts(); // Reload accounts after saving
         } catch (IOException e) {
             System.err.println("Error saving transactions or accounts: " + e.getMessage());
         }

@@ -89,7 +89,7 @@ class CustomerUI implements UI {
         for (Account account : customer.getAccountsList()) {
             System.out.println("Account: " + account.getAccountNumber());
             for (Transaction transaction : account.getTransactions()) {
-                System.out.println(transaction.getType() + ": $" + transaction.getAmount() + ", Status: " + transaction.getStatus());
+                System.out.println(transaction.getType() + ": $" + transaction.getAmount() + " Status: " + transaction.getStatus());
             }
         }
     }
@@ -104,6 +104,7 @@ class CustomerUI implements UI {
         System.out.println("Loan application submitted.");
         try {
             customerManager.saveLoans();  // Save loans whenever a new loan is created
+            customerManager.loadLoans();  // Reload loans after saving
         } catch (IOException e) {
             System.err.println("Error saving loans: " + e.getMessage());
         }
@@ -112,7 +113,7 @@ class CustomerUI implements UI {
     private void viewLoans() {
         System.out.println("Loans:");
         for (Loan loan : customer.getLoans()) {
-            System.out.println("Loan Amount: $" + loan.getLoanAmount() + ", Interest Rate: " + loan.getInterestRate() + "%, Approved: " + (loan.isApproved() ? "Yes" : "No") + ", Paid Off: " + (loan.isPaidOff() ? "Yes" : "No"));
+            System.out.println("Loan Amount: $" + loan.getLoanAmount() + " Interest Rate: " + loan.getInterestRate() + "% Approved: " + (loan.isApproved() ? "Yes" : "No") + " Paid Off: " + (loan.isPaidOff() ? "Yes" : "No"));
         }
     }
 
@@ -123,6 +124,12 @@ class CustomerUI implements UI {
             double amount = Double.parseDouble(scanner.nextLine());
             account.deposit(amount);
             System.out.println("Deposit processed.");
+            try {
+                customerManager.saveAccounts();  // Save accounts whenever a deposit is made
+                customerManager.loadAccounts();  // Reload accounts after saving
+            } catch (IOException e) {
+                System.err.println("Error saving accounts: " + e.getMessage());
+            }
         } else {
             System.out.println("No account selected.");
         }
@@ -136,6 +143,12 @@ class CustomerUI implements UI {
             try {
                 account.withdraw(amount);
                 System.out.println("Withdrawal processed.");
+                try {
+                    customerManager.saveAccounts();  // Save accounts whenever a withdrawal is made
+                    customerManager.loadAccounts();  // Reload accounts after saving
+                } catch (IOException e) {
+                    System.err.println("Error saving accounts: " + e.getMessage());
+                }
             } catch (InsufficientFundsException e) {
                 System.out.println("Insufficient funds for withdrawal.");
             }
@@ -155,6 +168,7 @@ class CustomerUI implements UI {
         customer.addAccount(account);
         try {
             customerManager.saveAccounts();  // Save accounts whenever a new one is created
+            customerManager.loadAccounts();  // Reload accounts after saving
         } catch (IOException e) {
             System.err.println("Error saving accounts: " + e.getMessage());
         }
@@ -165,7 +179,7 @@ class CustomerUI implements UI {
         System.out.println("Loans:");
         int loanIndex = 1;
         for (Loan loan : customer.getLoans()) {
-            System.out.println(loanIndex++ + ". Loan Amount: $" + loan.getLoanAmount() + ", Interest Rate: " + loan.getInterestRate() + "%, Approved: " + (loan.isApproved() ? "Yes" : "No") + ", Paid Off: " + (loan.isPaidOff() ? "Yes" : "No"));
+            System.out.println(loanIndex++ + ". Loan Amount: $" + loan.getLoanAmount() + " Interest Rate: " + loan.getInterestRate() + "% Approved: " + (loan.isApproved() ? "Yes" : "No") + " Paid Off: " + (loan.isPaidOff() ? "Yes" : "No"));
         }
         System.out.println("Enter the number of the loan you want to pay off:");
         int choice = Integer.parseInt(scanner.nextLine());
@@ -174,6 +188,7 @@ class CustomerUI implements UI {
             loan.payOffLoan();
             try {
                 customerManager.saveLoans();  // Save loans whenever a loan is paid off
+                customerManager.loadLoans();  // Reload loans after saving
             } catch (IOException e) {
                 System.err.println("Error saving loans: " + e.getMessage());
             }
@@ -189,24 +204,27 @@ class CustomerUI implements UI {
             System.out.println("No source account selected.");
             return;
         }
-
         System.out.println("Select destination account:");
         Account destinationAccount = selectAccount();
         if (destinationAccount == null) {
             System.out.println("No destination account selected.");
             return;
         }
-
         if (sourceAccount.equals(destinationAccount)) {
             System.out.println("Cannot transfer to the same account.");
             return;
         }
-
         System.out.println("Enter amount to transfer:");
         double amount = Double.parseDouble(scanner.nextLine());
         try {
             sourceAccount.transfer(amount, destinationAccount);
             System.out.println("Transfer processed.");
+            try {
+                customerManager.saveAccounts();  // Save accounts whenever a transfer is made
+                customerManager.loadAccounts();  // Reload accounts after saving
+            } catch (IOException e) {
+                System.err.println("Error saving accounts: " + e.getMessage());
+            }
         } catch (InsufficientFundsException e) {
             System.out.println("Insufficient funds for transfer.");
         }
@@ -232,6 +250,7 @@ class CustomerUI implements UI {
         }
     }
 }
+
 
 
 
@@ -308,6 +327,12 @@ class ManagerUI implements UI {
             if ("yes".equalsIgnoreCase(response)) {
                 transactionManager.approveTransaction(transaction.getTransactionId());
                 System.out.println("Transaction approved.");
+                try {
+                    transactionManager.loadTransactions();  // Reload transactions after approval
+                    customerManager.loadAccounts();  // Reload accounts after transaction approval
+                } catch (IOException e) {
+                    System.err.println("Error loading transactions or accounts: " + e.getMessage());
+                }
             }
         }
     }
@@ -331,6 +356,8 @@ class ManagerUI implements UI {
                     try {
                         customerManager.saveLoans();  // Save the updated loan information to file
                         customerManager.saveAccounts();  // Save the updated account information to file
+                        customerManager.loadLoans();  // Reload loans after saving
+                        customerManager.loadAccounts();  // Reload accounts after saving
                     } catch (IOException e) {
                         System.err.println("Error saving loans or accounts: " + e.getMessage());
                     }
@@ -361,6 +388,13 @@ class ManagerUI implements UI {
         boolean success = customerManager.deleteCustomer(customerId);
         if (success) {
             System.out.println("Customer successfully deleted.");
+            try {
+                customerManager.loadCustomers();  // Reload customers after deletion
+                customerManager.loadAccounts();  // Reload accounts after deletion
+                customerManager.loadLoans();  // Reload loans after deletion
+            } catch (IOException e) {
+                System.err.println("Error loading customers, accounts, or loans: " + e.getMessage());
+            }
         } else {
             System.out.println("Failed to delete customer.");
         }
@@ -391,6 +425,7 @@ class ManagerUI implements UI {
         customer.addAccount(account);
         try {
             customerManager.saveAccounts();  // Save the updated account information to file
+            customerManager.loadAccounts();  // Reload accounts after saving
         } catch (IOException e) {
             System.err.println("Error saving accounts: " + e.getMessage());
         }
@@ -411,12 +446,15 @@ class ManagerUI implements UI {
         if (removed) {
             try {
                 customerManager.saveAccounts();  // Save the updated account information to file
+                customerManager.loadAccounts();  // Reload accounts after saving
+                System.out.println("Account deleted successfully.");
             } catch (IOException e) {
                 System.err.println("Error saving accounts: " + e.getMessage());
             }
-            System.out.println("Account deleted successfully.");
         } else {
             System.out.println("Failed to delete account.");
         }
     }
 }
+
+
