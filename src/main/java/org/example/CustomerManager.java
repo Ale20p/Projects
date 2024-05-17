@@ -1,10 +1,7 @@
 package org.example;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CustomerManager {
     private Map<String, Customer> customers;
@@ -194,5 +191,10 @@ public class CustomerManager {
         }
 
         return report.toString();
+    }
+
+    // Generate a unique Customer ID
+    public String generateCustomerId() {
+        return UUID.randomUUID().toString();
     }
 }

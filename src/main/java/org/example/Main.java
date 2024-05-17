@@ -2,8 +2,6 @@ package org.example;
 
 import java.util.Scanner;
 
-import java.util.Scanner;
-
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -50,8 +48,7 @@ public class Main {
 
     private static void registerNewCustomer(Scanner scanner, CustomerManager customerManager) {
         System.out.println("Registering new customer.");
-        System.out.println("Enter Customer ID:");
-        String id = scanner.nextLine();
+        String id = customerManager.generateCustomerId(); // Automatically generate Customer ID
         System.out.println("Enter Customer Name:");
         String name = scanner.nextLine();
         System.out.println("Enter Customer Password:");
@@ -60,7 +57,7 @@ public class Main {
         String email = scanner.nextLine();
         Customer newCustomer = new Customer(id, name, password, email);
         customerManager.addCustomer(newCustomer);
-        System.out.println("Customer registered successfully.");
+        System.out.println("Customer registered successfully. Your Customer ID is: " + id);
     }
 
     private static void handleCustomerLogin(Scanner scanner, CustomerManager customerManager, TransactionManager transactionManager) {
