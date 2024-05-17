@@ -20,6 +20,14 @@ public class AccountManager {
         }
     }
 
+    public void setTransactionManager(TransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
+        // Update transaction manager for all accounts
+        for (Account account : accounts.values()) {
+            account.setTransactionManager(transactionManager);
+        }
+    }
+
     private void loadAccounts() throws IOException {
         List<String[]> data = CSVUtility.readCSV("accounts.csv");
         for (String[] line : data) {

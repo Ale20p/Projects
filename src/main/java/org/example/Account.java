@@ -19,6 +19,10 @@ public abstract class Account {
         this.transactionManager = transactionManager;
     }
 
+    public void setTransactionManager(TransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
+    }
+
     public void deposit(double amount) {
         if (amount > 5000) {
             Transaction transaction = new Transaction(UUID.randomUUID().toString(), "Deposit", amount, accountNumber, "Pending");
@@ -91,8 +95,6 @@ public abstract class Account {
         return this instanceof SavingsAccount ? "Savings" : "Checking";
     }
 }
-
-
 
 
 

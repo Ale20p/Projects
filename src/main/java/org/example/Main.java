@@ -8,7 +8,7 @@ public class Main {
 
         AccountManager accountManager = new AccountManager(null); // Temporarily pass null
         TransactionManager transactionManager = new TransactionManager(accountManager);
-        accountManager = new AccountManager(transactionManager); // Reinitialize with the correct transaction manager
+        accountManager.setTransactionManager(transactionManager); // Set the correct transaction manager
 
         CustomerManager customerManager = new CustomerManager(transactionManager);
 
