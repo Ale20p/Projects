@@ -253,7 +253,6 @@ class CustomerUI implements UI {
 
 
 
-
 class ManagerUI implements UI {
     private BankManager bankManager;
     private TransactionManager transactionManager;
@@ -327,12 +326,15 @@ class ManagerUI implements UI {
             if ("yes".equalsIgnoreCase(response)) {
                 transactionManager.approveTransaction(transaction.getTransactionId());
                 System.out.println("Transaction approved.");
-                try {
-                    transactionManager.loadTransactions();  // Reload transactions after approval
-                    customerManager.loadAccounts();  // Reload accounts after transaction approval
-                } catch (IOException e) {
-                    System.err.println("Error loading transactions or accounts: " + e.getMessage());
-                }
+            } else {
+                transactionManager.rejectTransaction(transaction.getTransactionId());
+                System.out.println("Transaction rejected.");
+            }
+            try {
+                transactionManager.loadTransactions();  // Reload transactions after approval
+                customerManager.loadAccounts();  // Reload accounts after transaction approval
+            } catch (IOException e) {
+                System.err.println("Error loading transactions or accounts: " + e.getMessage());
             }
         }
     }
@@ -456,5 +458,8 @@ class ManagerUI implements UI {
         }
     }
 }
+
+
+
 
 
