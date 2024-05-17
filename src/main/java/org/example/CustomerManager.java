@@ -19,7 +19,7 @@ public class CustomerManager {
         }
     }
 
-    public void loadCustomers() throws IOException { // Changed from private to public
+    public void loadCustomers() throws IOException {
         List<String[]> data = CSVUtility.readCSV("customers.csv");
         customers.clear(); // Clear the current map before reloading
         for (String[] line : data) {
@@ -30,9 +30,8 @@ public class CustomerManager {
         }
     }
 
-    public void loadAccounts() throws IOException { // Changed from private to public
+    public void loadAccounts() throws IOException {
         List<String[]> data = CSVUtility.readCSV("accounts.csv");
-        accounts.clear(); // Clear the current map before reloading
         for (String[] line : data) {
             if (line.length >= 4) {
                 String accountNumber = line[0];
@@ -53,7 +52,7 @@ public class CustomerManager {
         }
     }
 
-    public void loadLoans() throws IOException { // Changed from private to public
+    public void loadLoans() throws IOException {
         List<String[]> data = CSVUtility.readCSV("loans.csv");
         for (String[] line : data) {
             if (line.length >= 5) {
