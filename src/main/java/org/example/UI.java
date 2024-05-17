@@ -89,7 +89,7 @@ class CustomerUI implements UI {
         for (Account account : customer.getAccountsList()) {
             System.out.println("Account: " + account.getAccountNumber());
             for (Transaction transaction : account.getTransactions()) {
-                System.out.println(transaction.getType() + ": $" + transaction.getAmount());
+                System.out.println(transaction.getType() + ": $" + transaction.getAmount() + ", Status: " + transaction.getStatus());
             }
         }
     }
@@ -420,6 +420,3 @@ class ManagerUI implements UI {
         }
     }
 }
-
-
-

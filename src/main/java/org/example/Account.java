@@ -57,14 +57,14 @@ public abstract class Account {
             throw new InsufficientFundsException("Insufficient funds for transfer.");
         }
         if (amount > 5000) {
-            Transaction transaction = new Transaction(UUID.randomUUID().toString(), "Transfer", amount, accountNumber, "Pending");
+            Transaction transaction = new Transaction(UUID.randomUUID().toString(), "Transfer " + destinationAccount.getAccountNumber(), amount, accountNumber, "Pending");
             transactions.add(transaction);
             transactionManager.logTransaction(transaction);
             System.out.println("Transfer of $" + amount + " is pending approval.");
         } else {
             balance -= amount;
             destinationAccount.deposit(amount);
-            Transaction transaction = new Transaction(UUID.randomUUID().toString(), "Transfer", amount, accountNumber, "Approved");
+            Transaction transaction = new Transaction(UUID.randomUUID().toString(), "Transfer " + destinationAccount.getAccountNumber(), amount, accountNumber, "Approved");
             transactions.add(transaction);
             transactionManager.logTransaction(transaction);
             System.out.println("Transfer successful. New balance: $" + balance);
@@ -91,6 +91,7 @@ public abstract class Account {
         return this instanceof SavingsAccount ? "Savings" : "Checking";
     }
 }
+
 
 
 

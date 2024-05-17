@@ -22,7 +22,7 @@ public class TransactionManager {
     private void loadTransactions() throws IOException {
         List<String[]> data = CSVUtility.readCSV(TRANSACTIONS_FILE);
         for (String[] line : data) {
-            if (line.length >= 5) {  // Ensure there are enough elements in the line
+            if (line.length >= 5) {
                 Transaction transaction = new Transaction(line[0], line[1], Double.parseDouble(line[2]), line[3], line[4]);
                 transactions.add(transaction);
             }
@@ -37,13 +37,13 @@ public class TransactionManager {
                     transaction.getAccountNumber(), transaction.getStatus()
             });
         }
-        CSVUtility.writeCSV(TRANSACTIONS_FILE, data, false); // Overwrite the existing file
+        CSVUtility.writeCSV(TRANSACTIONS_FILE, data, false);
     }
 
     public void logTransaction(Transaction transaction) {
         transactions.add(transaction);
         try {
-            saveTransactions();  // Save the updated transactions to file
+            saveTransactions();
         } catch (IOException e) {
             System.err.println("Error saving transactions: " + e.getMessage());
         }
@@ -73,15 +73,30 @@ public class TransactionManager {
                         } catch (InsufficientFundsException e) {
                             System.err.println("Insufficient funds for withdrawal: " + e.getMessage());
                         }
+                    } else if ("Transfer".equalsIgnoreCase(transaction.getType())) {
+                        // Handle transfer by parsing the destination account from transaction description
+                        String[] parts = transaction.getType().split(" ");
+                        String destinationAccountNumber = parts.length > 1 ? parts[1] : null;
+                        if (destinationAccountNumber != null) {
+                            Account destinationAccount = accountManager.getAccount(destinationAccountNumber);
+                            if (destinationAccount != null) {
+                                try {
+                                    account.transfer(transaction.getAmount(), destinationAccount);
+                                } catch (InsufficientFundsException e) {
+                                    System.err.println("Insufficient funds for transfer: " + e.getMessage());
+                                }
+                            }
+                        }
                     }
                 }
                 break;
             }
         }
         try {
-            saveTransactions();  // Save the updated transactions to file
+            saveTransactions();
+            accountManager.saveAccounts();
         } catch (IOException e) {
-            System.err.println("Error saving transactions: " + e.getMessage());
+            System.err.println("Error saving transactions or accounts: " + e.getMessage());
         }
     }
 }
