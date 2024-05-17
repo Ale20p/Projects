@@ -2,14 +2,18 @@ package org.example;
 
 import java.util.Scanner;
 
+import java.util.Scanner;
+
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        AccountManager accountManager = new AccountManager();  // Assume this is correctly set up to manage accounts
-        CustomerManager customerManager = new CustomerManager();  // Assume this is set up for managing customers
-        TransactionManager transactionManager = new TransactionManager(accountManager);  // Ensure TransactionManager can interact with AccountManager
 
-        // Set up a bank manager with necessary dependencies
+        AccountManager accountManager = new AccountManager(null); // Temporarily pass null
+        TransactionManager transactionManager = new TransactionManager(accountManager);
+        accountManager = new AccountManager(transactionManager); // Reinitialize with the correct transaction manager
+
+        CustomerManager customerManager = new CustomerManager(transactionManager);
+
         BankManager bankManager = new BankManager("001", "manager_password", "Jane Doe", customerManager, transactionManager);
 
         System.out.println("Welcome to the Online Banking Management System!");
@@ -22,7 +26,7 @@ public class Main {
                     scanner.close();
                     return;
                 case "1":
-                    handleCustomer(scanner, customerManager);
+                    handleCustomer(scanner, customerManager, transactionManager);
                     break;
                 case "2":
                     handleManagerLogin(scanner, bankManager, transactionManager);
@@ -34,13 +38,13 @@ public class Main {
         }
     }
 
-    private static void handleCustomer(Scanner scanner, CustomerManager customerManager) {
+    private static void handleCustomer(Scanner scanner, CustomerManager customerManager, TransactionManager transactionManager) {
         System.out.println("Are you a new customer? (yes/no)");
         String response = scanner.nextLine();
         if ("yes".equalsIgnoreCase(response)) {
             registerNewCustomer(scanner, customerManager);
         } else {
-            handleCustomerLogin(scanner, customerManager);
+            handleCustomerLogin(scanner, customerManager, transactionManager);
         }
     }
 
@@ -59,14 +63,14 @@ public class Main {
         System.out.println("Customer registered successfully.");
     }
 
-    private static void handleCustomerLogin(Scanner scanner, CustomerManager customerManager) {
+    private static void handleCustomerLogin(Scanner scanner, CustomerManager customerManager, TransactionManager transactionManager) {
         System.out.println("Enter Customer Email:");
         String email = scanner.nextLine();
         System.out.println("Enter password:");
         String password = scanner.nextLine();
         Customer customer = customerManager.getCustomerByEmail(email);
         if (customer != null && customer.getPassword().equals(password)) {
-            CustomerUI customerUI = new CustomerUI(customer, scanner, customerManager);
+            CustomerUI customerUI = new CustomerUI(customer, scanner, customerManager, transactionManager);
             customerUI.displayDashboard();
         } else {
             System.out.println("Invalid credentials for customer. Please try again.");

@@ -2,16 +2,15 @@ package org.example;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class TransactionManager {
     private static final String TRANSACTIONS_FILE = "transactions.csv";
-    private List<Transaction> transactions = new ArrayList<>();
+    private List<Transaction> transactions;
     private AccountManager accountManager;
 
     public TransactionManager(AccountManager accountManager) {
+        this.transactions = new ArrayList<>();
         this.accountManager = accountManager;
         try {
             loadTransactions();
