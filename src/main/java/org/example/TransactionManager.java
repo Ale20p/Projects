@@ -68,24 +68,17 @@ public class TransactionManager {
                 Account account = accountManager.getAccount(transaction.getAccountNumber());
                 if (account != null) {
                     if ("Deposit".equalsIgnoreCase(transaction.getType())) {
-                        account.deposit(transaction.getAmount());
+                        account.setBalance(account.getBalance() + transaction.getAmount());
                     } else if ("Withdrawal".equalsIgnoreCase(transaction.getType())) {
-                        try {
-                            account.withdraw(transaction.getAmount());
-                        } catch (InsufficientFundsException e) {
-                            System.err.println("Insufficient funds for withdrawal: " + e.getMessage());
-                        }
+                        account.setBalance(account.getBalance() - transaction.getAmount());
                     } else if (transaction.getType().startsWith("Transfer")) {
                         String[] parts = transaction.getType().split(" ");
                         String destinationAccountNumber = parts.length > 1 ? parts[1] : null;
                         if (destinationAccountNumber != null) {
                             Account destinationAccount = accountManager.getAccount(destinationAccountNumber);
                             if (destinationAccount != null) {
-                                try {
-                                    account.transfer(transaction.getAmount(), destinationAccount);
-                                } catch (InsufficientFundsException e) {
-                                    System.err.println("Insufficient funds for transfer: " + e.getMessage());
-                                }
+                                account.setBalance(account.getBalance() - transaction.getAmount());
+                                destinationAccount.setBalance(destinationAccount.getBalance() + transaction.getAmount());
                             }
                         }
                     }

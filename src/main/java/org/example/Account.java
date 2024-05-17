@@ -99,6 +99,10 @@ public abstract class Account {
         return balance;
     }
 
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+
     public List<Transaction> getTransactions() {
         return transactions;
     }
@@ -107,6 +111,8 @@ public abstract class Account {
         return this instanceof SavingsAccount ? "Savings" : "Checking";
     }
 }
+
+
 
 
 

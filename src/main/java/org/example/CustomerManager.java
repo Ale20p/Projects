@@ -21,7 +21,7 @@ public class CustomerManager {
 
     public void loadCustomers() throws IOException {
         List<String[]> data = CSVUtility.readCSV("customers.csv");
-        customers.clear(); // Clear the current map before reloading
+        customers.clear();
         for (String[] line : data) {
             if (line.length >= 4) {
                 Customer customer = new Customer(line[0], line[1], line[2], line[3]);
@@ -32,6 +32,9 @@ public class CustomerManager {
 
     public void loadAccounts() throws IOException {
         List<String[]> data = CSVUtility.readCSV("accounts.csv");
+        for (Customer customer : customers.values()) {
+            customer.clearAccounts(); // Clear existing accounts for each customer
+        }
         for (String[] line : data) {
             if (line.length >= 4) {
                 String accountNumber = line[0];
@@ -78,7 +81,7 @@ public class CustomerManager {
             data.add(new String[]{customer.getCustomerID(), customer.getName(), customer.getPassword(), customer.getEmail()});
         }
         CSVUtility.writeCSV("customers.csv", data, false);
-        loadCustomers(); // Reload customers after saving
+        loadCustomers();
     }
 
     public void saveAccounts() throws IOException {
@@ -89,7 +92,7 @@ public class CustomerManager {
             }
         }
         CSVUtility.writeCSV("accounts.csv", data, false);
-        loadAccounts(); // Reload accounts after saving
+        loadAccounts();
     }
 
     public void saveLoans() throws IOException {
@@ -100,7 +103,7 @@ public class CustomerManager {
             }
         }
         CSVUtility.writeCSV("loans.csv", data, false);
-        loadLoans(); // Reload loans after saving
+        loadLoans();
     }
 
     public void addCustomer(Customer customer) {
@@ -189,7 +192,6 @@ public class CustomerManager {
         return report.toString();
     }
 
-    // Generate a unique Customer ID
     public String generateCustomerId() {
         return UUID.randomUUID().toString();
     }

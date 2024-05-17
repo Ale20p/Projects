@@ -103,8 +103,8 @@ class CustomerUI implements UI {
         customer.addLoan(loan);
         System.out.println("Loan application submitted.");
         try {
-            customerManager.saveLoans();  // Save loans whenever a new loan is created
-            customerManager.loadLoans();  // Reload loans after saving
+            customerManager.saveLoans();
+            customerManager.loadLoans();
         } catch (IOException e) {
             System.err.println("Error saving loans: " + e.getMessage());
         }
@@ -125,8 +125,8 @@ class CustomerUI implements UI {
             account.deposit(amount);
             System.out.println("Deposit processed.");
             try {
-                customerManager.saveAccounts();  // Save accounts whenever a deposit is made
-                customerManager.loadAccounts();  // Reload accounts after saving
+                customerManager.saveAccounts();
+                customerManager.loadAccounts();
             } catch (IOException e) {
                 System.err.println("Error saving accounts: " + e.getMessage());
             }
@@ -144,8 +144,8 @@ class CustomerUI implements UI {
                 account.withdraw(amount);
                 System.out.println("Withdrawal processed.");
                 try {
-                    customerManager.saveAccounts();  // Save accounts whenever a withdrawal is made
-                    customerManager.loadAccounts();  // Reload accounts after saving
+                    customerManager.saveAccounts();
+                    customerManager.loadAccounts();
                 } catch (IOException e) {
                     System.err.println("Error saving accounts: " + e.getMessage());
                 }
@@ -167,8 +167,8 @@ class CustomerUI implements UI {
                 new CheckingAccount(UUID.randomUUID().toString(), customer.getCustomerID(), balance, transactionManager);
         customer.addAccount(account);
         try {
-            customerManager.saveAccounts();  // Save accounts whenever a new one is created
-            customerManager.loadAccounts();  // Reload accounts after saving
+            customerManager.saveAccounts();
+            customerManager.loadAccounts();
         } catch (IOException e) {
             System.err.println("Error saving accounts: " + e.getMessage());
         }
@@ -187,8 +187,8 @@ class CustomerUI implements UI {
             Loan loan = customer.getLoans().get(choice - 1);
             loan.payOffLoan();
             try {
-                customerManager.saveLoans();  // Save loans whenever a loan is paid off
-                customerManager.loadLoans();  // Reload loans after saving
+                customerManager.saveLoans();
+                customerManager.loadLoans();
             } catch (IOException e) {
                 System.err.println("Error saving loans: " + e.getMessage());
             }
@@ -220,8 +220,8 @@ class CustomerUI implements UI {
             sourceAccount.transfer(amount, destinationAccount);
             System.out.println("Transfer processed.");
             try {
-                customerManager.saveAccounts();  // Save accounts whenever a transfer is made
-                customerManager.loadAccounts();  // Reload accounts after saving
+                customerManager.saveAccounts();
+                customerManager.loadAccounts();
             } catch (IOException e) {
                 System.err.println("Error saving accounts: " + e.getMessage());
             }
@@ -353,7 +353,7 @@ class ManagerUI implements UI {
                 Customer customer = customerManager.getCustomerByLoan(loan);
                 if (customer != null) {
                     Account account = customer.getAccountsList().get(0);  // Assuming money goes to the first account or enhance this logic
-                    account.deposit(loan.getLoanAmount());
+                    account.setBalance(account.getBalance() + loan.getLoanAmount());
                     System.out.println("Loan approved and funds deposited to account " + account.getAccountNumber());
                     try {
                         customerManager.saveLoans();  // Save the updated loan information to file
@@ -458,6 +458,7 @@ class ManagerUI implements UI {
         }
     }
 }
+
 
 
 
