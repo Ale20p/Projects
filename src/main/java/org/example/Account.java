@@ -24,67 +24,40 @@ public abstract class Account {
     }
 
     public void deposit(double amount) {
-        if (amount > 5000) {
-            Transaction transaction = new Transaction(UUID.randomUUID().toString(), "Deposit", amount, accountNumber, "Pending");
-            transactions.add(transaction);
-            if (transactionManager != null) {
-                transactionManager.logTransaction(transaction);
-            }
-            System.out.println("Deposit of $" + amount + " is pending approval.");
-        } else {
-            balance += amount;
-            Transaction transaction = new Transaction(UUID.randomUUID().toString(), "Deposit", amount, accountNumber, "Approved");
-            transactions.add(transaction);
-            if (transactionManager != null) {
-                transactionManager.logTransaction(transaction);
-            }
-            System.out.println("Deposit successful. New balance: $" + balance);
+        balance += amount;
+        Transaction transaction = new Transaction(UUID.randomUUID().toString(), "Deposit", amount, accountNumber, "Approved");
+        transactions.add(transaction);
+        if (transactionManager != null) {
+            transactionManager.logTransaction(transaction);
         }
+        System.out.println("Deposit successful. New balance: $" + balance);
     }
 
     public void withdraw(double amount) throws InsufficientFundsException {
         if (amount > balance) {
             throw new InsufficientFundsException("Insufficient funds for withdrawal.");
         }
-        if (amount > 5000) {
-            Transaction transaction = new Transaction(UUID.randomUUID().toString(), "Withdrawal", amount, accountNumber, "Pending");
-            transactions.add(transaction);
-            if (transactionManager != null) {
-                transactionManager.logTransaction(transaction);
-            }
-            System.out.println("Withdrawal of $" + amount + " is pending approval.");
-        } else {
-            balance -= amount;
-            Transaction transaction = new Transaction(UUID.randomUUID().toString(), "Withdrawal", amount, accountNumber, "Approved");
-            transactions.add(transaction);
-            if (transactionManager != null) {
-                transactionManager.logTransaction(transaction);
-            }
-            System.out.println("Withdrawal successful. New balance: $" + balance);
+        balance -= amount;
+        Transaction transaction = new Transaction(UUID.randomUUID().toString(), "Withdrawal", amount, accountNumber, "Approved");
+        transactions.add(transaction);
+        if (transactionManager != null) {
+            transactionManager.logTransaction(transaction);
         }
+        System.out.println("Withdrawal successful. New balance: $" + balance);
     }
 
     public void transfer(double amount, Account destinationAccount) throws InsufficientFundsException {
         if (amount > balance) {
             throw new InsufficientFundsException("Insufficient funds for transfer.");
         }
-        if (amount > 5000) {
-            Transaction transaction = new Transaction(UUID.randomUUID().toString(), "Transfer " + destinationAccount.getAccountNumber(), amount, accountNumber, "Pending");
-            transactions.add(transaction);
-            if (transactionManager != null) {
-                transactionManager.logTransaction(transaction);
-            }
-            System.out.println("Transfer of $" + amount + " is pending approval.");
-        } else {
-            balance -= amount;
-            destinationAccount.deposit(amount);
-            Transaction transaction = new Transaction(UUID.randomUUID().toString(), "Transfer " + destinationAccount.getAccountNumber(), amount, accountNumber, "Approved");
-            transactions.add(transaction);
-            if (transactionManager != null) {
-                transactionManager.logTransaction(transaction);
-            }
-            System.out.println("Transfer successful. New balance: $" + balance);
+        balance -= amount;
+        destinationAccount.deposit(amount);
+        Transaction transaction = new Transaction(UUID.randomUUID().toString(), "Transfer " + destinationAccount.getAccountNumber(), amount, accountNumber, "Approved");
+        transactions.add(transaction);
+        if (transactionManager != null) {
+            transactionManager.logTransaction(transaction);
         }
+        System.out.println("Transfer successful. New balance: $" + balance);
     }
 
     public String getAccountNumber() {
@@ -111,6 +84,7 @@ public abstract class Account {
         return this instanceof SavingsAccount ? "Savings" : "Checking";
     }
 }
+
 
 
 

@@ -13,13 +13,11 @@ class CustomerUI implements UI {
     private Customer customer;
     private Scanner scanner;
     private CustomerManager customerManager;
-    private TransactionManager transactionManager;
 
-    public CustomerUI(Customer customer, Scanner scanner, CustomerManager customerManager, TransactionManager transactionManager) {
+    public CustomerUI(Customer customer, Scanner scanner, CustomerManager customerManager) {
         this.customer = customer;
         this.scanner = scanner;
         this.customerManager = customerManager;
-        this.transactionManager = transactionManager;
     }
 
     @Override
@@ -27,48 +25,36 @@ class CustomerUI implements UI {
         int action;
         do {
             System.out.println("Customer Dashboard: " + customer.getName());
-            System.out.println("1. View Accounts");
-            System.out.println("2. View Transactions");
-            System.out.println("3. Apply for Loan");
-            System.out.println("4. View Loans");
-            System.out.println("5. Deposit Money");
-            System.out.println("6. Withdraw Money");
-            System.out.println("7. Open New Account");
-            System.out.println("8. Pay Off Loan");
-            System.out.println("9. Transfer Money");
-            System.out.println("0. Logout");
+            System.out.println("1. Deposit");
+            System.out.println("2. Withdraw");
+            System.out.println("3. Transfer");
+            System.out.println("4. View Transactions");
+            System.out.println("5. Apply for Loan");
+            System.out.println("6. View Loans");
+            System.out.println("0. Exit");
             System.out.println("Choose an action:");
             action = Integer.parseInt(scanner.nextLine());
             switch (action) {
                 case 1:
-                    viewAccounts();
+                    performDeposit();
                     break;
                 case 2:
-                    viewTransactions();
+                    performWithdrawal();
                     break;
                 case 3:
-                    applyForLoan();
-                    break;
-                case 4:
-                    viewLoans();
-                    break;
-                case 5:
-                    depositMoney();
-                    break;
-                case 6:
-                    withdrawMoney();
-                    break;
-                case 7:
-                    openNewAccount();
-                    break;
-                case 8:
-                    payOffLoan();
-                    break;
-                case 9:
                     performTransfer();
                     break;
+                case 4:
+                    viewTransactions();
+                    break;
+                case 5:
+                    applyForLoan();
+                    break;
+                case 6:
+                    viewLoans();
+                    break;
                 case 0:
-                    System.out.println("Logging out...");
+                    System.out.println("Exiting customer dashboard...");
                     return;
                 default:
                     System.out.println("Invalid action. Please try again.");
@@ -77,19 +63,62 @@ class CustomerUI implements UI {
         } while (action != 0);
     }
 
-    private void viewAccounts() {
-        System.out.println("Accounts:");
-        for (Account account : customer.getAccountsList()) {
-            System.out.println(account.getAccountType() + " - " + account.getAccountNumber() + ": Balance $" + account.getBalance());
+    private void performDeposit() {
+        Account account = selectAccount();
+        if (account == null) return;
+        System.out.println("Enter amount to deposit:");
+        double amount = Double.parseDouble(scanner.nextLine());
+        account.deposit(amount);
+        try {
+            customerManager.saveAccounts();
+        } catch (IOException e) {
+            System.err.println("Error saving accounts: " + e.getMessage());
+        }
+    }
+
+    private void performWithdrawal() {
+        Account account = selectAccount();
+        if (account == null) return;
+        System.out.println("Enter amount to withdraw:");
+        double amount = Double.parseDouble(scanner.nextLine());
+        try {
+            account.withdraw(amount);
+            try {
+                customerManager.saveAccounts();
+            } catch (IOException e) {
+                System.err.println("Error saving accounts: " + e.getMessage());
+            }
+        } catch (InsufficientFundsException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private void performTransfer() {
+        System.out.println("Select source account:");
+        Account sourceAccount = selectAccount();
+        if (sourceAccount == null) return;
+        System.out.println("Select destination account:");
+        Account destinationAccount = selectAccount();
+        if (destinationAccount == null) return;
+        System.out.println("Enter amount to transfer:");
+        double amount = Double.parseDouble(scanner.nextLine());
+        try {
+            sourceAccount.transfer(amount, destinationAccount);
+            try {
+                customerManager.saveAccounts();
+            } catch (IOException e) {
+                System.err.println("Error saving accounts: " + e.getMessage());
+            }
+        } catch (InsufficientFundsException e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
     private void viewTransactions() {
-        System.out.println("Transactions:");
         for (Account account : customer.getAccountsList()) {
-            System.out.println("Account: " + account.getAccountNumber());
+            System.out.println("Transactions for account " + account.getAccountNumber() + ":");
             for (Transaction transaction : account.getTransactions()) {
-                System.out.println(transaction.getType() + ": $" + transaction.getAmount() + " Status: " + transaction.getStatus());
+                System.out.println(transaction.getType() + ": $" + transaction.getAmount() + " - " + transaction.getStatus());
             }
         }
     }
@@ -101,155 +130,35 @@ class CustomerUI implements UI {
         double interestRate = Double.parseDouble(scanner.nextLine());
         Loan loan = new Loan(amount, interestRate);
         customer.addLoan(loan);
-        System.out.println("Loan application submitted.");
+        System.out.println("Loan applied successfully. Pending approval.");
         try {
             customerManager.saveLoans();
-            customerManager.loadLoans();
         } catch (IOException e) {
             System.err.println("Error saving loans: " + e.getMessage());
         }
     }
 
     private void viewLoans() {
-        System.out.println("Loans:");
         for (Loan loan : customer.getLoans()) {
-            System.out.println("Loan Amount: $" + loan.getLoanAmount() + " Interest Rate: " + loan.getInterestRate() + "% Approved: " + (loan.isApproved() ? "Yes" : "No") + " Paid Off: " + (loan.isPaidOff() ? "Yes" : "No"));
-        }
-    }
-
-    private void depositMoney() {
-        Account account = selectAccount();
-        if (account != null) {
-            System.out.println("Enter amount to deposit:");
-            double amount = Double.parseDouble(scanner.nextLine());
-            account.deposit(amount);
-            System.out.println("Deposit processed.");
-            try {
-                customerManager.saveAccounts();
-                customerManager.loadAccounts();
-            } catch (IOException e) {
-                System.err.println("Error saving accounts: " + e.getMessage());
-            }
-        } else {
-            System.out.println("No account selected.");
-        }
-    }
-
-    private void withdrawMoney() {
-        Account account = selectAccount();
-        if (account != null) {
-            System.out.println("Enter amount to withdraw:");
-            double amount = Double.parseDouble(scanner.nextLine());
-            try {
-                account.withdraw(amount);
-                System.out.println("Withdrawal processed.");
-                try {
-                    customerManager.saveAccounts();
-                    customerManager.loadAccounts();
-                } catch (IOException e) {
-                    System.err.println("Error saving accounts: " + e.getMessage());
-                }
-            } catch (InsufficientFundsException e) {
-                System.out.println("Insufficient funds for withdrawal.");
-            }
-        } else {
-            System.out.println("No account selected.");
-        }
-    }
-
-    private void openNewAccount() {
-        System.out.println("Enter account type (Savings/Checking):");
-        String type = scanner.nextLine();
-        System.out.println("Enter initial balance:");
-        double balance = Double.parseDouble(scanner.nextLine());
-        Account account = type.equalsIgnoreCase("Savings") ?
-                new SavingsAccount(UUID.randomUUID().toString(), customer.getCustomerID(), balance, transactionManager) :
-                new CheckingAccount(UUID.randomUUID().toString(), customer.getCustomerID(), balance, transactionManager);
-        customer.addAccount(account);
-        try {
-            customerManager.saveAccounts();
-            customerManager.loadAccounts();
-        } catch (IOException e) {
-            System.err.println("Error saving accounts: " + e.getMessage());
-        }
-        System.out.println("Account opened successfully.");
-    }
-
-    private void payOffLoan() {
-        System.out.println("Loans:");
-        int loanIndex = 1;
-        for (Loan loan : customer.getLoans()) {
-            System.out.println(loanIndex++ + ". Loan Amount: $" + loan.getLoanAmount() + " Interest Rate: " + loan.getInterestRate() + "% Approved: " + (loan.isApproved() ? "Yes" : "No") + " Paid Off: " + (loan.isPaidOff() ? "Yes" : "No"));
-        }
-        System.out.println("Enter the number of the loan you want to pay off:");
-        int choice = Integer.parseInt(scanner.nextLine());
-        if (choice > 0 && choice <= customer.getLoans().size()) {
-            Loan loan = customer.getLoans().get(choice - 1);
-            loan.payOffLoan();
-            try {
-                customerManager.saveLoans();
-                customerManager.loadLoans();
-            } catch (IOException e) {
-                System.err.println("Error saving loans: " + e.getMessage());
-            }
-        } else {
-            System.out.println("Invalid choice. No loan paid off.");
-        }
-    }
-
-    private void performTransfer() {
-        System.out.println("Select source account:");
-        Account sourceAccount = selectAccount();
-        if (sourceAccount == null) {
-            System.out.println("No source account selected.");
-            return;
-        }
-        System.out.println("Select destination account:");
-        Account destinationAccount = selectAccount();
-        if (destinationAccount == null) {
-            System.out.println("No destination account selected.");
-            return;
-        }
-        if (sourceAccount.equals(destinationAccount)) {
-            System.out.println("Cannot transfer to the same account.");
-            return;
-        }
-        System.out.println("Enter amount to transfer:");
-        double amount = Double.parseDouble(scanner.nextLine());
-        try {
-            sourceAccount.transfer(amount, destinationAccount);
-            System.out.println("Transfer processed.");
-            try {
-                customerManager.saveAccounts();
-                customerManager.loadAccounts();
-            } catch (IOException e) {
-                System.err.println("Error saving accounts: " + e.getMessage());
-            }
-        } catch (InsufficientFundsException e) {
-            System.out.println("Insufficient funds for transfer.");
+            System.out.println("Loan Amount: $" + loan.getLoanAmount() + " - Interest Rate: " + loan.getInterestRate() + "% - Approved: " + (loan.isApproved() ? "Yes" : "No") + " - Paid Off: " + (loan.isPaidOff() ? "Yes" : "No"));
         }
     }
 
     private Account selectAccount() {
-        List<Account> accounts = customer.getAccountsList();
-        if (accounts.isEmpty()) {
-            System.out.println("No accounts available.");
-            return null;
-        }
         System.out.println("Select an account:");
-        for (int i = 0; i < accounts.size(); i++) {
-            Account account = accounts.get(i);
+        for (int i = 0; i < customer.getAccountsList().size(); i++) {
+            Account account = customer.getAccountsList().get(i);
             System.out.println((i + 1) + ". " + account.getAccountType() + " - " + account.getAccountNumber() + ": Balance $" + account.getBalance());
         }
-        int choice = Integer.parseInt(scanner.nextLine());
-        if (choice > 0 && choice <= accounts.size()) {
-            return accounts.get(choice - 1);
-        } else {
-            System.out.println("Invalid choice.");
-            return null;
+        int choice = Integer.parseInt(scanner.nextLine()) - 1;
+        if (choice >= 0 && choice < customer.getAccountsList().size()) {
+            return customer.getAccountsList().get(choice);
         }
+        System.out.println("Invalid selection.");
+        return null;
     }
 }
+
 
 
 
@@ -271,36 +180,32 @@ class ManagerUI implements UI {
         int action;
         do {
             System.out.println("Manager Dashboard: " + bankManager.getName());
-            System.out.println("1. Approve Transactions");
-            System.out.println("2. Approve Loans");
-            System.out.println("3. Add Customer");
-            System.out.println("4. Delete Customer");
-            System.out.println("5. Generate Customer Report");
-            System.out.println("6. Add Customer Account");
-            System.out.println("7. Delete Customer Account");
+            System.out.println("1. Approve Loans");
+            System.out.println("2. Add Customer");
+            System.out.println("3. Delete Customer");
+            System.out.println("4. Generate Customer Report");
+            System.out.println("5. Add Customer Account");
+            System.out.println("6. Delete Customer Account");
             System.out.println("0. Exit");
             System.out.println("Choose an action:");
             action = Integer.parseInt(scanner.nextLine());
             switch (action) {
                 case 1:
-                    approveTransactions();
-                    break;
-                case 2:
                     approveLoans();
                     break;
-                case 3:
+                case 2:
                     addCustomer();
                     break;
-                case 4:
+                case 3:
                     deleteCustomer();
                     break;
-                case 5:
+                case 4:
                     generateCustomerReport();
                     break;
-                case 6:
+                case 5:
                     addCustomerAccount();
                     break;
-                case 7:
+                case 6:
                     deleteCustomerAccount();
                     break;
                 case 0:
@@ -311,32 +216,6 @@ class ManagerUI implements UI {
                     break;
             }
         } while (action != 0);
-    }
-
-    private void approveTransactions() {
-        List<Transaction> pendingTransactions = transactionManager.getPendingTransactions();
-        if (pendingTransactions.isEmpty()) {
-            System.out.println("No pending transactions to approve.");
-            return;
-        }
-        for (Transaction transaction : pendingTransactions) {
-            System.out.println("Transaction ID: " + transaction.getTransactionId() + " - $" + transaction.getAmount() + " - " + transaction.getType());
-            System.out.println("Approve? (yes/no)");
-            String response = scanner.nextLine();
-            if ("yes".equalsIgnoreCase(response)) {
-                transactionManager.approveTransaction(transaction.getTransactionId());
-                System.out.println("Transaction approved.");
-            } else {
-                transactionManager.rejectTransaction(transaction.getTransactionId());
-                System.out.println("Transaction rejected.");
-            }
-            try {
-                transactionManager.loadTransactions();  // Reload transactions after approval
-                customerManager.loadAccounts();  // Reload accounts after transaction approval
-            } catch (IOException e) {
-                System.err.println("Error loading transactions or accounts: " + e.getMessage());
-            }
-        }
     }
 
     private void approveLoans() {
@@ -458,6 +337,7 @@ class ManagerUI implements UI {
         }
     }
 }
+
 
 
 
