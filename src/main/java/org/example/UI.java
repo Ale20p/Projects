@@ -36,7 +36,8 @@ class CustomerUI implements UI {
             System.out.println("5. View Transactions");
             System.out.println("6. Apply for Loan");
             System.out.println("7. View Loans");
-            System.out.println("8. Open New Account");
+            System.out.println("8. Pay Off Loan");
+            System.out.println("9. Open New Account");
             System.out.println("0. Logout");
             System.out.println("Choose an action:");
             action = Integer.parseInt(scanner.nextLine());
@@ -63,6 +64,9 @@ class CustomerUI implements UI {
                     viewLoans();
                     break;
                 case 8:
+                    payOffLoan();
+                    break;
+                case 9:
                     openNewAccount();
                     break;
                 case 0:
@@ -137,10 +141,8 @@ class CustomerUI implements UI {
     private void applyForLoan() {
         System.out.println("Enter loan amount:");
         double amount = Double.parseDouble(scanner.nextLine());
-        System.out.println("Enter interest rate:");
-        double interestRate = Double.parseDouble(scanner.nextLine());
         Account account = selectAccount();
-        Loan loan = new Loan(amount, interestRate, account.getAccountNumber());
+        Loan loan = new Loan(amount, account.getAccountNumber());
         customer.addLoan(loan);
         customerManager.addLoan(loan);
         System.out.println("Loan application submitted.");
@@ -151,6 +153,29 @@ class CustomerUI implements UI {
         System.out.println("Loans:");
         for (Loan loan : loans) {
             System.out.println("  - Loan Amount: $" + loan.getLoanAmount() + ", Interest Rate: " + loan.getInterestRate() + "%, Approved: " + (loan.isApproved() ? "Yes" : "No") + ", Paid Off: " + (loan.isPaidOff() ? "Yes" : "No"));
+        }
+    }
+
+    private void payOffLoan() {
+        System.out.println("Select a loan to pay off:");
+        List<Loan> loans = customer.getLoans();
+        for (int i = 0; i < loans.size(); i++) {
+            Loan loan = loans.get(i);
+            if (loan.isApproved() && !loan.isPaidOff()) {
+                System.out.println((i + 1) + ". Loan Amount: $" + loan.getLoanAmount() + ", Interest Rate: " + loan.getInterestRate() + "%");
+            }
+        }
+        int choice = Integer.parseInt(scanner.nextLine());
+        Loan loan = loans.get(choice - 1);
+        Account account = selectAccount();
+        try {
+            account.withdraw(loan.getLoanAmount());
+            loan.payOffLoan();
+            customerManager.updateLoan(loan);
+            accountManager.saveAccounts();
+            System.out.println("Loan paid off successfully.");
+        } catch (InsufficientFundsException e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
@@ -187,7 +212,6 @@ class CustomerUI implements UI {
 
 
 
-
 class ManagerUI implements UI {
     private BankManager bankManager;
     private TransactionManager transactionManager;
@@ -210,8 +234,8 @@ class ManagerUI implements UI {
             System.out.println("Manager Dashboard: " + bankManager.getManagerId());
             System.out.println("1. Approve Transactions");
             System.out.println("2. Approve Loans");
-            System.out.println("3. Create Customer Account");
-            System.out.println("4. Delete Customer Account");
+            System.out.println("3. Add Customer");
+            System.out.println("4. Delete Customer");
             System.out.println("5. Generate Customer Report");
             System.out.println("0. Logout");
             System.out.println("Choose an action:");
@@ -224,10 +248,10 @@ class ManagerUI implements UI {
                     approveLoans();
                     break;
                 case 3:
-                    createCustomerAccount();
+                    addCustomer();
                     break;
                 case 4:
-                    deleteCustomerAccount();
+                    deleteCustomer();
                     break;
                 case 5:
                     generateCustomerReport();
@@ -247,87 +271,65 @@ class ManagerUI implements UI {
         for (Transaction transaction : pendingTransactions) {
             System.out.println("Approve transaction: " + transaction.getType() + " of $" + transaction.getAmount() + " for account " + transaction.getSourceAccount().getAccountNumber() + "? (yes/no)");
             String approval = scanner.nextLine();
-            if ("yes".equalsIgnoreCase(approval)) {
+            if (approval.equalsIgnoreCase("yes")) {
                 transactionManager.approveTransaction(transaction);
                 System.out.println("Transaction approved.");
             } else {
-                System.out.println("Transaction rejected.");
+                System.out.println("Transaction not approved.");
             }
         }
+        transactionManager.saveTransactions();
     }
 
     private void approveLoans() {
         List<Loan> pendingLoans = customerManager.getPendingLoans();
         for (Loan loan : pendingLoans) {
-            System.out.println("Approve loan of $" + loan.getLoanAmount() + " for account " + loan.getAccountNumber() + "? (yes/no)");
+            System.out.println("Approve loan: " + loan.getLoanAmount() + " for account " + loan.getAccountNumber() + "? (yes/no)");
             String approval = scanner.nextLine();
-            if ("yes".equalsIgnoreCase(approval)) {
+            if (approval.equalsIgnoreCase("yes")) {
                 loan.approveLoan();
                 Account account = accountManager.getAccount(loan.getAccountNumber());
                 account.deposit(loan.getLoanAmount());
-                accountManager.saveAccounts();
-                System.out.println("Loan approved and amount deposited to the account.");
+                System.out.println("Loan approved and funds deposited.");
             } else {
-                System.out.println("Loan rejected.");
+                System.out.println("Loan not approved.");
             }
         }
+        customerManager.saveLoans();
+        accountManager.saveAccounts();
     }
 
-    private void createCustomerAccount() {
-        System.out.println("Enter customer ID:");
-        String customerId = scanner.nextLine();
-        Customer customer = customerManager.getCustomer(customerId);
-        if (customer == null) {
-            System.out.println("Customer not found.");
-            return;
-        }
-
-        System.out.println("Choose account type:");
-        System.out.println("1. Savings");
-        System.out.println("2. Checking");
-        int choice = Integer.parseInt(scanner.nextLine());
-        System.out.println("Enter initial balance:");
-        double balance = Double.parseDouble(scanner.nextLine());
-
-        Account account;
-        if (choice == 1) {
-            account = new SavingsAccount(java.util.UUID.randomUUID().toString(), customer.getCustomerID(), balance);
-        } else {
-            account = new CheckingAccount(java.util.UUID.randomUUID().toString(), customer.getCustomerID(), balance);
-        }
-
-        customer.getAccountsList().add(account);
-        accountManager.addAccount(account);
-        System.out.println("New account created successfully.");
+    private void addCustomer() {
+        System.out.print("Enter customer name: ");
+        String name = scanner.nextLine();
+        System.out.print("Enter customer password: ");
+        String password = scanner.nextLine();
+        System.out.print("Enter customer email: ");
+        String email = scanner.nextLine();
+        Customer newCustomer = new Customer(name, password, email);
+        customerManager.addCustomer(newCustomer);
+        System.out.println("Customer added successfully.");
     }
 
-    private void deleteCustomerAccount() {
-        System.out.println("Enter customer ID:");
+    private void deleteCustomer() {
+        System.out.print("Enter customer ID to delete: ");
         String customerId = scanner.nextLine();
-        Customer customer = customerManager.getCustomer(customerId);
-        if (customer == null) {
-            System.out.println("Customer not found.");
-            return;
-        }
-
-        System.out.println("Enter account number:");
-        String accountNumber = scanner.nextLine();
-        boolean removed = customer.deleteAccount(accountNumber);
-        if (removed) {
-            accountManager.removeAccount(accountNumber);
-            System.out.println("Account deleted successfully.");
+        boolean success = customerManager.deleteCustomer(customerId);
+        if (success) {
+            System.out.println("Customer deleted successfully.");
         } else {
-            System.out.println("Account not found.");
+            System.out.println("Customer not found.");
         }
     }
 
     private void generateCustomerReport() {
-        System.out.println("Enter customer ID:");
+        System.out.print("Enter customer ID for report: ");
         String customerId = scanner.nextLine();
         String report = customerManager.generateCustomerReport(customerId);
         System.out.println(report);
     }
 }
+
 
 
 

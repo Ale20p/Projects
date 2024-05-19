@@ -7,11 +7,13 @@ import java.util.List;
 public class CustomerManager {
     private List<Customer> customers;
     private String customersFilePath;
-    private AccountManager accountManager;
     private List<Loan> loans;
+    private String loansFilePath;
+    private AccountManager accountManager;
 
-    public CustomerManager(AccountManager accountManager) {
-        this.customersFilePath = "customers.csv"; // Change this path as needed
+    public CustomerManager(String customersFilePath, String loansFilePath, AccountManager accountManager) {
+        this.customersFilePath = customersFilePath;
+        this.loansFilePath = loansFilePath;
         this.accountManager = accountManager;
         this.customers = new ArrayList<>();
         this.loans = new ArrayList<>();
@@ -75,9 +77,9 @@ public class CustomerManager {
         report.append("Loans:\n");
         for (Loan loan : customer.getLoans()) {
             report.append("  - Loan Amount: $").append(loan.getLoanAmount())
-                    .append(", Interest Rate: ").append(loan.getInterestRate())
-                    .append("%, Approved: ").append(loan.isApproved() ? "Yes" : "No")
-                    .append(", Paid Off: ").append(loan.isPaidOff() ? "Yes" : "No").append("\n");
+                    .append(" Interest Rate: ").append(loan.getInterestRate())
+                    .append("% Approved: ").append(loan.isApproved() ? "Yes" : "No")
+                    .append(" Paid Off: ").append(loan.isPaidOff() ? "Yes" : "No").append("\n");
         }
         return report.toString();
     }
@@ -140,7 +142,7 @@ public class CustomerManager {
     }
 
     public void loadLoans() {
-        loans = Loan.loadLoans("loans.csv"); // Change this path as needed
+        loans = Loan.loadLoans(loansFilePath);
         for (Loan loan : loans) {
             Customer customer = getCustomerByLoan(loan);
             if (customer != null) {
@@ -150,11 +152,21 @@ public class CustomerManager {
     }
 
     public void saveLoans() {
-        Loan.saveLoans(loans, "loans.csv"); // Change this path as needed
+        Loan.saveLoans(loans, loansFilePath);
     }
 
     public void addLoan(Loan loan) {
         loans.add(loan);
+        saveLoans();
+    }
+
+    public void updateLoan(Loan loan) {
+        for (int i = 0; i < loans.size(); i++) {
+            if (loans.get(i).getLoanId().equals(loan.getLoanId())) {
+                loans.set(i, loan);
+                break;
+            }
+        }
         saveLoans();
     }
 }

@@ -12,10 +12,10 @@ public class Loan {
     private boolean paidOff;
     private String accountNumber;
 
-    public Loan(double loanAmount, double interestRate, String accountNumber) {
+    public Loan(double loanAmount, String accountNumber) {
         this.loanId = java.util.UUID.randomUUID().toString();
         this.loanAmount = loanAmount;
-        this.interestRate = interestRate;
+        this.interestRate = 0.05; // Constant 5% interest rate
         this.accountNumber = accountNumber;
         this.approved = false;
         this.paidOff = false;
@@ -37,26 +37,23 @@ public class Loan {
         return approved;
     }
 
-    public void setApproved(boolean approved) {
-        this.approved = approved;
+    public void approveLoan() {
+        this.approved = true;
     }
 
     public boolean isPaidOff() {
         return paidOff;
     }
 
-    public void setPaidOff(boolean paidOff) {
-        this.paidOff = paidOff;
+    public void payOffLoan() {
+        this.paidOff = true;
     }
 
     public String getAccountNumber() {
         return accountNumber;
     }
 
-    public void approveLoan() {
-        this.approved = true;
-    }
-
+    // Static method to load loans from a CSV file
     public static List<Loan> loadLoans(String loansFilePath) {
         List<Loan> loans = new ArrayList<>();
         try {
@@ -68,7 +65,7 @@ public class Loan {
                 boolean approved = Boolean.parseBoolean(row[3]);
                 boolean paidOff = Boolean.parseBoolean(row[4]);
                 String accountNumber = row[5];
-                Loan loan = new Loan(loanAmount, interestRate, accountNumber);
+                Loan loan = new Loan(loanAmount, accountNumber);
                 loan.loanId = loanId;
                 loan.approved = approved;
                 loan.paidOff = paidOff;
@@ -80,6 +77,7 @@ public class Loan {
         return loans;
     }
 
+    // Static method to save loans to a CSV file
     public static void saveLoans(List<Loan> loans, String loansFilePath) {
         List<String[]> data = new ArrayList<>();
         for (Loan loan : loans) {
