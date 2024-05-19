@@ -56,6 +56,11 @@ public class AccountManager {
         saveAccounts();
     }
 
+    public void removeAccount(String accountNumber) {
+        accounts.removeIf(account -> account.getAccountNumber().equals(accountNumber));
+        saveAccounts();
+    }
+
     public void loadAccounts() {
         accounts.clear();
         try {

@@ -1,36 +1,34 @@
 package org.example;
 
 public class SavingsAccount extends Account {
-
     public SavingsAccount(String accountNumber, String customerId, double balance) {
         super(accountNumber, customerId, balance, "Savings");
     }
 
     @Override
     public void withdraw(double amount) throws InsufficientFundsException {
-        super.withdraw(amount);
-        Transaction transaction = new Transaction(java.util.UUID.randomUUID().toString(), "Withdrawal", amount, this);
-        getTransactionManager().logTransaction(transaction);
-        addTransaction(transaction);  // Add transaction to the account
-    }
-
-    @Override
-    public void deposit(double amount) {
-        super.deposit(amount);
-        Transaction transaction = new Transaction(java.util.UUID.randomUUID().toString(), "Deposit", amount, this);
-        getTransactionManager().logTransaction(transaction);
-        addTransaction(transaction);  // Add transaction to the account
+        if (getBalance() < amount) {
+            throw new InsufficientFundsException("Insufficient funds for withdrawal.");
+        }
+        adjustBalance(-amount);
+        Transaction transaction = new Transaction("Withdrawal", amount, this, null);
+        getTransactions().add(transaction);
+        if (getTransactionManager() != null) {
+            getTransactionManager().logTransaction(transaction);
+        }
     }
 
     @Override
     public void transfer(double amount, Account destinationAccount) throws InsufficientFundsException {
-        if (this.getBalance() < amount) {
-            throw new InsufficientFundsException("Insufficient funds");
+        if (getBalance() < amount) {
+            throw new InsufficientFundsException("Insufficient funds for transfer.");
         }
-        super.withdraw(amount);
+        adjustBalance(-amount);
         destinationAccount.deposit(amount);
-        Transaction transaction = new Transaction(java.util.UUID.randomUUID().toString(), "Transfer", amount, this);
-        getTransactionManager().logTransaction(transaction);
-        addTransaction(transaction);  // Add transaction to the account
+        Transaction transaction = new Transaction("Transfer", amount, this, destinationAccount);
+        getTransactions().add(transaction);
+        if (getTransactionManager() != null) {
+            getTransactionManager().logTransaction(transaction);
+        }
     }
 }

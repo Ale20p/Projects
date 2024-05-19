@@ -4,15 +4,23 @@ public class Transaction {
     private String transactionId;
     private String type;
     private double amount;
-    private Account account;
+    private Account sourceAccount;
+    private Account destinationAccount;
     private String status;
 
-    public Transaction(String transactionId, String type, double amount, Account account) {
-        this.transactionId = transactionId;
+    // Constructor for transactions with only a source account
+    public Transaction(String type, double amount, Account sourceAccount) {
+        this(type, amount, sourceAccount, null);
+    }
+
+    // Constructor for transactions with both source and destination accounts
+    public Transaction(String type, double amount, Account sourceAccount, Account destinationAccount) {
+        this.transactionId = java.util.UUID.randomUUID().toString();
         this.type = type;
         this.amount = amount;
-        this.account = account;
-        this.status = "Pending"; // Default status
+        this.sourceAccount = sourceAccount;
+        this.destinationAccount = destinationAccount;
+        this.status = "Pending"; // Default status for new transactions
     }
 
     public String getTransactionId() {
@@ -27,28 +35,16 @@ public class Transaction {
         return amount;
     }
 
-    public Account getAccount() {
-        return account;
+    public Account getSourceAccount() {
+        return sourceAccount;
+    }
+
+    public Account getDestinationAccount() {
+        return destinationAccount;
     }
 
     public String getStatus() {
         return status;
-    }
-
-    public void setTransactionId(String transactionId) {
-        this.transactionId = transactionId;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
-
-    public void setAccount(Account account) {
-        this.account = account;
     }
 
     public void setStatus(String status) {

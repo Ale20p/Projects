@@ -1,7 +1,7 @@
 package org.example;
 
 public class CheckingAccount extends Account {
-    private static final double OVERDRAFT_LIMIT = -500.0;
+    private static final double OVERDRAFT_LIMIT = -500.00;
 
     public CheckingAccount(String accountNumber, String customerId, double balance) {
         super(accountNumber, customerId, balance, "Checking");
@@ -9,32 +9,28 @@ public class CheckingAccount extends Account {
 
     @Override
     public void withdraw(double amount) throws InsufficientFundsException {
-        if (this.getBalance() - amount < OVERDRAFT_LIMIT) {
-            throw new InsufficientFundsException("Overdraft limit exceeded");
+        if (getBalance() - amount < OVERDRAFT_LIMIT) {
+            throw new InsufficientFundsException("Insufficient funds, overdraft limit reached.");
         }
-        super.withdraw(amount);
-        Transaction transaction = new Transaction(java.util.UUID.randomUUID().toString(), "Withdrawal", amount, this);
-        getTransactionManager().logTransaction(transaction);
-        addTransaction(transaction);  // Add transaction to the account
-    }
-
-    @Override
-    public void deposit(double amount) {
-        super.deposit(amount);
-        Transaction transaction = new Transaction(java.util.UUID.randomUUID().toString(), "Deposit", amount, this);
-        getTransactionManager().logTransaction(transaction);
-        addTransaction(transaction);  // Add transaction to the account
+        adjustBalance(-amount);
+        Transaction transaction = new Transaction("Withdrawal", amount, this, null);
+        getTransactions().add(transaction);
+        if (getTransactionManager() != null) {
+            getTransactionManager().logTransaction(transaction);
+        }
     }
 
     @Override
     public void transfer(double amount, Account destinationAccount) throws InsufficientFundsException {
-        if (this.getBalance() - amount < OVERDRAFT_LIMIT) {
-            throw new InsufficientFundsException("Overdraft limit exceeded");
+        if (getBalance() - amount < OVERDRAFT_LIMIT) {
+            throw new InsufficientFundsException("Insufficient funds, overdraft limit reached.");
         }
-        super.withdraw(amount);
+        adjustBalance(-amount);
         destinationAccount.deposit(amount);
-        Transaction transaction = new Transaction(java.util.UUID.randomUUID().toString(), "Transfer", amount, this);
-        getTransactionManager().logTransaction(transaction);
-        addTransaction(transaction);  // Add transaction to the account
+        Transaction transaction = new Transaction("Transfer", amount, this, destinationAccount);
+        getTransactions().add(transaction);
+        if (getTransactionManager() != null) {
+            getTransactionManager().logTransaction(transaction);
+        }
     }
 }

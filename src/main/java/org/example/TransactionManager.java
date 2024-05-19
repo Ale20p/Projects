@@ -29,6 +29,38 @@ public class TransactionManager {
         return transactions;
     }
 
+    public List<Transaction> getPendingTransactions() {
+        List<Transaction> pendingTransactions = new ArrayList<>();
+        for (Transaction transaction : transactions) {
+            if ("Pending".equalsIgnoreCase(transaction.getStatus())) {
+                pendingTransactions.add(transaction);
+            }
+        }
+        return pendingTransactions;
+    }
+
+    public void approveTransaction(Transaction transaction) {
+        transaction.setStatus("Approved");
+        Account sourceAccount = transaction.getSourceAccount();
+        Account destinationAccount = transaction.getDestinationAccount();
+
+        try {
+            if ("Transfer".equalsIgnoreCase(transaction.getType()) && destinationAccount != null) {
+                sourceAccount.withdraw(transaction.getAmount());
+                destinationAccount.deposit(transaction.getAmount());
+            } else if ("Withdrawal".equalsIgnoreCase(transaction.getType())) {
+                sourceAccount.withdraw(transaction.getAmount());
+            } else if ("Deposit".equalsIgnoreCase(transaction.getType())) {
+                sourceAccount.deposit(transaction.getAmount());
+            }
+        } catch (InsufficientFundsException e) {
+            e.printStackTrace();
+        }
+
+        saveTransactions();
+        accountManager.saveAccounts();
+    }
+
     public void loadTransactions() {
         transactions.clear();
         try {
@@ -39,12 +71,11 @@ public class TransactionManager {
                 double amount = Double.parseDouble(row[2]);
                 String accountNumber = row[3];
                 String status = row[4];
-                Account account = accountManager.getAccount(accountNumber);
-                if (account != null) {
-                    Transaction transaction = new Transaction(transactionId, type, amount, account);
-                    transaction.setStatus(status);
-                    transactions.add(transaction);
-                }
+                Account sourceAccount = accountManager.getAccount(accountNumber);
+                Account destinationAccount = row.length > 5 ? accountManager.getAccount(row[5]) : null;
+                Transaction transaction = new Transaction(type, amount, sourceAccount, destinationAccount);
+                transaction.setStatus(status);
+                transactions.add(transaction);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -58,8 +89,9 @@ public class TransactionManager {
                     transaction.getTransactionId(),
                     transaction.getType(),
                     String.valueOf(transaction.getAmount()),
-                    transaction.getAccount().getAccountNumber(),
-                    transaction.getStatus()
+                    transaction.getSourceAccount().getAccountNumber(),
+                    transaction.getStatus(),
+                    transaction.getDestinationAccount() != null ? transaction.getDestinationAccount().getAccountNumber() : ""
             });
         }
         try {

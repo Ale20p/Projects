@@ -1,23 +1,22 @@
 package org.example;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Account implements Serializable {
+public abstract class Account {
     private String accountNumber;
     private String customerId;
     private double balance;
     private String accountType;
-    private transient TransactionManager transactionManager;
-    private List<Transaction> transactions;  // Add this field
+    private TransactionManager transactionManager;
+    private List<Transaction> transactions;
 
     public Account(String accountNumber, String customerId, double balance, String accountType) {
         this.accountNumber = accountNumber;
         this.customerId = customerId;
         this.balance = balance;
         this.accountType = accountType;
-        this.transactions = new ArrayList<>();  // Initialize the transactions list
+        this.transactions = new ArrayList<>();
     }
 
     public String getAccountNumber() {
@@ -36,39 +35,59 @@ public abstract class Account implements Serializable {
         return accountType;
     }
 
-    public TransactionManager getTransactionManager() {
-        return transactionManager;
-    }
-
     public void setTransactionManager(TransactionManager transactionManager) {
         this.transactionManager = transactionManager;
     }
 
-    public List<Transaction> getTransactions() {
-        return transactions;  // Return the transactions list
-    }
-
-    public void addTransaction(Transaction transaction) {
-        transactions.add(transaction);
+    public TransactionManager getTransactionManager() {
+        return transactionManager;
     }
 
     public void deposit(double amount) {
-        balance += amount;
+        adjustBalance(amount);
+        Transaction transaction = new Transaction("Deposit", amount, this);
+        transactions.add(transaction);
+        if (transactionManager != null) {
+            transactionManager.logTransaction(transaction);
+        }
     }
 
     public void withdraw(double amount) throws InsufficientFundsException {
         if (balance < amount) {
-            throw new InsufficientFundsException("Insufficient funds");
+            throw new InsufficientFundsException("Insufficient funds for withdrawal.");
         }
-        balance -= amount;
+        adjustBalance(-amount);
+        Transaction transaction = new Transaction("Withdrawal", amount, this);
+        transactions.add(transaction);
+        if (transactionManager != null) {
+            transactionManager.logTransaction(transaction);
+        }
     }
 
-    public abstract void transfer(double amount, Account destinationAccount) throws InsufficientFundsException;
+    public void transfer(double amount, Account destinationAccount) throws InsufficientFundsException {
+        if (balance < amount) {
+            throw new InsufficientFundsException("Insufficient funds for transfer.");
+        }
+        adjustBalance(-amount);
+        destinationAccount.deposit(amount);
+        Transaction transaction = new Transaction("Transfer", amount, this, destinationAccount);
+        transactions.add(transaction);
+        if (transactionManager != null) {
+            transactionManager.logTransaction(transaction);
+        }
+    }
 
-    public void setBalance(double balance) {
-        this.balance = balance;
+    protected void adjustBalance(double amount) {
+        balance += amount;
+    }
+
+    public List<Transaction> getTransactions() {
+        return transactions;
     }
 }
+
+
+
 
 
 
