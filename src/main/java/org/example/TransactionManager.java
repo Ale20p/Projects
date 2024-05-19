@@ -39,6 +39,7 @@ public class TransactionManager {
             });
         }
         CSVUtility.writeCSV(TRANSACTIONS_FILE, data, false);
+        loadTransactions();
     }
 
     public void logTransaction(Transaction transaction) {
