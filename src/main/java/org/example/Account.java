@@ -1,89 +1,80 @@
 package org.example;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-public abstract class Account {
+public abstract class Account implements Serializable {
     private String accountNumber;
-    private String customerID;
+    private String customerId;
     private double balance;
-    private List<Transaction> transactions;
-    private TransactionManager transactionManager;
+    private String accountType;
+    private transient TransactionManager transactionManager;
+    private List<Transaction> transactions;  // Add this field
 
-    public Account(String accountNumber, String customerID, double balance, TransactionManager transactionManager) {
+    public Account(String accountNumber, String customerId, double balance, String accountType) {
         this.accountNumber = accountNumber;
-        this.customerID = customerID;
+        this.customerId = customerId;
         this.balance = balance;
-        this.transactions = new ArrayList<>();
-        this.transactionManager = transactionManager;
-    }
-
-    public void setTransactionManager(TransactionManager transactionManager) {
-        this.transactionManager = transactionManager;
-    }
-
-    public void deposit(double amount) {
-        balance += amount;
-        Transaction transaction = new Transaction(UUID.randomUUID().toString(), "Deposit", amount, accountNumber, "Approved");
-        transactions.add(transaction);
-        if (transactionManager != null) {
-            transactionManager.logTransaction(transaction);
-        }
-        System.out.println("Deposit successful. New balance: $" + balance);
-    }
-
-    public void withdraw(double amount) throws InsufficientFundsException {
-        if (amount > balance) {
-            throw new InsufficientFundsException("Insufficient funds for withdrawal.");
-        }
-        balance -= amount;
-        Transaction transaction = new Transaction(UUID.randomUUID().toString(), "Withdrawal", amount, accountNumber, "Approved");
-        transactions.add(transaction);
-        if (transactionManager != null) {
-            transactionManager.logTransaction(transaction);
-        }
-        System.out.println("Withdrawal successful. New balance: $" + balance);
-    }
-
-    public void transfer(double amount, Account destinationAccount) throws InsufficientFundsException {
-        if (amount > balance) {
-            throw new InsufficientFundsException("Insufficient funds for transfer.");
-        }
-        balance -= amount;
-        destinationAccount.deposit(amount);
-        Transaction transaction = new Transaction(UUID.randomUUID().toString(), "Transfer " + destinationAccount.getAccountNumber(), amount, accountNumber, "Approved");
-        transactions.add(transaction);
-        if (transactionManager != null) {
-            transactionManager.logTransaction(transaction);
-        }
-        System.out.println("Transfer successful. New balance: $" + balance);
+        this.accountType = accountType;
+        this.transactions = new ArrayList<>();  // Initialize the transactions list
     }
 
     public String getAccountNumber() {
         return accountNumber;
     }
 
-    public String getCustomerID() {
-        return customerID;
+    public String getCustomerId() {
+        return customerId;
     }
 
     public double getBalance() {
         return balance;
     }
 
-    public void setBalance(double balance) {
-        this.balance = balance;
+    public String getAccountType() {
+        return accountType;
+    }
+
+    public TransactionManager getTransactionManager() {
+        return transactionManager;
+    }
+
+    public void setTransactionManager(TransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
     }
 
     public List<Transaction> getTransactions() {
-        return transactions;
+        return transactions;  // Return the transactions list
     }
 
-    public String getAccountType() {
-        return this instanceof SavingsAccount ? "Savings" : "Checking";
+    public void addTransaction(Transaction transaction) {
+        transactions.add(transaction);
+    }
+
+    public void deposit(double amount) {
+        balance += amount;
+    }
+
+    public void withdraw(double amount) throws InsufficientFundsException {
+        if (balance < amount) {
+            throw new InsufficientFundsException("Insufficient funds");
+        }
+        balance -= amount;
+    }
+
+    public abstract void transfer(double amount, Account destinationAccount) throws InsufficientFundsException;
+
+    public void setBalance(double balance) {
+        this.balance = balance;
     }
 }
+
+
+
+
+
+
 
 class InsufficientFundsException extends Exception {
     public InsufficientFundsException(String message) {

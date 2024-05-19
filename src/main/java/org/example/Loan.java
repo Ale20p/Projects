@@ -1,34 +1,30 @@
 package org.example;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Loan {
+    private String loanId;
     private double loanAmount;
     private double interestRate;
-    private boolean isApproved;
-    private boolean isPaidOff;
+    private boolean approved;
+    private boolean paidOff;
+    private String accountNumber;
 
-    public Loan(double loanAmount, double interestRate) {
+    public Loan(double loanAmount, double interestRate, String accountNumber) {
+        this.loanId = java.util.UUID.randomUUID().toString();
         this.loanAmount = loanAmount;
         this.interestRate = interestRate;
-        this.isApproved = false;  // Initially, loans are not approved
-        this.isPaidOff = false;   // Initially, loans are not paid off
+        this.accountNumber = accountNumber;
+        this.approved = false;
+        this.paidOff = false;
     }
 
-    // Method to approve the loan
-    public void approveLoan() {
-        this.isApproved = true;
+    public String getLoanId() {
+        return loanId;
     }
 
-    // Method to pay off the loan
-    public void payOffLoan() {
-        if (isApproved && !isPaidOff) {
-            this.isPaidOff = true;
-            System.out.println("Loan of $" + loanAmount + " paid off.");
-        } else {
-            System.out.println("Loan cannot be paid off. Either it's not approved or already paid off.");
-        }
-    }
-
-    // Getters and setters
     public double getLoanAmount() {
         return loanAmount;
     }
@@ -38,26 +34,68 @@ public class Loan {
     }
 
     public boolean isApproved() {
-        return isApproved;
-    }
-
-    public boolean isPaidOff() {
-        return isPaidOff;
-    }
-
-    public void setLoanAmount(double loanAmount) {
-        this.loanAmount = loanAmount;
-    }
-
-    public void setInterestRate(double interestRate) {
-        this.interestRate = interestRate;
+        return approved;
     }
 
     public void setApproved(boolean approved) {
-        isApproved = approved;
+        this.approved = approved;
+    }
+
+    public boolean isPaidOff() {
+        return paidOff;
     }
 
     public void setPaidOff(boolean paidOff) {
-        isPaidOff = paidOff;
+        this.paidOff = paidOff;
+    }
+
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public void approveLoan() {
+        this.approved = true;
+    }
+
+    public static List<Loan> loadLoans(String loansFilePath) {
+        List<Loan> loans = new ArrayList<>();
+        try {
+            List<String[]> data = CSVUtility.readCSV(loansFilePath);
+            for (String[] row : data) {
+                String loanId = row[0];
+                double loanAmount = Double.parseDouble(row[1]);
+                double interestRate = Double.parseDouble(row[2]);
+                boolean approved = Boolean.parseBoolean(row[3]);
+                boolean paidOff = Boolean.parseBoolean(row[4]);
+                String accountNumber = row[5];
+                Loan loan = new Loan(loanAmount, interestRate, accountNumber);
+                loan.loanId = loanId;
+                loan.approved = approved;
+                loan.paidOff = paidOff;
+                loans.add(loan);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return loans;
+    }
+
+    public static void saveLoans(List<Loan> loans, String loansFilePath) {
+        List<String[]> data = new ArrayList<>();
+        for (Loan loan : loans) {
+            data.add(new String[]{
+                    loan.getLoanId(),
+                    String.valueOf(loan.getLoanAmount()),
+                    String.valueOf(loan.getInterestRate()),
+                    String.valueOf(loan.isApproved()),
+                    String.valueOf(loan.isPaidOff()),
+                    loan.getAccountNumber()
+            });
+        }
+        try {
+            CSVUtility.writeCSV(loansFilePath, data, false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

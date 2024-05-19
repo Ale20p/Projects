@@ -1,198 +1,160 @@
 package org.example;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CustomerManager {
-    private Map<String, Customer> customers;
-    private TransactionManager transactionManager;
+    private List<Customer> customers;
+    private String customersFilePath;
+    private AccountManager accountManager;
+    private List<Loan> loans;
 
-    public CustomerManager(TransactionManager transactionManager) {
-        this.customers = new HashMap<>();
-        this.transactionManager = transactionManager;
-        try {
-            loadCustomers();
-            loadAccounts();
-            loadLoans();
-        } catch (IOException e) {
-            System.err.println("Error loading data: " + e.getMessage());
-        }
-    }
-
-    public void loadCustomers() throws IOException {
-        List<String[]> data = CSVUtility.readCSV("customers.csv");
-        customers.clear();
-        for (String[] line : data) {
-            if (line.length >= 4) {
-                Customer customer = new Customer(line[0], line[1], line[2], line[3]);
-                customers.put(customer.getCustomerID(), customer);
-            }
-        }
-    }
-
-    public void loadAccounts() throws IOException {
-        List<String[]> data = CSVUtility.readCSV("accounts.csv");
-        for (Customer customer : customers.values()) {
-            customer.clearAccounts(); // Clear existing accounts for each customer
-        }
-        for (String[] line : data) {
-            if (line.length >= 4) {
-                String accountNumber = line[0];
-                String customerId = line[1];
-                double balance = Double.parseDouble(line[2]);
-                String type = line[3];
-                Account account;
-                if ("Savings".equalsIgnoreCase(type)) {
-                    account = new SavingsAccount(accountNumber, customerId, balance, transactionManager);
-                } else {
-                    account = new CheckingAccount(accountNumber, customerId, balance, transactionManager);
-                }
-                Customer customer = customers.get(customerId);
-                if (customer != null) {
-                    customer.addAccount(account);
-                }
-            }
-        }
-    }
-
-    public void loadLoans() throws IOException {
-        List<String[]> data = CSVUtility.readCSV("loans.csv");
-        for (String[] line : data) {
-            if (line.length >= 5) {
-                String customerId = line[0];
-                double amount = Double.parseDouble(line[1]);
-                double interestRate = Double.parseDouble(line[2]);
-                boolean approved = Boolean.parseBoolean(line[3]);
-                boolean paidOff = Boolean.parseBoolean(line[4]);
-                Loan loan = new Loan(amount, interestRate);
-                loan.setApproved(approved);
-                loan.setPaidOff(paidOff);
-                Customer customer = customers.get(customerId);
-                if (customer != null) {
-                    customer.addLoan(loan);
-                }
-            }
-        }
-    }
-
-    public void saveCustomers() throws IOException {
-        List<String[]> data = new ArrayList<>();
-        for (Customer customer : customers.values()) {
-            data.add(new String[]{customer.getCustomerID(), customer.getName(), customer.getPassword(), customer.getEmail()});
-        }
-        CSVUtility.writeCSV("customers.csv", data, false);
+    public CustomerManager(AccountManager accountManager) {
+        this.customersFilePath = "customers.csv"; // Change this path as needed
+        this.accountManager = accountManager;
+        this.customers = new ArrayList<>();
+        this.loans = new ArrayList<>();
         loadCustomers();
-    }
-
-    public void saveAccounts() throws IOException {
-        List<String[]> data = new ArrayList<>();
-        for (Customer customer : customers.values()) {
-            for (Account account : customer.getAccountsList()) {
-                data.add(new String[]{account.getAccountNumber(), account.getCustomerID(), String.valueOf(account.getBalance()), account.getAccountType()});
-            }
-        }
-        CSVUtility.writeCSV("accounts.csv", data, false);
-        loadAccounts();
-    }
-
-    public void saveLoans() throws IOException {
-        List<String[]> data = new ArrayList<>();
-        for (Customer customer : customers.values()) {
-            for (Loan loan : customer.getLoans()) {
-                data.add(new String[]{customer.getCustomerID(), String.valueOf(loan.getLoanAmount()), String.valueOf(loan.getInterestRate()), String.valueOf(loan.isApproved()), String.valueOf(loan.isPaidOff())});
-            }
-        }
-        CSVUtility.writeCSV("loans.csv", data, false);
         loadLoans();
     }
 
+    public List<Customer> getCustomers() {
+        return customers;
+    }
+
     public void addCustomer(Customer customer) {
-        customers.put(customer.getCustomerID(), customer);
-        try {
-            saveCustomers();
-        } catch (IOException e) {
-            System.err.println("Error saving customers: " + e.getMessage());
-        }
+        customers.add(customer);
+        saveCustomers();
     }
 
-    public boolean deleteCustomer(String customerId) {
-        if (customers.remove(customerId) != null) {
-            try {
-                saveCustomers();
-                saveAccounts();
-                saveLoans();
-                return true;
-            } catch (IOException e) {
-                System.err.println("Error saving data: " + e.getMessage());
-            }
-        }
-        return false;
-    }
-
-    public Customer getCustomer(String customerId) {
-        return customers.get(customerId);
-    }
-
-    public Customer getCustomerByEmail(String email) {
-        for (Customer customer : customers.values()) {
-            if (customer.getEmail().equals(email)) {
+    public Customer authenticateCustomer(String email, String password) {
+        for (Customer customer : customers) {
+            if (customer.getEmail().equals(email) && customer.getPassword().equals(password)) {
                 return customer;
             }
         }
         return null;
     }
 
+    public Customer getCustomer(String customerId) {
+        for (Customer customer : customers) {
+            if (customer.getCustomerID().equals(customerId)) {
+                return customer;
+            }
+        }
+        return null;
+    }
+
+    public boolean deleteCustomer(String customerId) {
+        Customer customer = getCustomer(customerId);
+        if (customer != null) {
+            customers.remove(customer);
+            accountManager.removeAccountsByCustomerId(customerId);
+            saveCustomers();
+            return true;
+        }
+        return false;
+    }
+
+    public String generateCustomerReport(String customerId) {
+        Customer customer = getCustomer(customerId);
+        if (customer == null) {
+            return "Customer not found.";
+        }
+        StringBuilder report = new StringBuilder();
+        report.append("Customer ID: ").append(customer.getCustomerID()).append("\n");
+        report.append("Name: ").append(customer.getName()).append("\n");
+        report.append("Email: ").append(customer.getEmail()).append("\n");
+        report.append("Accounts:\n");
+        for (Account account : customer.getAccountsList()) {
+            report.append("  - ").append(account.getAccountType()).append(" (")
+                    .append(account.getAccountNumber()).append("): $")
+                    .append(account.getBalance()).append("\n");
+        }
+        report.append("Loans:\n");
+        for (Loan loan : customer.getLoans()) {
+            report.append("  - Loan Amount: $").append(loan.getLoanAmount())
+                    .append(", Interest Rate: ").append(loan.getInterestRate())
+                    .append("%, Approved: ").append(loan.isApproved() ? "Yes" : "No")
+                    .append(", Paid Off: ").append(loan.isPaidOff() ? "Yes" : "No").append("\n");
+        }
+        return report.toString();
+    }
+
+    public void loadCustomers() {
+        customers.clear();
+        try {
+            List<String[]> data = CSVUtility.readCSV(customersFilePath);
+            for (String[] row : data) {
+                String customerId = row[0];
+                String name = row[1];
+                String password = row[2];
+                String email = row[3];
+                Customer customer = new Customer(customerId, name, password, email);
+                List<Account> customerAccounts = accountManager.getAccountsByCustomerId(customerId);
+                customer.getAccountsList().addAll(customerAccounts);
+                customers.add(customer);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void saveCustomers() {
+        List<String[]> data = new ArrayList<>();
+        for (Customer customer : customers) {
+            data.add(new String[]{
+                    customer.getCustomerID(),
+                    customer.getName(),
+                    customer.getPassword(),
+                    customer.getEmail()
+            });
+        }
+        try {
+            CSVUtility.writeCSV(customersFilePath, data, false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public List<Loan> getPendingLoans() {
         List<Loan> pendingLoans = new ArrayList<>();
-        for (Customer customer : customers.values()) {
-            for (Loan loan : customer.getLoans()) {
-                if (!loan.isApproved() && !loan.isPaidOff()) {
-                    pendingLoans.add(loan);
-                }
+        for (Loan loan : loans) {
+            if (!loan.isApproved()) {
+                pendingLoans.add(loan);
             }
         }
         return pendingLoans;
     }
 
     public Customer getCustomerByLoan(Loan loan) {
-        for (Customer customer : customers.values()) {
-            if (customer.getLoans().contains(loan)) {
-                return customer;
+        for (Customer customer : customers) {
+            for (Loan customerLoan : customer.getLoans()) {
+                if (customerLoan.getLoanId().equals(loan.getLoanId())) {
+                    return customer;
+                }
             }
         }
         return null;
     }
 
-    public String generateCustomerReport(String customerId) {
-        Customer customer = customers.get(customerId);
-        if (customer == null) {
-            return "Customer not found.";
-        }
-        StringBuilder report = new StringBuilder();
-        report.append("Customer Report for ").append(customer.getName()).append(" (").append(customer.getCustomerID()).append(")\n");
-        report.append("Email: ").append(customer.getEmail()).append("\n\n");
-        report.append("Accounts:\n");
-        for (Account account : customer.getAccountsList()) {
-            report.append(account.getAccountType()).append(" - ").append(account.getAccountNumber()).append(": Balance $").append(account.getBalance()).append("\n");
-        }
-        report.append("\n");
-        report.append("Loans:\n");
-        for (Loan loan : customer.getLoans()) {
-            report.append("Loan Amount: $").append(loan.getLoanAmount()).append(" Interest Rate: ").append(loan.getInterestRate()).append("% Approved: ").append(loan.isApproved() ? "Yes" : "No").append(" Paid Off: ").append(loan.isPaidOff() ? "Yes" : "No").append("\n");
-        }
-        report.append("\n");
-        report.append("Transactions:\n");
-        for (Account account : customer.getAccountsList()) {
-            report.append("Account: ").append(account.getAccountNumber()).append("\n");
-            for (Transaction transaction : account.getTransactions()) {
-                report.append(transaction.getType()).append(": $").append(transaction.getAmount()).append(" Status: ").append(transaction.getStatus()).append("\n");
+    public void loadLoans() {
+        loans = Loan.loadLoans("loans.csv"); // Change this path as needed
+        for (Loan loan : loans) {
+            Customer customer = getCustomerByLoan(loan);
+            if (customer != null) {
+                customer.addLoan(loan);
             }
-            report.append("\n");
         }
-        return report.toString();
     }
 
-    public String generateCustomerId() {
-        return UUID.randomUUID().toString();
+    public void saveLoans() {
+        Loan.saveLoans(loans, "loans.csv"); // Change this path as needed
+    }
+
+    public void addLoan(Loan loan) {
+        loans.add(loan);
+        saveLoans();
     }
 }
