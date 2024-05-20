@@ -36,7 +36,8 @@ class CustomerUI implements UI {
             System.out.println("5. Apply for Loan");
             System.out.println("6. View Loans");
             System.out.println("7. Open Account");
-            System.out.println("8. Pay Off Loan");
+            System.out.println("8. View Accounts (Sorted by Balance)");
+            System.out.println("9. Pay Off Loan");
             System.out.println("0. Logout");
             System.out.println("Choose an action:");
             action = Integer.parseInt(scanner.nextLine());
@@ -63,6 +64,9 @@ class CustomerUI implements UI {
                     openAccount();
                     break;
                 case 8:
+                    viewAccounts();
+                    break;
+                case 9:
                     payOffLoan();
                     break;
                 case 0:
@@ -73,6 +77,21 @@ class CustomerUI implements UI {
                     break;
             }
         } while (action != 0);
+    }
+
+    private void viewAccounts() {
+        List<Account> accounts = accountManager.getAccountsByCustomerId(customer.getCustomerID());
+        if (accounts.isEmpty()) {
+            System.out.println("No accounts found.");
+            return;
+        }
+
+        SortUtils.quickSortAccounts(accounts, 0, accounts.size() - 1);
+
+        System.out.println("Accounts sorted by balance (decreasing order):");
+        for (Account account : accounts) {
+            System.out.println(account.getAccountType() + " (" + account.getAccountNumber() + "): $" + account.getBalance());
+        }
     }
 
     private void deposit() {
@@ -237,6 +256,7 @@ class CustomerUI implements UI {
         return accounts.get(choice - 1);
     }
 }
+
 
 
 

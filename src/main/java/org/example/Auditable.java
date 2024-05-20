@@ -36,3 +36,34 @@ class TransactionUtils {
     }
 }
 
+class SortUtils {
+    public static void quickSortAccounts(List<Account> accounts, int low, int high) {
+        if (low < high) {
+            int pi = partition(accounts, low, high);
+            quickSortAccounts(accounts, low, pi - 1);
+            quickSortAccounts(accounts, pi + 1, high);
+        }
+    }
+
+    private static int partition(List<Account> accounts, int low, int high) {
+        double pivot = accounts.get(high).getBalance();
+        int i = (low - 1);
+
+        for (int j = low; j < high; j++) {
+            if (accounts.get(j).getBalance() > pivot) {  // Sorting in decreasing order
+                i++;
+                Account temp = accounts.get(i);
+                accounts.set(i, accounts.get(j));
+                accounts.set(j, temp);
+            }
+        }
+
+        Account temp = accounts.get(i + 1);
+        accounts.set(i + 1, accounts.get(high));
+        accounts.set(high, temp);
+
+        return i + 1;
+    }
+}
+
+
