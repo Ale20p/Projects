@@ -64,6 +64,36 @@ class SortUtils {
 
         return i + 1;
     }
+
+    public static void mergeSortTransactions(List<Transaction> transactions) {
+        if (transactions.size() < 2) {
+            return;
+        }
+        int mid = transactions.size() / 2;
+        List<Transaction> left = new ArrayList<>(transactions.subList(0, mid));
+        List<Transaction> right = new ArrayList<>(transactions.subList(mid, transactions.size()));
+
+        mergeSortTransactions(left);
+        mergeSortTransactions(right);
+        merge(transactions, left, right);
+    }
+
+    private static void merge(List<Transaction> transactions, List<Transaction> left, List<Transaction> right) {
+        int i = 0, j = 0, k = 0;
+        while (i < left.size() && j < right.size()) {
+            if (left.get(i).getDate().after(right.get(j).getDate())) {
+                transactions.set(k++, left.get(i++));
+            } else {
+                transactions.set(k++, right.get(j++));
+            }
+        }
+        while (i < left.size()) {
+            transactions.set(k++, left.get(i++));
+        }
+        while (j < right.size()) {
+            transactions.set(k++, right.get(j++));
+        }
+    }
 }
 
 

@@ -146,6 +146,8 @@ class CustomerUI implements UI {
         if (transactions.isEmpty()) {
             System.out.println("No transactions found.");
         } else {
+            SortUtils.mergeSortTransactions(transactions);  // Sort transactions by date in decreasing order
+            System.out.println("Transactions (sorted by date, most recent first):");
             for (Transaction transaction : transactions) {
                 System.out.println(transaction.getType() + ": $" + transaction.getAmount() + " Date: " + transaction.getFormattedDate() + " Status: " + transaction.getStatus());
             }
