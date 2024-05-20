@@ -60,7 +60,7 @@ public class CustomerManager {
     }
 
     public String generateCustomerReport(String customerId) {
-        Customer customer = getCustomer(customerId);
+        Customer customer = linearSearchCustomerById(customerId);  // Use linear search
         if (customer == null) {
             return "Customer not found.";
         }
@@ -209,5 +209,14 @@ public class CustomerManager {
     public void approveLoan(Loan loan) {
         loan.setApproved(true);
         updateLoan(loan);
+    }
+
+    private Customer linearSearchCustomerById(String customerId) {
+        for (Customer customer : customers) {
+            if (customer.getCustomerID().equals(customerId)) {
+                return customer;
+            }
+        }
+        return null;
     }
 }
