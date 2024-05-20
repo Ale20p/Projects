@@ -88,13 +88,7 @@ public abstract class Account implements Auditable{
 
     @Override
     public List<Transaction> getHighValueTransactions(double threshold) {
-        List<Transaction> highValueTransactions = new ArrayList<>();
-        for (Transaction transaction : transactions) {
-            if (transaction.getAmount() > 5000.00) {
-                highValueTransactions.add(transaction);
-            }
-        }
-        return highValueTransactions;
+        return TransactionUtils.binarySearchHighValueTransactions(transactions, threshold);
     }
 }
 
