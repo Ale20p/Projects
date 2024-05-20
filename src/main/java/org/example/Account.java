@@ -92,4 +92,3 @@ class InsufficientFundsException extends Exception {
         super(message);
     }
 }
-

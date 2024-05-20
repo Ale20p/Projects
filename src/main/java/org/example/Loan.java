@@ -37,20 +37,28 @@ public class Loan {
         return approved;
     }
 
-    public void approveLoan() {
-        this.approved = true;
+    public void setApproved(boolean approved) {
+        this.approved = approved;
+    }
+
+    public void setLoanId(String loanId) {
+        this.loanId = loanId;
     }
 
     public boolean isPaidOff() {
         return paidOff;
     }
 
-    public void payOffLoan() {
-        this.paidOff = true;
+    public void setPaidOff(boolean paidOff) {
+        this.paidOff = paidOff;
     }
 
     public String getAccountNumber() {
         return accountNumber;
+    }
+
+    public void payOffLoan() {
+        this.paidOff = true;
     }
 
     public static List<Loan> loadLoans(String loansFilePath) {
@@ -65,9 +73,9 @@ public class Loan {
                 boolean paidOff = Boolean.parseBoolean(row[4]);
                 String accountNumber = row[5];
                 Loan loan = new Loan(loanAmount, accountNumber);
-                loan.loanId = loanId;
-                loan.approved = approved;
-                loan.paidOff = paidOff;
+                loan.setLoanId(loanId);
+                loan.setApproved(approved);
+                loan.setPaidOff(paidOff);
                 loans.add(loan);
             }
         } catch (IOException e) {

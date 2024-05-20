@@ -9,9 +9,11 @@ public class Main {
         String loansFilePath = "loans.csv";
         String accountsFilePath = "accounts.csv";
         String transactionsFilePath = "transactions.csv";
+
         AccountManager accountManager = new AccountManager(accountsFilePath, null);
         TransactionManager transactionManager = new TransactionManager(transactionsFilePath, accountManager);
         accountManager.setTransactionManager(transactionManager);
+
         CustomerManager customerManager = new CustomerManager(customersFilePath, loansFilePath, accountManager);
         BankManager bankManager = new BankManager("admin", "admin123", customerManager);
 
@@ -39,6 +41,8 @@ public class Main {
         } while (option != 0);
         scanner.close();
     }
+
+
 
     private static void handleCustomerLogin(Scanner scanner, CustomerManager customerManager, AccountManager accountManager, TransactionManager transactionManager) {
         System.out.println("Are you a new customer?");
@@ -76,7 +80,7 @@ public class Main {
         System.out.print("Enter your password: ");
         String password = scanner.nextLine();
         if (bankManager.getManagerId().equals(managerId) && bankManager.authenticateManager(password)) {
-            ManagerUI managerUI = new ManagerUI(bankManager, transactionManager, customerManager, accountManager, scanner);
+            ManagerUI managerUI = new ManagerUI(bankManager, customerManager, accountManager, scanner);
             managerUI.displayDashboard();
         } else {
             System.out.println("Invalid manager ID or password. Please try again.");

@@ -21,36 +21,6 @@ public class TransactionManager {
         saveTransactions();
     }
 
-    public List<Transaction> getPendingTransactions() {
-        List<Transaction> pendingTransactions = new ArrayList<>();
-        for (Transaction transaction : transactions) {
-            if (transaction.getStatus().equals("Pending")) {
-                pendingTransactions.add(transaction);
-            }
-        }
-        return pendingTransactions;
-    }
-
-    public void approveTransaction(Transaction transaction) {
-        transaction.setStatus("Approved");
-        Account sourceAccount = accountManager.getAccount(transaction.getSourceAccountNumber());
-        Account destinationAccount = accountManager.getAccount(transaction.getDestinationAccountNumber());
-        try {
-            if ("Transfer".equalsIgnoreCase(transaction.getType()) && destinationAccount != null) {
-                sourceAccount.withdraw(transaction.getAmount());
-                destinationAccount.deposit(transaction.getAmount());
-            } else if ("Withdrawal".equalsIgnoreCase(transaction.getType())) {
-                sourceAccount.withdraw(transaction.getAmount());
-            } else if ("Deposit".equalsIgnoreCase(transaction.getType())) {
-                sourceAccount.deposit(transaction.getAmount());
-            }
-        } catch (InsufficientFundsException e) {
-            e.printStackTrace();
-        }
-        saveTransactions();
-        accountManager.saveAccounts();
-    }
-
     public void loadTransactions() {
         transactions.clear();
         try {
@@ -64,6 +34,11 @@ public class TransactionManager {
                 String status = row[5];
                 Transaction transaction = new Transaction(transactionId, type, amount, sourceAccountNumber, destinationAccountNumber, status);
                 transactions.add(transaction);
+                // Link transaction to the source account
+                Account sourceAccount = accountManager.getAccount(sourceAccountNumber);
+                if (sourceAccount != null) {
+                    sourceAccount.getTransactions().add(transaction);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

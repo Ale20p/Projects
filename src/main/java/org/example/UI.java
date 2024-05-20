@@ -240,22 +240,14 @@ class CustomerUI implements UI {
 
 
 
-
-
-
-
-
-
 class ManagerUI implements UI {
     private BankManager bankManager;
-    private TransactionManager transactionManager;
     private CustomerManager customerManager;
     private AccountManager accountManager;
     private Scanner scanner;
 
-    public ManagerUI(BankManager bankManager, TransactionManager transactionManager, CustomerManager customerManager, AccountManager accountManager, Scanner scanner) {
+    public ManagerUI(BankManager bankManager, CustomerManager customerManager, AccountManager accountManager, Scanner scanner) {
         this.bankManager = bankManager;
-        this.transactionManager = transactionManager;
         this.customerManager = customerManager;
         this.accountManager = accountManager;
         this.scanner = scanner;
@@ -266,28 +258,24 @@ class ManagerUI implements UI {
         int action;
         do {
             System.out.println("Manager Dashboard: " + bankManager.getManagerId());
-            System.out.println("1. Approve Transactions");
-            System.out.println("2. Approve Loans");
-            System.out.println("3. Add Customer");
-            System.out.println("4. Delete Customer");
-            System.out.println("5. Generate Customer Report");
+            System.out.println("1. Approve Loans");
+            System.out.println("2. Add Customer");
+            System.out.println("3. Delete Customer");
+            System.out.println("4. Generate Customer Report");
             System.out.println("0. Logout");
             System.out.println("Choose an action:");
             action = Integer.parseInt(scanner.nextLine());
             switch (action) {
                 case 1:
-                    approveTransactions();
-                    break;
-                case 2:
                     approveLoans();
                     break;
-                case 3:
+                case 2:
                     addCustomer();
                     break;
-                case 4:
+                case 3:
                     deleteCustomer();
                     break;
-                case 5:
+                case 4:
                     generateCustomerReport();
                     break;
                 case 0:
@@ -300,37 +288,26 @@ class ManagerUI implements UI {
         } while (action != 0);
     }
 
-    private void approveTransactions() {
-        List<Transaction> pendingTransactions = transactionManager.getPendingTransactions();
-        for (Transaction transaction : pendingTransactions) {
-            System.out.println("Approve transaction: " + transaction.getType() + " of $" + transaction.getAmount() + " for account " + transaction.getSourceAccountNumber() + "? (yes/no)");
-            String approval = scanner.nextLine();
-            if (approval.equalsIgnoreCase("yes")) {
-                transactionManager.approveTransaction(transaction);
-                System.out.println("Transaction approved.");
-            } else {
-                System.out.println("Transaction not approved.");
-            }
-        }
-        transactionManager.saveTransactions();
-    }
-
     private void approveLoans() {
-        List<Loan> pendingLoans = customerManager.getPendingLoans();
+        List<Loan> pendingLoans = customerManager.getLoans();
         for (Loan loan : pendingLoans) {
-            System.out.println("Approve loan: " + loan.getLoanAmount() + " for account " + loan.getAccountNumber() + "? (yes/no)");
-            String approval = scanner.nextLine();
-            if (approval.equalsIgnoreCase("yes")) {
-                loan.approveLoan();
-                Account account = accountManager.getAccount(loan.getAccountNumber());
-                account.deposit(loan.getLoanAmount());
-                System.out.println("Loan approved and funds deposited.");
-            } else {
-                System.out.println("Loan not approved.");
+            if (!loan.isApproved()) {
+                System.out.println("Approve loan: " + loan.getLoanAmount() + " for account " + loan.getAccountNumber() + "? (yes/no)");
+                String approval = scanner.nextLine();
+                if (approval.equalsIgnoreCase("yes")) {
+                    loan.setApproved(true);
+                    Account account = accountManager.getAccount(loan.getAccountNumber());
+                    if (account != null) {
+                        account.deposit(loan.getLoanAmount());
+                        accountManager.saveAccounts();
+                    }
+                    System.out.println("Loan approved and funds deposited.");
+                } else {
+                    System.out.println("Loan not approved.");
+                }
             }
         }
         customerManager.saveLoans();
-        accountManager.saveAccounts();
     }
 
     private void addCustomer() {
@@ -363,6 +340,9 @@ class ManagerUI implements UI {
         System.out.println(report);
     }
 }
+
+
+
 
 
 

@@ -120,34 +120,34 @@ public class CustomerManager {
         }
     }
 
-    public List<Loan> getPendingLoans() {
-        List<Loan> pendingLoans = new ArrayList<>();
-        for (Loan loan : loans) {
-            if (!loan.isApproved()) {
-                pendingLoans.add(loan);
-            }
-        }
-        return pendingLoans;
-    }
-
-    public Customer getCustomerByLoan(Loan loan) {
-        for (Customer customer : customers) {
-            for (Loan customerLoan : customer.getLoans()) {
-                if (customerLoan.getLoanId().equals(loan.getLoanId())) {
-                    return customer;
-                }
-            }
-        }
-        return null;
+    public List<Loan> getLoans() {
+        return loans;
     }
 
     public void loadLoans() {
-        loans = Loan.loadLoans(loansFilePath);
-        for (Loan loan : loans) {
-            Customer customer = getCustomerByLoan(loan);
-            if (customer != null) {
-                customer.addLoan(loan);
+        loans.clear();
+        try {
+            List<String[]> data = CSVUtility.readCSV(loansFilePath);
+            for (String[] row : data) {
+                String loanId = row[0];
+                double loanAmount = Double.parseDouble(row[1]);
+                double interestRate = Double.parseDouble(row[2]);
+                boolean approved = Boolean.parseBoolean(row[3]);
+                boolean paidOff = Boolean.parseBoolean(row[4]);
+                String accountNumber = row[5];
+                Loan loan = new Loan(loanAmount, accountNumber);
+                loan.setLoanId(loanId);
+                loan.setApproved(approved);
+                loan.setPaidOff(paidOff);
+                loans.add(loan);
+                // Link loan to the customer
+                Customer customer = getCustomerByLoan(loan);
+                if (customer != null) {
+                    customer.getLoans().add(loan);
+                }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -168,5 +168,31 @@ public class CustomerManager {
             }
         }
         saveLoans();
+    }
+
+    public Customer getCustomerByLoan(Loan loan) {
+        for (Customer customer : customers) {
+            for (Loan customerLoan : customer.getLoans()) {
+                if (customerLoan.getLoanId().equals(loan.getLoanId())) {
+                    return customer;
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<Loan> getPendingLoans() {
+        List<Loan> pendingLoans = new ArrayList<>();
+        for (Loan loan : loans) {
+            if (!loan.isApproved()) {
+                pendingLoans.add(loan);
+            }
+        }
+        return pendingLoans;
+    }
+
+    public void approveLoan(Loan loan) {
+        loan.setApproved(true);
+        updateLoan(loan);
     }
 }

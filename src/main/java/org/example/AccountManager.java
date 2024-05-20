@@ -77,6 +77,7 @@ public class AccountManager {
         }
     }
 
+
     public void saveAccounts() {
         List<String[]> data = new ArrayList<>();
         for (Account account : accounts) {
@@ -93,6 +94,7 @@ public class AccountManager {
             e.printStackTrace();
         }
     }
+
 
     public void setTransactionManager(TransactionManager transactionManager) {
         this.transactionManager = transactionManager;

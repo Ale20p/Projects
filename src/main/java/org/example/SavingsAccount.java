@@ -5,4 +5,3 @@ public class SavingsAccount extends Account {
         super(accountNumber, customerId, balance, "Savings", transactionManager);
     }
 }
-
