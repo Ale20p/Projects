@@ -36,6 +36,7 @@ class CustomerUI implements UI {
             System.out.println("5. Apply for Loan");
             System.out.println("6. View Loans");
             System.out.println("7. Open Account");
+            System.out.println("8. Pay Off Loan");
             System.out.println("0. Logout");
             System.out.println("Choose an action:");
             action = Integer.parseInt(scanner.nextLine());
@@ -60,6 +61,9 @@ class CustomerUI implements UI {
                     break;
                 case 7:
                     openAccount();
+                    break;
+                case 8:
+                    payOffLoan();
                     break;
                 case 0:
                     System.out.println("Logging out...");
@@ -174,6 +178,46 @@ class CustomerUI implements UI {
         System.out.println("Account opened successfully.");
     }
 
+    private void payOffLoan() {
+        System.out.println("Select a loan to pay off:");
+        List<Loan> loans = customer.getLoans();
+        if (loans.isEmpty()) {
+            System.out.println("No loans found.");
+            return;
+        }
+        for (int i = 0; i < loans.size(); i++) {
+            Loan loan = loans.get(i);
+            System.out.println((i + 1) + ". Loan Amount: $" + loan.getLoanAmount() + " Interest Rate: " + loan.getInterestRate() + "% Approved: " + (loan.isApproved() ? "Yes" : "No") + " Paid Off: " + (loan.isPaidOff() ? "Yes" : "No"));
+        }
+        int choice = Integer.parseInt(scanner.nextLine());
+        if (choice < 1 || choice > loans.size()) {
+            System.out.println("Invalid loan selection. Please try again.");
+            return;
+        }
+        Loan selectedLoan = loans.get(choice - 1);
+        if (!selectedLoan.isApproved()) {
+            System.out.println("Loan not approved yet.");
+            return;
+        }
+        if (selectedLoan.isPaidOff()) {
+            System.out.println("Loan already paid off.");
+            return;
+        }
+        double totalAmount = selectedLoan.getLoanAmount() * (1 + selectedLoan.getInterestRate());
+        System.out.println("Total amount to pay off: $" + totalAmount);
+        Account account = selectAccount();
+        if (account == null) return;
+        try {
+            account.withdraw(totalAmount);
+            selectedLoan.payOffLoan();
+            accountManager.saveAccounts();
+            customerManager.saveLoans();
+            System.out.println("Loan paid off successfully.");
+        } catch (InsufficientFundsException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
     private Account selectAccount() {
         List<Account> accounts = accountManager.getAccountsByCustomerId(customer.getCustomerID());
         if (accounts.isEmpty()) {
@@ -193,6 +237,7 @@ class CustomerUI implements UI {
         return accounts.get(choice - 1);
     }
 }
+
 
 
 

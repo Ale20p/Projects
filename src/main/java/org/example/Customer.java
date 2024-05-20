@@ -61,4 +61,13 @@ public class Customer {
     public void addLoan(Loan loan) {
         loans.add(loan);
     }
+
+    public void payOffLoan(String loanId) {
+        for (Loan loan : loans) {
+            if (loan.getLoanId().equals(loanId) && loan.isApproved() && !loan.isPaidOff()) {
+                loan.payOffLoan();
+                break;
+            }
+        }
+    }
 }
