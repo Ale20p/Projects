@@ -76,7 +76,8 @@ public class CustomerManager {
             report.append("    Transactions:\n");
             for (Transaction transaction : account.getTransactions()) {
                 report.append("      - ").append(transaction.getType()).append(": $")
-                        .append(transaction.getAmount()).append(" Status: ")
+                        .append(transaction.getAmount()).append(" Date: ")
+                        .append(transaction.getFormattedDate()).append(" Status: ")
                         .append(transaction.getStatus()).append("\n");
             }
             List<Transaction> highValueTransactions = account.getHighValueTransactions(5000.00);
@@ -84,7 +85,8 @@ public class CustomerManager {
                 report.append("    High Value Transactions (>$5000):\n");
                 for (Transaction transaction : highValueTransactions) {
                     report.append("      - ").append(transaction.getType()).append(": $")
-                            .append(transaction.getAmount()).append(" Status: ")
+                            .append(transaction.getAmount()).append(" Date: ")
+                            .append(transaction.getFormattedDate()).append(" Status: ")
                             .append(transaction.getStatus()).append("\n");
                 }
             }

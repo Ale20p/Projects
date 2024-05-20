@@ -3,7 +3,7 @@ package org.example;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Account implements Auditable{
+public abstract class Account implements Auditable {
     private String accountNumber;
     private String customerId;
     private double balance;
@@ -91,6 +91,7 @@ public abstract class Account implements Auditable{
         return TransactionUtils.binarySearchHighValueTransactions(transactions, threshold);
     }
 }
+
 
 class InsufficientFundsException extends Exception {
     public InsufficientFundsException(String message) {

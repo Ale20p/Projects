@@ -30,8 +30,9 @@ class CSVUtility {
     public static void writeCSV(String fileName, List<String[]> dataLines, boolean append) throws IOException {
         Path filePath = Paths.get(getBasePath() + fileName);
         Files.createDirectories(filePath.getParent());
-        OpenOption[] options = append ? new OpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND} :
-                new OpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING};
+        OpenOption[] options = append
+                ? new OpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND}
+                : new OpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING};
         try (BufferedWriter bw = Files.newBufferedWriter(filePath, options)) {
             for (String[] data : dataLines) {
                 bw.write(String.join(",", data));

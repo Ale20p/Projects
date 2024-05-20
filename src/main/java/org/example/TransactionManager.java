@@ -2,6 +2,7 @@ package org.example;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class TransactionManager {
@@ -32,7 +33,8 @@ public class TransactionManager {
                 String sourceAccountNumber = row[3];
                 String destinationAccountNumber = row[4];
                 String status = row[5];
-                Transaction transaction = new Transaction(transactionId, type, amount, sourceAccountNumber, destinationAccountNumber, status);
+                Date date = new Date(Long.parseLong(row[6]));  // Parse the date from the CSV
+                Transaction transaction = new Transaction(transactionId, type, amount, sourceAccountNumber, destinationAccountNumber, status, date);
                 transactions.add(transaction);
                 // Link transaction to the source account
                 Account sourceAccount = accountManager.getAccount(sourceAccountNumber);
@@ -54,7 +56,8 @@ public class TransactionManager {
                     String.valueOf(transaction.getAmount()),
                     transaction.getSourceAccountNumber(),
                     transaction.getDestinationAccountNumber(),
-                    transaction.getStatus()
+                    transaction.getStatus(),
+                    String.valueOf(transaction.getDate().getTime())  // Save the date as a long
             });
         }
         try {

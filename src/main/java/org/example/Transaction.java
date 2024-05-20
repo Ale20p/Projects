@@ -1,7 +1,9 @@
 package org.example;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class Transaction {
@@ -11,6 +13,8 @@ public class Transaction {
     private String sourceAccountNumber;
     private String destinationAccountNumber;
     private String status;
+    private Date date;
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public Transaction(String type, double amount, String sourceAccountNumber, String destinationAccountNumber) {
         this.transactionId = java.util.UUID.randomUUID().toString();
@@ -19,15 +23,17 @@ public class Transaction {
         this.sourceAccountNumber = sourceAccountNumber;
         this.destinationAccountNumber = destinationAccountNumber;
         this.status = "Completed";  // Default status to "Completed" for now
+        this.date = new Date();  // Set the transaction date to the current date
     }
 
-    public Transaction(String transactionId, String type, double amount, String sourceAccountNumber, String destinationAccountNumber, String status) {
+    public Transaction(String transactionId, String type, double amount, String sourceAccountNumber, String destinationAccountNumber, String status, Date date) {
         this.transactionId = transactionId;
         this.type = type;
         this.amount = amount;
         this.sourceAccountNumber = sourceAccountNumber;
         this.destinationAccountNumber = destinationAccountNumber;
         this.status = status;
+        this.date = date;
     }
 
     public String getTransactionId() {
@@ -54,8 +60,16 @@ public class Transaction {
         return status;
     }
 
+    public Date getDate() {
+        return date;
+    }
+
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getFormattedDate() {
+        return DATE_FORMAT.format(date);
     }
 
     public static List<Transaction> loadTransactions(String transactionsFilePath) {
@@ -69,7 +83,8 @@ public class Transaction {
                 String sourceAccountNumber = row[3];
                 String destinationAccountNumber = row[4];
                 String status = row[5];
-                Transaction transaction = new Transaction(transactionId, type, amount, sourceAccountNumber, destinationAccountNumber, status);
+                Date date = new Date(Long.parseLong(row[6]));  // Parse the date from the CSV
+                Transaction transaction = new Transaction(transactionId, type, amount, sourceAccountNumber, destinationAccountNumber, status, date);
                 transactions.add(transaction);
             }
         } catch (IOException e) {
@@ -87,7 +102,8 @@ public class Transaction {
                     String.valueOf(transaction.getAmount()),
                     transaction.getSourceAccountNumber(),
                     transaction.getDestinationAccountNumber(),
-                    transaction.getStatus()
+                    transaction.getStatus(),
+                    String.valueOf(transaction.getDate().getTime())  // Save the date as a long
             });
         }
         try {

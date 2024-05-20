@@ -147,7 +147,7 @@ class CustomerUI implements UI {
             System.out.println("No transactions found.");
         } else {
             for (Transaction transaction : transactions) {
-                System.out.println(transaction.getType() + ": $" + transaction.getAmount() + " Status: " + transaction.getStatus());
+                System.out.println(transaction.getType() + ": $" + transaction.getAmount() + " Date: " + transaction.getFormattedDate() + " Status: " + transaction.getStatus());
             }
         }
     }
@@ -256,6 +256,7 @@ class CustomerUI implements UI {
         return accounts.get(choice - 1);
     }
 }
+
 
 
 
