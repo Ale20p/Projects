@@ -73,6 +73,12 @@ public class CustomerManager {
             report.append("  - ").append(account.getAccountType()).append(" (")
                     .append(account.getAccountNumber()).append("): $")
                     .append(account.getBalance()).append("\n");
+            report.append("    Transactions:\n");
+            for (Transaction transaction : account.getTransactions()) {
+                report.append("      - ").append(transaction.getType()).append(": $")
+                        .append(transaction.getAmount()).append(" Status: ")
+                        .append(transaction.getStatus()).append("\n");
+            }
         }
         report.append("Loans:\n");
         for (Loan loan : customer.getLoans()) {
