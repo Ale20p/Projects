@@ -53,7 +53,6 @@ public class Loan {
         return accountNumber;
     }
 
-    // Static method to load loans from a CSV file
     public static List<Loan> loadLoans(String loansFilePath) {
         List<Loan> loans = new ArrayList<>();
         try {
@@ -77,7 +76,6 @@ public class Loan {
         return loans;
     }
 
-    // Static method to save loans to a CSV file
     public static void saveLoans(List<Loan> loans, String loansFilePath) {
         List<String[]> data = new ArrayList<>();
         for (Loan loan : loans) {

@@ -11,11 +11,12 @@ public abstract class Account {
     private TransactionManager transactionManager;
     private List<Transaction> transactions;
 
-    public Account(String accountNumber, String customerId, double balance, String accountType) {
+    public Account(String accountNumber, String customerId, double balance, String accountType, TransactionManager transactionManager) {
         this.accountNumber = accountNumber;
         this.customerId = customerId;
         this.balance = balance;
         this.accountType = accountType;
+        this.transactionManager = transactionManager;
         this.transactions = new ArrayList<>();
     }
 
@@ -45,7 +46,7 @@ public abstract class Account {
 
     public void deposit(double amount) {
         adjustBalance(amount);
-        Transaction transaction = new Transaction("Deposit", amount, this);
+        Transaction transaction = new Transaction("Deposit", amount, accountNumber, null);
         transactions.add(transaction);
         if (transactionManager != null) {
             transactionManager.logTransaction(transaction);
@@ -57,7 +58,7 @@ public abstract class Account {
             throw new InsufficientFundsException("Insufficient funds for withdrawal.");
         }
         adjustBalance(-amount);
-        Transaction transaction = new Transaction("Withdrawal", amount, this);
+        Transaction transaction = new Transaction("Withdrawal", amount, accountNumber, null);
         transactions.add(transaction);
         if (transactionManager != null) {
             transactionManager.logTransaction(transaction);
@@ -70,7 +71,7 @@ public abstract class Account {
         }
         adjustBalance(-amount);
         destinationAccount.deposit(amount);
-        Transaction transaction = new Transaction("Transfer", amount, this, destinationAccount);
+        Transaction transaction = new Transaction("Transfer", amount, accountNumber, destinationAccount.getAccountNumber());
         transactions.add(transaction);
         if (transactionManager != null) {
             transactionManager.logTransaction(transaction);
@@ -86,19 +87,9 @@ public abstract class Account {
     }
 }
 
-
-
-
-
-
-
-
-
-
 class InsufficientFundsException extends Exception {
     public InsufficientFundsException(String message) {
         super(message);
     }
 }
-
 

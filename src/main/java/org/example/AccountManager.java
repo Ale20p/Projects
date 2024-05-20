@@ -9,17 +9,11 @@ public class AccountManager {
     private String accountsFilePath;
     private TransactionManager transactionManager;
 
-    public AccountManager(String accountsFilePath) {
+    public AccountManager(String accountsFilePath, TransactionManager transactionManager) {
         this.accountsFilePath = accountsFilePath;
+        this.transactionManager = transactionManager;
         this.accounts = new ArrayList<>();
         loadAccounts();
-    }
-
-    public void setTransactionManager(TransactionManager transactionManager) {
-        this.transactionManager = transactionManager;
-        for (Account account : accounts) {
-            account.setTransactionManager(transactionManager);
-        }
     }
 
     public List<Account> getAccounts() {
@@ -72,11 +66,10 @@ public class AccountManager {
                 String accountType = row[3];
                 Account account;
                 if ("Savings".equalsIgnoreCase(accountType)) {
-                    account = new SavingsAccount(accountNumber, customerId, balance);
+                    account = new SavingsAccount(accountNumber, customerId, balance, transactionManager);
                 } else {
-                    account = new CheckingAccount(accountNumber, customerId, balance);
+                    account = new CheckingAccount(accountNumber, customerId, balance, transactionManager);
                 }
-                account.setTransactionManager(transactionManager);
                 accounts.add(account);
             }
         } catch (IOException e) {
@@ -98,6 +91,13 @@ public class AccountManager {
             CSVUtility.writeCSV(accountsFilePath, data, false);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void setTransactionManager(TransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
+        for (Account account : accounts) {
+            account.setTransactionManager(transactionManager);
         }
     }
 }
