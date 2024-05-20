@@ -79,6 +79,15 @@ public class CustomerManager {
                         .append(transaction.getAmount()).append(" Status: ")
                         .append(transaction.getStatus()).append("\n");
             }
+            List<Transaction> highValueTransactions = account.getHighValueTransactions(5000.00);
+            if (!highValueTransactions.isEmpty()) {
+                report.append("    High Value Transactions (>$5000):\n");
+                for (Transaction transaction : highValueTransactions) {
+                    report.append("      - ").append(transaction.getType()).append(": $")
+                            .append(transaction.getAmount()).append(" Status: ")
+                            .append(transaction.getStatus()).append("\n");
+                }
+            }
         }
         report.append("Loans:\n");
         for (Loan loan : customer.getLoans()) {

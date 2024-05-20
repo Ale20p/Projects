@@ -3,7 +3,7 @@ package org.example;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Account {
+public abstract class Account implements Auditable{
     private String accountNumber;
     private String customerId;
     private double balance;
@@ -84,6 +84,17 @@ public abstract class Account {
 
     public List<Transaction> getTransactions() {
         return transactions;
+    }
+
+    @Override
+    public List<Transaction> getHighValueTransactions(double threshold) {
+        List<Transaction> highValueTransactions = new ArrayList<>();
+        for (Transaction transaction : transactions) {
+            if (transaction.getAmount() > 5000.00) {
+                highValueTransactions.add(transaction);
+            }
+        }
+        return highValueTransactions;
     }
 }
 
