@@ -240,6 +240,7 @@ class CustomerUI implements UI {
 
 
 
+
 class ManagerUI implements UI {
     private BankManager bankManager;
     private CustomerManager customerManager;

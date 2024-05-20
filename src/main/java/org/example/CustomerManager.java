@@ -172,8 +172,8 @@ public class CustomerManager {
 
     public Customer getCustomerByLoan(Loan loan) {
         for (Customer customer : customers) {
-            for (Loan customerLoan : customer.getLoans()) {
-                if (customerLoan.getLoanId().equals(loan.getLoanId())) {
+            for (Account account : customer.getAccountsList()) {
+                if (account.getAccountNumber().equals(loan.getAccountNumber())) {
                     return customer;
                 }
             }
