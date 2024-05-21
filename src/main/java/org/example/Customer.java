@@ -55,19 +55,31 @@ public class Customer {
     }
 
     public void addAccount(Account account) {
-        accounts.add(account);
+        try {
+            accounts.add(account);
+        } catch (Exception e) {
+            System.err.println("Error adding account: " + e.getMessage());
+        }
     }
 
     public void addLoan(Loan loan) {
-        loans.add(loan);
+        try {
+            loans.add(loan);
+        } catch (Exception e) {
+            System.err.println("Error adding loan: " + e.getMessage());
+        }
     }
 
     public void payOffLoan(String loanId) {
-        for (Loan loan : loans) {
-            if (loan.getLoanId().equals(loanId) && loan.isApproved() && !loan.isPaidOff()) {
-                loan.payOffLoan();
-                break;
+        try {
+            for (Loan loan : loans) {
+                if (loan.getLoanId().equals(loanId) && loan.isApproved() && !loan.isPaidOff()) {
+                    loan.payOffLoan();
+                    break;
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Error paying off loan: " + e.getMessage());
         }
     }
 }

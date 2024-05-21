@@ -9,10 +9,17 @@ public class CheckingAccount extends Account {
 
     @Override
     public void withdraw(double amount) throws InsufficientFundsException {
-        if (getBalance() - amount < OVERDRAFT_LIMIT) {
-            throw new InsufficientFundsException("Overdraft limit exceeded.");
+        try {
+            if (getBalance() - amount < OVERDRAFT_LIMIT) {
+                throw new InsufficientFundsException("Overdraft limit exceeded.");
+            }
+            super.withdraw(amount);
+        } catch (InsufficientFundsException e) {
+            System.err.println("Error during withdrawal: " + e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            System.err.println("Unexpected error during withdrawal: " + e.getMessage());
         }
-        super.withdraw(amount);
     }
 }
 

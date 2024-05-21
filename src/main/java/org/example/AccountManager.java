@@ -21,38 +21,58 @@ public class AccountManager {
     }
 
     public void addAccount(Account account) {
-        account.setTransactionManager(transactionManager);
-        accounts.add(account);
-        saveAccounts();
+        try {
+            account.setTransactionManager(transactionManager);
+            accounts.add(account);
+            saveAccounts();
+        } catch (Exception e) {
+            System.err.println("Error adding account: " + e.getMessage());
+        }
     }
 
     public Account getAccount(String accountNumber) {
-        for (Account account : accounts) {
-            if (account.getAccountNumber().equals(accountNumber)) {
-                return account;
+        try {
+            for (Account account : accounts) {
+                if (account.getAccountNumber().equals(accountNumber)) {
+                    return account;
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Error getting account: " + e.getMessage());
         }
         return null;
     }
 
     public List<Account> getAccountsByCustomerId(String customerId) {
         List<Account> customerAccounts = new ArrayList<>();
-        for (Account account : accounts) {
-            if (account.getCustomerId().equals(customerId)) {
-                customerAccounts.add(account);
+        try {
+            for (Account account : accounts) {
+                if (account.getCustomerId().equals(customerId)) {
+                    customerAccounts.add(account);
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Error getting accounts by customer ID: " + e.getMessage());
         }
         return customerAccounts;
     }
 
     public void removeAccountsByCustomerId(String customerId) {
-        accounts.removeIf(account -> account.getCustomerId().equals(customerId));
-        saveAccounts();
+        try {
+            accounts.removeIf(account -> account.getCustomerId().equals(customerId));
+            saveAccounts();
+        } catch (Exception e) {
+            System.err.println("Error removing accounts by customer ID: " + e.getMessage());
+        }
     }
 
     public void removeAccount(String accountNumber) {
-        accounts.removeIf(account -> account.getAccountNumber().equals(accountNumber));
-        saveAccounts();
+        try {
+            accounts.removeIf(account -> account.getAccountNumber().equals(accountNumber));
+            saveAccounts();
+        } catch (Exception e) {
+            System.err.println("Error removing account: " + e.getMessage());
+        }
     }
 
     public void loadAccounts() {
@@ -72,11 +92,12 @@ public class AccountManager {
                 }
                 accounts.add(account);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (NumberFormatException e) {
+            System.err.println("Error parsing account balance: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected error loading accounts: " + e.getMessage());
         }
     }
-
 
     public void saveAccounts() {
         List<String[]> data = new ArrayList<>();
@@ -90,11 +111,10 @@ public class AccountManager {
         }
         try {
             CSVUtility.writeCSV(accountsFilePath, data, false);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("Unexpected error saving accounts: " + e.getMessage());
         }
     }
-
 
     public void setTransactionManager(TransactionManager transactionManager) {
         this.transactionManager = transactionManager;

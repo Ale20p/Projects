@@ -26,79 +26,100 @@ public class CustomerManager {
     }
 
     public void addCustomer(Customer customer) {
-        customers.add(customer);
-        saveCustomers();
+        try {
+            customers.add(customer);
+            saveCustomers();
+        } catch (Exception e) {
+            System.err.println("Error adding customer: " + e.getMessage());
+        }
     }
 
     public Customer authenticateCustomer(String email, String password) {
-        for (Customer customer : customers) {
-            if (customer.getEmail().equals(email) && customer.getPassword().equals(password)) {
-                return customer;
+        try {
+            for (Customer customer : customers) {
+                if (customer.getEmail().equals(email) && customer.getPassword().equals(password)) {
+                    return customer;
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Error during customer authentication: " + e.getMessage());
         }
         return null;
     }
 
     public Customer getCustomer(String customerId) {
-        for (Customer customer : customers) {
-            if (customer.getCustomerID().equals(customerId)) {
-                return customer;
+        try {
+            for (Customer customer : customers) {
+                if (customer.getCustomerID().equals(customerId)) {
+                    return customer;
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Error getting customer: " + e.getMessage());
         }
         return null;
     }
 
     public boolean deleteCustomer(String customerId) {
-        Customer customer = getCustomer(customerId);
-        if (customer != null) {
-            customers.remove(customer);
-            accountManager.removeAccountsByCustomerId(customerId);
-            saveCustomers();
-            return true;
+        try {
+            Customer customer = getCustomer(customerId);
+            if (customer != null) {
+                customers.remove(customer);
+                accountManager.removeAccountsByCustomerId(customerId);
+                saveCustomers();
+                return true;
+            }
+        } catch (Exception e) {
+            System.err.println("Error deleting customer: " + e.getMessage());
         }
         return false;
     }
 
     public String generateCustomerReport(String customerId) {
-        Customer customer = linearSearchCustomerById(customerId);  // Use linear search
-        if (customer == null) {
-            return "Customer not found.";
-        }
-        StringBuilder report = new StringBuilder();
-        report.append("Customer ID: ").append(customer.getCustomerID()).append("\n");
-        report.append("Name: ").append(customer.getName()).append("\n");
-        report.append("Email: ").append(customer.getEmail()).append("\n");
-        report.append("Accounts:\n");
-        for (Account account : customer.getAccountsList()) {
-            report.append("  - ").append(account.getAccountType()).append(" (")
-                    .append(account.getAccountNumber()).append("): $")
-                    .append(account.getBalance()).append("\n");
-            report.append("    Transactions:\n");
-            for (Transaction transaction : account.getTransactions()) {
-                report.append("      - ").append(transaction.getType()).append(": $")
-                        .append(transaction.getAmount()).append(" Date: ")
-                        .append(transaction.getFormattedDate()).append(" Status: ")
-                        .append(transaction.getStatus()).append("\n");
+        try {
+            Customer customer = linearSearchCustomerById(customerId);  // Use linear search
+            if (customer == null) {
+                return "Customer not found.";
             }
-            List<Transaction> highValueTransactions = account.getHighValueTransactions(5000.00);
-            if (!highValueTransactions.isEmpty()) {
-                report.append("    High Value Transactions (>$5000):\n");
-                for (Transaction transaction : highValueTransactions) {
+            StringBuilder report = new StringBuilder();
+            report.append("Customer ID: ").append(customer.getCustomerID()).append("\n");
+            report.append("Name: ").append(customer.getName()).append("\n");
+            report.append("Email: ").append(customer.getEmail()).append("\n");
+            report.append("Accounts:\n");
+            for (Account account : customer.getAccountsList()) {
+                report.append("  - ").append(account.getAccountType()).append(" (")
+                        .append(account.getAccountNumber()).append("): $")
+                        .append(account.getBalance()).append("\n");
+                report.append("    Transactions:\n");
+                for (Transaction transaction : account.getTransactions()) {
                     report.append("      - ").append(transaction.getType()).append(": $")
                             .append(transaction.getAmount()).append(" Date: ")
                             .append(transaction.getFormattedDate()).append(" Status: ")
                             .append(transaction.getStatus()).append("\n");
                 }
+                List<Transaction> highValueTransactions = account.getHighValueTransactions(5000.00);
+                if (!highValueTransactions.isEmpty()) {
+                    report.append("    High Value Transactions (>$5000):\n");
+                    for (Transaction transaction : highValueTransactions) {
+                        report.append("      - ").append(transaction.getType()).append(": $")
+                                .append(transaction.getAmount()).append(" Date: ")
+                                .append(transaction.getFormattedDate()).append(" Status: ")
+                                .append(transaction.getStatus()).append("\n");
+                    }
+                }
             }
+            report.append("Loans:\n");
+            for (Loan loan : customer.getLoans()) {
+                report.append("  - Loan Amount: $").append(loan.getLoanAmount())
+                        .append(" Interest Rate: ").append(loan.getInterestRate())
+                        .append("% Approved: ").append(loan.isApproved() ? "Yes" : "No")
+                        .append(" Paid Off: ").append(loan.isPaidOff() ? "Yes" : "No").append("\n");
+            }
+            return report.toString();
+        } catch (Exception e) {
+            System.err.println("Error generating customer report: " + e.getMessage());
+            return "Error generating customer report.";
         }
-        report.append("Loans:\n");
-        for (Loan loan : customer.getLoans()) {
-            report.append("  - Loan Amount: $").append(loan.getLoanAmount())
-                    .append(" Interest Rate: ").append(loan.getInterestRate())
-                    .append("% Approved: ").append(loan.isApproved() ? "Yes" : "No")
-                    .append(" Paid Off: ").append(loan.isPaidOff() ? "Yes" : "No").append("\n");
-        }
-        return report.toString();
     }
 
     public void loadCustomers() {
@@ -115,8 +136,8 @@ public class CustomerManager {
                 customer.getAccountsList().addAll(customerAccounts);
                 customers.add(customer);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("Unexpected error loading customers: " + e.getMessage());
         }
     }
 
@@ -132,8 +153,8 @@ public class CustomerManager {
         }
         try {
             CSVUtility.writeCSV(customersFilePath, data, false);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("Unexpected error saving customers: " + e.getMessage());
         }
     }
 
@@ -163,61 +184,91 @@ public class CustomerManager {
                     customer.getLoans().add(loan);
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (NumberFormatException e) {
+            System.err.println("Error parsing loan data: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected error loading loans: " + e.getMessage());
         }
     }
 
     public void saveLoans() {
-        Loan.saveLoans(loans, loansFilePath);
+        try {
+            Loan.saveLoans(loans, loansFilePath);
+        } catch (Exception e) {
+            System.err.println("Error saving loans: " + e.getMessage());
+        }
     }
 
     public void addLoan(Loan loan) {
-        loans.add(loan);
-        saveLoans();
+        try {
+            loans.add(loan);
+            saveLoans();
+        } catch (Exception e) {
+            System.err.println("Error adding loan: " + e.getMessage());
+        }
     }
 
     public void updateLoan(Loan loan) {
-        for (int i = 0; i < loans.size(); i++) {
-            if (loans.get(i).getLoanId().equals(loan.getLoanId())) {
-                loans.set(i, loan);
-                break;
+        try {
+            for (int i = 0; i < loans.size(); i++) {
+                if (loans.get(i).getLoanId().equals(loan.getLoanId())) {
+                    loans.set(i, loan);
+                    break;
+                }
             }
+            saveLoans();
+        } catch (Exception e) {
+            System.err.println("Error updating loan: " + e.getMessage());
         }
-        saveLoans();
     }
 
     public Customer getCustomerByLoan(Loan loan) {
-        for (Customer customer : customers) {
-            for (Account account : customer.getAccountsList()) {
-                if (account.getAccountNumber().equals(loan.getAccountNumber())) {
-                    return customer;
+        try {
+            for (Customer customer : customers) {
+                for (Account account : customer.getAccountsList()) {
+                    if (account.getAccountNumber().equals(loan.getAccountNumber())) {
+                        return customer;
+                    }
                 }
             }
+        } catch (Exception e) {
+            System.err.println("Error getting customer by loan: " + e.getMessage());
         }
         return null;
     }
 
     public List<Loan> getPendingLoans() {
         List<Loan> pendingLoans = new ArrayList<>();
-        for (Loan loan : loans) {
-            if (!loan.isApproved()) {
-                pendingLoans.add(loan);
+        try {
+            for (Loan loan : loans) {
+                if (!loan.isApproved()) {
+                    pendingLoans.add(loan);
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Error getting pending loans: " + e.getMessage());
         }
         return pendingLoans;
     }
 
     public void approveLoan(Loan loan) {
-        loan.setApproved(true);
-        updateLoan(loan);
+        try {
+            loan.setApproved(true);
+            updateLoan(loan);
+        } catch (Exception e) {
+            System.err.println("Error approving loan: " + e.getMessage());
+        }
     }
 
     private Customer linearSearchCustomerById(String customerId) {
-        for (Customer customer : customers) {
-            if (customer.getCustomerID().equals(customerId)) {
-                return customer;
+        try {
+            for (Customer customer : customers) {
+                if (customer.getCustomerID().equals(customerId)) {
+                    return customer;
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Error during linear search for customer ID: " + e.getMessage());
         }
         return null;
     }

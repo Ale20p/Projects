@@ -78,8 +78,10 @@ public class Loan {
                 loan.setPaidOff(paidOff);
                 loans.add(loan);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (NumberFormatException e) {
+            System.err.println("Error parsing loan data: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected error loading loans: " + e.getMessage());
         }
         return loans;
     }
@@ -98,8 +100,8 @@ public class Loan {
         }
         try {
             CSVUtility.writeCSV(loansFilePath, data, false);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("Unexpected error saving loans: " + e.getMessage());
         }
     }
 }

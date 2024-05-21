@@ -87,8 +87,10 @@ public class Transaction {
                 Transaction transaction = new Transaction(transactionId, type, amount, sourceAccountNumber, destinationAccountNumber, status, date);
                 transactions.add(transaction);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (NumberFormatException e) {
+            System.err.println("Error parsing transaction data: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected error loading transactions: " + e.getMessage());
         }
         return transactions;
     }
@@ -108,8 +110,8 @@ public class Transaction {
         }
         try {
             CSVUtility.writeCSV(transactionsFilePath, data, false);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("Unexpected error saving transactions: " + e.getMessage());
         }
     }
 }

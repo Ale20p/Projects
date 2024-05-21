@@ -26,7 +26,7 @@ class CustomerUI implements UI {
 
     @Override
     public void displayDashboard() {
-        int action;
+        int action = -1;
         do {
             System.out.println("Customer Dashboard: " + customer.getName());
             System.out.println("1. Deposit");
@@ -40,7 +40,12 @@ class CustomerUI implements UI {
             System.out.println("9. Pay Off Loan");
             System.out.println("0. Logout");
             System.out.println("Choose an action:");
-            action = Integer.parseInt(scanner.nextLine());
+            try {
+                action = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+                continue;
+            }
             switch (action) {
                 case 1:
                     deposit();
@@ -80,189 +85,237 @@ class CustomerUI implements UI {
     }
 
     private void viewAccounts() {
-        List<Account> accounts = accountManager.getAccountsByCustomerId(customer.getCustomerID());
-        if (accounts.isEmpty()) {
-            System.out.println("No accounts found.");
-            return;
-        }
-
-        SortUtils.quickSortAccounts(accounts, 0, accounts.size() - 1);
-
-        System.out.println("Accounts sorted by balance (decreasing order):");
-        for (Account account : accounts) {
-            System.out.println(account.getAccountType() + " (" + account.getAccountNumber() + "): $" + account.getBalance());
+        try {
+            List<Account> accounts = accountManager.getAccountsByCustomerId(customer.getCustomerID());
+            if (accounts.isEmpty()) {
+                System.out.println("No accounts found.");
+                return;
+            }
+            SortUtils.quickSortAccounts(accounts, 0, accounts.size() - 1);
+            System.out.println("Accounts sorted by balance (decreasing order):");
+            for (Account account : accounts) {
+                System.out.println(account.getAccountType() + " (" + account.getAccountNumber() + "): $" + account.getBalance());
+            }
+        } catch (Exception e) {
+            System.err.println("Error viewing accounts: " + e.getMessage());
         }
     }
 
     private void deposit() {
-        Account account = selectAccount();
-        if (account == null) return;
-        System.out.print("Enter amount to deposit: ");
-        double amount = Double.parseDouble(scanner.nextLine());
-        account.deposit(amount);
-        accountManager.saveAccounts();
-        transactionManager.saveTransactions();
-        System.out.println("Deposit successful.");
+        try {
+            Account account = selectAccount();
+            if (account == null) return;
+            System.out.print("Enter amount to deposit: ");
+            double amount = Double.parseDouble(scanner.nextLine());
+            account.deposit(amount);
+            accountManager.saveAccounts();
+            transactionManager.saveTransactions();
+            System.out.println("Deposit successful.");
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid amount. Please enter a valid number.");
+        } catch (Exception e) {
+            System.err.println("Error during deposit: " + e.getMessage());
+        }
     }
 
     private void withdraw() {
-        Account account = selectAccount();
-        if (account == null) return;
-        System.out.print("Enter amount to withdraw: ");
-        double amount = Double.parseDouble(scanner.nextLine());
         try {
-            account.withdraw(amount);
-            accountManager.saveAccounts();
-            transactionManager.saveTransactions();
-            System.out.println("Withdrawal successful.");
-        } catch (InsufficientFundsException e) {
-            System.out.println("Error: " + e.getMessage());
+            Account account = selectAccount();
+            if (account == null) return;
+            System.out.print("Enter amount to withdraw: ");
+            double amount = Double.parseDouble(scanner.nextLine());
+            try {
+                account.withdraw(amount);
+                accountManager.saveAccounts();
+                transactionManager.saveTransactions();
+                System.out.println("Withdrawal successful.");
+            } catch (InsufficientFundsException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid amount. Please enter a valid number.");
+        } catch (Exception e) {
+            System.err.println("Error during withdrawal: " + e.getMessage());
         }
     }
 
     private void transfer() {
-        System.out.println("Select source account:");
-        Account sourceAccount = selectAccount();
-        if (sourceAccount == null) return;
-        System.out.println("Select destination account:");
-        Account destinationAccount = selectAccount();
-        if (destinationAccount == null) return;
-        System.out.print("Enter amount to transfer: ");
-        double amount = Double.parseDouble(scanner.nextLine());
         try {
-            sourceAccount.transfer(amount, destinationAccount);
-            accountManager.saveAccounts();
-            transactionManager.saveTransactions();
-            System.out.println("Transfer successful.");
-        } catch (InsufficientFundsException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("Select source account:");
+            Account sourceAccount = selectAccount();
+            if (sourceAccount == null) return;
+            System.out.println("Select destination account:");
+            Account destinationAccount = selectAccount();
+            if (destinationAccount == null) return;
+            System.out.print("Enter amount to transfer: ");
+            double amount = Double.parseDouble(scanner.nextLine());
+            try {
+                sourceAccount.transfer(amount, destinationAccount);
+                accountManager.saveAccounts();
+                transactionManager.saveTransactions();
+                System.out.println("Transfer successful.");
+            } catch (InsufficientFundsException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid amount. Please enter a valid number.");
+        } catch (Exception e) {
+            System.err.println("Error during transfer: " + e.getMessage());
         }
     }
 
     private void viewTransactions() {
-        Account account = selectAccount();
-        if (account == null) return;
-        List<Transaction> transactions = account.getTransactions();
-        if (transactions.isEmpty()) {
-            System.out.println("No transactions found.");
-        } else {
-            SortUtils.mergeSortTransactions(transactions);  // Sort transactions by date in decreasing order
-            System.out.println("Transactions (sorted by date, most recent first):");
-            for (Transaction transaction : transactions) {
-                System.out.println(transaction.getType() + ": $" + transaction.getAmount() + " Date: " + transaction.getFormattedDate() + " Status: " + transaction.getStatus());
+        try {
+            Account account = selectAccount();
+            if (account == null) return;
+            List<Transaction> transactions = account.getTransactions();
+            if (transactions.isEmpty()) {
+                System.out.println("No transactions found.");
+            } else {
+                SortUtils.mergeSortTransactions(transactions);  // Sort transactions by date in decreasing order
+                System.out.println("Transactions:");
+                for (Transaction transaction : transactions) {
+                    System.out.println(transaction.getType() + ": $" + transaction.getAmount() + " Date: " + transaction.getFormattedDate() + " Status: " + transaction.getStatus());
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Error viewing transactions: " + e.getMessage());
         }
     }
 
     private void applyForLoan() {
-        System.out.print("Enter loan amount: ");
-        double amount = Double.parseDouble(scanner.nextLine());
-        System.out.println("Select account to receive the loan:");
-        Account account = selectAccount();
-        if (account == null) return;
-        Loan loan = new Loan(amount, account.getAccountNumber());
-        customer.addLoan(loan);
-        customerManager.addLoan(loan);
-        customerManager.saveCustomers();
-        customerManager.saveLoans();
-        System.out.println("Loan application submitted.");
+        try {
+            System.out.print("Enter loan amount: ");
+            double amount = Double.parseDouble(scanner.nextLine());
+            System.out.println("Select account to receive the loan:");
+            Account account = selectAccount();
+            if (account == null) return;
+            Loan loan = new Loan(amount, account.getAccountNumber());
+            customer.addLoan(loan);
+            customerManager.addLoan(loan);
+            customerManager.saveCustomers();
+            customerManager.saveLoans();
+            System.out.println("Loan application submitted.");
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid amount. Please enter a valid number.");
+        } catch (Exception e) {
+            System.err.println("Error applying for loan: " + e.getMessage());
+        }
     }
 
     private void viewLoans() {
-        List<Loan> loans = customer.getLoans();
-        if (loans.isEmpty()) {
-            System.out.println("No loans found.");
-        } else {
-            for (Loan loan : loans) {
-                System.out.println("Loan Amount: $" + loan.getLoanAmount() + " Interest Rate: " + loan.getInterestRate() + "% Approved: " + (loan.isApproved() ? "Yes" : "No") + " Paid Off: " + (loan.isPaidOff() ? "Yes" : "No"));
+        try {
+            List<Loan> loans = customer.getLoans();
+            if (loans.isEmpty()) {
+                System.out.println("No loans found.");
+            } else {
+                for (Loan loan : loans) {
+                    System.out.println("Loan Amount: $" + loan.getLoanAmount() + " Interest Rate: " + loan.getInterestRate() + "% Approved: " + (loan.isApproved() ? "Yes" : "No") + " Paid Off: " + (loan.isPaidOff() ? "Yes" : "No"));
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Error viewing loans: " + e.getMessage());
         }
     }
 
     private void openAccount() {
-        System.out.println("Select account type:");
-        System.out.println("1. Savings");
-        System.out.println("2. Checking");
-        int accountType = Integer.parseInt(scanner.nextLine());
-        System.out.print("Enter initial deposit amount: ");
-        double balance = Double.parseDouble(scanner.nextLine());
-        Account account;
-        if (accountType == 1) {
-            account = new SavingsAccount(UUID.randomUUID().toString(), customer.getCustomerID(), balance, transactionManager);
-        } else {
-            account = new CheckingAccount(UUID.randomUUID().toString(), customer.getCustomerID(), balance, transactionManager);
+        try {
+            System.out.println("Select account type:");
+            System.out.println("1. Savings");
+            System.out.println("2. Checking");
+            int accountType = Integer.parseInt(scanner.nextLine());
+            System.out.print("Enter initial deposit amount: ");
+            double balance = Double.parseDouble(scanner.nextLine());
+            Account account;
+            if (accountType == 1) {
+                account = new SavingsAccount(UUID.randomUUID().toString(), customer.getCustomerID(), balance, transactionManager);
+            } else {
+                account = new CheckingAccount(UUID.randomUUID().toString(), customer.getCustomerID(), balance, transactionManager);
+            }
+            accountManager.addAccount(account);
+            customer.addAccount(account);
+            customerManager.saveCustomers();
+            accountManager.saveAccounts();
+            System.out.println("Account opened successfully.");
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid amount. Please enter a valid number.");
+        } catch (Exception e) {
+            System.err.println("Error opening account: " + e.getMessage());
         }
-        accountManager.addAccount(account);
-        customer.addAccount(account);
-        customerManager.saveCustomers();
-        accountManager.saveAccounts();
-        System.out.println("Account opened successfully.");
     }
 
     private void payOffLoan() {
-        System.out.println("Select a loan to pay off:");
-        List<Loan> loans = customer.getLoans();
-        if (loans.isEmpty()) {
-            System.out.println("No loans found.");
-            return;
-        }
-        for (int i = 0; i < loans.size(); i++) {
-            Loan loan = loans.get(i);
-            System.out.println((i + 1) + ". Loan Amount: $" + loan.getLoanAmount() + " Interest Rate: " + loan.getInterestRate() + "% Approved: " + (loan.isApproved() ? "Yes" : "No") + " Paid Off: " + (loan.isPaidOff() ? "Yes" : "No"));
-        }
-        int choice = Integer.parseInt(scanner.nextLine());
-        if (choice < 1 || choice > loans.size()) {
-            System.out.println("Invalid loan selection. Please try again.");
-            return;
-        }
-        Loan selectedLoan = loans.get(choice - 1);
-        if (!selectedLoan.isApproved()) {
-            System.out.println("Loan not approved yet.");
-            return;
-        }
-        if (selectedLoan.isPaidOff()) {
-            System.out.println("Loan already paid off.");
-            return;
-        }
-        double totalAmount = selectedLoan.getLoanAmount() * (1 + selectedLoan.getInterestRate());
-        System.out.println("Total amount to pay off: $" + totalAmount);
-        Account account = selectAccount();
-        if (account == null) return;
         try {
-            account.withdraw(totalAmount);
-            selectedLoan.payOffLoan();
-            accountManager.saveAccounts();
-            customerManager.saveLoans();
-            System.out.println("Loan paid off successfully.");
-        } catch (InsufficientFundsException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("Select a loan to pay off:");
+            List<Loan> loans = customer.getLoans();
+            if (loans.isEmpty()) {
+                System.out.println("No loans found.");
+                return;
+            }
+            for (int i = 0; i < loans.size(); i++) {
+                Loan loan = loans.get(i);
+                System.out.println((i + 1) + ". Loan Amount: $" + loan.getLoanAmount() + " Interest Rate: " + loan.getInterestRate() + "% Approved: " + (loan.isApproved() ? "Yes" : "No") + " Paid Off: " + (loan.isPaidOff() ? "Yes" : "No"));
+            }
+            int choice = Integer.parseInt(scanner.nextLine());
+            if (choice < 1 || choice > loans.size()) {
+                System.out.println("Invalid loan selection. Please try again.");
+                return;
+            }
+            Loan selectedLoan = loans.get(choice - 1);
+            if (!selectedLoan.isApproved()) {
+                System.out.println("Loan not approved yet.");
+                return;
+            }
+            if (selectedLoan.isPaidOff()) {
+                System.out.println("Loan already paid off.");
+                return;
+            }
+            double totalAmount = selectedLoan.getLoanAmount() * (1 + selectedLoan.getInterestRate());
+            System.out.println("Total amount to pay off: $" + totalAmount);
+            Account account = selectAccount();
+            if (account == null) return;
+            try {
+                account.withdraw(totalAmount);
+                selectedLoan.payOffLoan();
+                accountManager.saveAccounts();
+                customerManager.saveLoans();
+                System.out.println("Loan paid off successfully.");
+            } catch (InsufficientFundsException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a valid number.");
+        } catch (Exception e) {
+            System.err.println("Error paying off loan: " + e.getMessage());
         }
     }
 
     private Account selectAccount() {
-        List<Account> accounts = accountManager.getAccountsByCustomerId(customer.getCustomerID());
-        if (accounts.isEmpty()) {
-            System.out.println("No accounts found.");
-            return null;
+        try {
+            List<Account> accounts = accountManager.getAccountsByCustomerId(customer.getCustomerID());
+            if (accounts.isEmpty()) {
+                System.out.println("No accounts found.");
+                return null;
+            }
+            for (int i = 0; i < accounts.size(); i++) {
+                Account account = accounts.get(i);
+                System.out.println((i + 1) + ". " + account.getAccountType() + " (" + account.getAccountNumber() + "): $" + account.getBalance());
+            }
+            System.out.print("Select an account: ");
+            int choice = Integer.parseInt(scanner.nextLine());
+            if (choice < 1 || choice > accounts.size()) {
+                System.out.println("Invalid account selection. Please try again.");
+                return null;
+            }
+            return accounts.get(choice - 1);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a valid number.");
+        } catch (Exception e) {
+            System.err.println("Error selecting account: " + e.getMessage());
         }
-        for (int i = 0; i < accounts.size(); i++) {
-            Account account = accounts.get(i);
-            System.out.println((i + 1) + ". " + account.getAccountType() + " (" + account.getAccountNumber() + "): $" + account.getBalance());
-        }
-        System.out.print("Select an account: ");
-        int choice = Integer.parseInt(scanner.nextLine());
-        if (choice < 1 || choice > accounts.size()) {
-            System.out.println("Invalid account selection. Please try again.");
-            return null;
-        }
-        return accounts.get(choice - 1);
+        return null;
     }
 }
-
-
-
-
-
 
 class ManagerUI implements UI {
     private BankManager bankManager;
@@ -279,7 +332,7 @@ class ManagerUI implements UI {
 
     @Override
     public void displayDashboard() {
-        int action;
+        int action = -1;  // Initialize action with a default value
         do {
             System.out.println("Manager Dashboard: " + bankManager.getManagerId());
             System.out.println("1. Approve Loans");
@@ -288,7 +341,12 @@ class ManagerUI implements UI {
             System.out.println("4. Generate Customer Report");
             System.out.println("0. Logout");
             System.out.println("Choose an action:");
-            action = Integer.parseInt(scanner.nextLine());
+            try {
+                action = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+                continue;
+            }
             switch (action) {
                 case 1:
                     approveLoans();
@@ -313,79 +371,70 @@ class ManagerUI implements UI {
     }
 
     private void approveLoans() {
-        List<Loan> pendingLoans = customerManager.getLoans();
-        for (Loan loan : pendingLoans) {
-            if (!loan.isApproved()) {
-                System.out.println("Approve loan: " + loan.getLoanAmount() + " for account " + loan.getAccountNumber() + "? (yes/no)");
-                String approval = scanner.nextLine();
-                if (approval.equalsIgnoreCase("yes")) {
-                    loan.setApproved(true);
-                    Account account = accountManager.getAccount(loan.getAccountNumber());
-                    if (account != null) {
-                        account.deposit(loan.getLoanAmount());
-                        accountManager.saveAccounts();
+        try {
+            List<Loan> pendingLoans = customerManager.getLoans();
+            for (Loan loan : pendingLoans) {
+                if (!loan.isApproved()) {
+                    System.out.println("Approve loan: " + loan.getLoanAmount() + " for account " + loan.getAccountNumber() + "? (yes/no)");
+                    String approval = scanner.nextLine();
+                    if (approval.equalsIgnoreCase("yes")) {
+                        loan.setApproved(true);
+                        Account account = accountManager.getAccount(loan.getAccountNumber());
+                        if (account != null) {
+                            account.deposit(loan.getLoanAmount());
+                            accountManager.saveAccounts();
+                        }
+                        System.out.println("Loan approved and funds deposited.");
+                    } else {
+                        System.out.println("Loan not approved.");
                     }
-                    System.out.println("Loan approved and funds deposited.");
-                } else {
-                    System.out.println("Loan not approved.");
                 }
             }
+            customerManager.saveLoans();
+        } catch (Exception e) {
+            System.err.println("Error approving loans: " + e.getMessage());
         }
-        customerManager.saveLoans();
     }
 
     private void addCustomer() {
-        System.out.print("Enter customer name: ");
-        String name = scanner.nextLine();
-        System.out.print("Enter customer password: ");
-        String password = scanner.nextLine();
-        System.out.print("Enter customer email: ");
-        String email = scanner.nextLine();
-        Customer newCustomer = new Customer(name, password, email);
-        customerManager.addCustomer(newCustomer);
-        System.out.println("Customer added successfully.");
+        try {
+            System.out.print("Enter customer name: ");
+            String name = scanner.nextLine();
+            System.out.print("Enter customer password: ");
+            String password = scanner.nextLine();
+            System.out.print("Enter customer email: ");
+            String email = scanner.nextLine();
+            Customer newCustomer = new Customer(name, password, email);
+            customerManager.addCustomer(newCustomer);
+            System.out.println("Customer added successfully.");
+        } catch (Exception e) {
+            System.err.println("Error adding customer: " + e.getMessage());
+        }
     }
 
     private void deleteCustomer() {
-        System.out.print("Enter customer ID to delete: ");
-        String customerId = scanner.nextLine();
-        boolean success = customerManager.deleteCustomer(customerId);
-        if (success) {
-            System.out.println("Customer deleted successfully.");
-        } else {
-            System.out.println("Customer not found.");
+        try {
+            System.out.print("Enter customer ID to delete: ");
+            String customerId = scanner.nextLine();
+            boolean success = customerManager.deleteCustomer(customerId);
+            if (success) {
+                System.out.println("Customer deleted successfully.");
+            } else {
+                System.out.println("Customer not found.");
+            }
+        } catch (Exception e) {
+            System.err.println("Error deleting customer: " + e.getMessage());
         }
     }
 
     private void generateCustomerReport() {
-        System.out.print("Enter customer ID for report: ");
-        String customerId = scanner.nextLine();
-        String report = customerManager.generateCustomerReport(customerId);
-        System.out.println(report);
+        try {
+            System.out.print("Enter customer ID for report: ");
+            String customerId = scanner.nextLine();
+            String report = customerManager.generateCustomerReport(customerId);
+            System.out.println(report);
+        } catch (Exception e) {
+            System.err.println("Error generating customer report: " + e.getMessage());
+        }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

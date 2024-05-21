@@ -16,7 +16,12 @@ public class BankManager {
     }
 
     public boolean authenticateManager(String password) {
-        return this.password.equals(password);
+        try {
+            return this.password.equals(password);
+        } catch (Exception e) {
+            System.err.println("Error during manager authentication: " + e.getMessage());
+            return false;
+        }
     }
 
     public CustomerManager getCustomerManager() {
@@ -27,3 +32,4 @@ public class BankManager {
         return managerId; // Assuming managerId is used as the name here. Adjust if needed.
     }
 }
+
