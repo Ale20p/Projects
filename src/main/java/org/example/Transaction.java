@@ -116,15 +116,6 @@ public class Transaction {
     }
 
     /**
-     * Sets the status of the transaction.
-     *
-     * @param status the status to set
-     */
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    /**
      * Returns the date of the transaction.
      *
      * @return the date of the transaction

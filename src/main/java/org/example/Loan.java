@@ -122,37 +122,6 @@ public class Loan {
     }
 
     /**
-     * Loads loans from the CSV file specified by the loansFilePath.
-     *
-     * @param loansFilePath the file path where loan data is stored
-     * @return a list of loans loaded from the file
-     */
-    public static List<Loan> loadLoans(String loansFilePath) {
-        List<Loan> loans = new ArrayList<>();
-        try {
-            List<String[]> data = CSVUtility.readCSV(loansFilePath);
-            for (String[] row : data) {
-                String loanId = row[0];
-                double loanAmount = Double.parseDouble(row[1]);
-                double interestRate = Double.parseDouble(row[2]);
-                boolean approved = Boolean.parseBoolean(row[3]);
-                boolean paidOff = Boolean.parseBoolean(row[4]);
-                String accountNumber = row[5];
-                Loan loan = new Loan(loanAmount, accountNumber);
-                loan.setLoanId(loanId);
-                loan.setApproved(approved);
-                loan.setPaidOff(paidOff);
-                loans.add(loan);
-            }
-        } catch (NumberFormatException e) {
-            System.err.println("Error parsing loan data: " + e.getMessage());
-        } catch (Exception e) {
-            System.err.println("Unexpected error loading loans: " + e.getMessage());
-        }
-        return loans;
-    }
-
-    /**
      * Saves the list of loans to the CSV file specified by the loansFilePath.
      *
      * @param loans the list of loans to save

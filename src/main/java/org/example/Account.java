@@ -82,15 +82,6 @@ abstract class Account implements Auditable {
     }
 
     /**
-     * Returns the transaction manager.
-     *
-     * @return the transaction manager
-     */
-    public TransactionManager getTransactionManager() {
-        return transactionManager;
-    }
-
-    /**
      * Deposits the specified amount into the account.
      *
      * @param amount the amount to deposit

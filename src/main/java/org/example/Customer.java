@@ -131,22 +131,4 @@ public class Customer {
             System.err.println("Error adding loan: " + e.getMessage());
         }
     }
-
-    /**
-     * Pays off a loan with the specified loan ID.
-     *
-     * @param loanId the ID of the loan to be paid off
-     */
-    public void payOffLoan(String loanId) {
-        try {
-            for (Loan loan : loans) {
-                if (loan.getLoanId().equals(loanId) && loan.isApproved() && !loan.isPaidOff()) {
-                    loan.payOffLoan();
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error paying off loan: " + e.getMessage());
-        }
-    }
 }

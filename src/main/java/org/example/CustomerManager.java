@@ -34,15 +34,6 @@ public class CustomerManager {
     }
 
     /**
-     * Returns the list of all customers.
-     *
-     * @return the list of all customers
-     */
-    public List<Customer> getCustomers() {
-        return customers;
-    }
-
-    /**
      * Adds a new customer to the list of customers and saves the updated list to the file.
      *
      * @param customer the customer to be added
@@ -212,15 +203,6 @@ public class CustomerManager {
     }
 
     /**
-     * Returns the list of all loans.
-     *
-     * @return the list of all loans
-     */
-    public List<Loan> getLoans() {
-        return loans;
-    }
-
-    /**
      * Loads loans from the CSV file specified by the loansFilePath.
      */
     public void loadLoans() {
@@ -334,20 +316,6 @@ public class CustomerManager {
             System.err.println("Error getting pending loans: " + e.getMessage());
         }
         return pendingLoans;
-    }
-
-    /**
-     * Approves a loan and updates its status in the list.
-     *
-     * @param loan the loan to be approved
-     */
-    public void approveLoan(Loan loan) {
-        try {
-            loan.setApproved(true);
-            updateLoan(loan);
-        } catch (Exception e) {
-            System.err.println("Error approving loan: " + e.getMessage());
-        }
     }
 
     /**

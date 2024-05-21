@@ -28,15 +28,6 @@ public class AccountManager {
     }
 
     /**
-     * Returns the list of all accounts.
-     *
-     * @return the list of all accounts
-     */
-    public List<Account> getAccounts() {
-        return accounts;
-    }
-
-    /**
      * Adds a new account to the list of accounts and saves the updated list to the file.
      *
      * @param account the account to be added
@@ -101,20 +92,6 @@ public class AccountManager {
             saveAccounts();
         } catch (Exception e) {
             System.err.println("Error removing accounts by customer ID: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Removes an account by its account number and saves the updated list to the file.
-     *
-     * @param accountNumber the account number
-     */
-    public void removeAccount(String accountNumber) {
-        try {
-            accounts.removeIf(account -> account.getAccountNumber().equals(accountNumber));
-            saveAccounts();
-        } catch (Exception e) {
-            System.err.println("Error removing account: " + e.getMessage());
         }
     }
 

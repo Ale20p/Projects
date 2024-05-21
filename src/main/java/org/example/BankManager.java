@@ -2,7 +2,7 @@ package org.example;
 
 /**
  * The BankManager class represents a manager in the banking system.
- * It provides functionalities to authenticate the manager and access the customer manager.
+ * It provides functionalities to authenticate the manager.
  *
  * @author Alessandro Pomponi
  */
@@ -46,23 +46,5 @@ public class BankManager {
             System.err.println("Error during manager authentication: " + e.getMessage());
             return false;
         }
-    }
-
-    /**
-     * Returns the customer manager associated with the bank manager.
-     *
-     * @return the customer manager
-     */
-    public CustomerManager getCustomerManager() {
-        return customerManager;
-    }
-
-    /**
-     * Returns the name of the manager.
-     *
-     * @return the manager ID (used as the name)
-     */
-    public String getName() {
-        return managerId; // Assuming managerId is used as the name here. Adjust if needed.
     }
 }
