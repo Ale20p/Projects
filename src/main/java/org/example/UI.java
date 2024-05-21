@@ -1,14 +1,22 @@
 package org.example;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
 
+/**
+ * The UI interface defines a method for displaying the dashboard for different user types.
+ */
 public interface UI {
+    /**
+     * Displays the dashboard for the user.
+     */
     void displayDashboard();
 }
 
+/**
+ * The CustomerUI class implements the UI interface and provides the customer dashboard functionality.
+ */
 class CustomerUI implements UI {
     private Customer customer;
     private Scanner scanner;
@@ -16,6 +24,15 @@ class CustomerUI implements UI {
     private AccountManager accountManager;
     private TransactionManager transactionManager;
 
+    /**
+     * Constructs a CustomerUI with the specified customer, scanner, customer manager, account manager, and transaction manager.
+     *
+     * @param customer the customer
+     * @param scanner the scanner for user input
+     * @param customerManager the customer manager
+     * @param accountManager the account manager
+     * @param transactionManager the transaction manager
+     */
     public CustomerUI(Customer customer, Scanner scanner, CustomerManager customerManager, AccountManager accountManager, TransactionManager transactionManager) {
         this.customer = customer;
         this.scanner = scanner;
@@ -24,6 +41,9 @@ class CustomerUI implements UI {
         this.transactionManager = transactionManager;
     }
 
+    /**
+     * Displays the customer dashboard and handles customer actions.
+     */
     @Override
     public void displayDashboard() {
         int action = -1;
@@ -84,6 +104,9 @@ class CustomerUI implements UI {
         } while (action != 0);
     }
 
+    /**
+     * Displays and handles the view accounts action for the customer.
+     */
     private void viewAccounts() {
         try {
             List<Account> accounts = accountManager.getAccountsByCustomerId(customer.getCustomerID());
@@ -101,6 +124,9 @@ class CustomerUI implements UI {
         }
     }
 
+    /**
+     * Handles the deposit action for the customer.
+     */
     private void deposit() {
         try {
             Account account = selectAccount();
@@ -118,6 +144,9 @@ class CustomerUI implements UI {
         }
     }
 
+    /**
+     * Handles the withdrawal action for the customer.
+     */
     private void withdraw() {
         try {
             Account account = selectAccount();
@@ -139,6 +168,9 @@ class CustomerUI implements UI {
         }
     }
 
+    /**
+     * Handles the transfer action for the customer.
+     */
     private void transfer() {
         try {
             System.out.println("Select source account:");
@@ -164,6 +196,9 @@ class CustomerUI implements UI {
         }
     }
 
+    /**
+     * Displays and handles the view transactions action for the customer.
+     */
     private void viewTransactions() {
         try {
             Account account = selectAccount();
@@ -183,6 +218,9 @@ class CustomerUI implements UI {
         }
     }
 
+    /**
+     * Handles the apply for loan action for the customer.
+     */
     private void applyForLoan() {
         try {
             System.out.print("Enter loan amount: ");
@@ -203,6 +241,9 @@ class CustomerUI implements UI {
         }
     }
 
+    /**
+     * Displays and handles the view loans action for the customer.
+     */
     private void viewLoans() {
         try {
             List<Loan> loans = customer.getLoans();
@@ -218,6 +259,9 @@ class CustomerUI implements UI {
         }
     }
 
+    /**
+     * Handles the open account action for the customer.
+     */
     private void openAccount() {
         try {
             System.out.println("Select account type:");
@@ -244,6 +288,9 @@ class CustomerUI implements UI {
         }
     }
 
+    /**
+     * Handles the pay-off loan action for the customer.
+     */
     private void payOffLoan() {
         try {
             System.out.println("Select a loan to pay off:");
@@ -290,6 +337,11 @@ class CustomerUI implements UI {
         }
     }
 
+    /**
+     * Prompts the customer to select an account from their list of accounts.
+     *
+     * @return the selected account, or null if no account is selected
+     */
     private Account selectAccount() {
         try {
             List<Account> accounts = accountManager.getAccountsByCustomerId(customer.getCustomerID());
@@ -317,12 +369,23 @@ class CustomerUI implements UI {
     }
 }
 
+/**
+ * The ManagerUI class implements the UI interface and provides the manager dashboard functionality.
+ */
 class ManagerUI implements UI {
     private BankManager bankManager;
     private CustomerManager customerManager;
     private AccountManager accountManager;
     private Scanner scanner;
 
+    /**
+     * Constructs a ManagerUI with the specified bank manager, customer manager, account manager, and scanner.
+     *
+     * @param bankManager the bank manager
+     * @param customerManager the customer manager
+     * @param accountManager the account manager
+     * @param scanner the scanner for user input
+     */
     public ManagerUI(BankManager bankManager, CustomerManager customerManager, AccountManager accountManager, Scanner scanner) {
         this.bankManager = bankManager;
         this.customerManager = customerManager;
@@ -330,6 +393,9 @@ class ManagerUI implements UI {
         this.scanner = scanner;
     }
 
+    /**
+     * Displays the manager dashboard and handles manager actions.
+     */
     @Override
     public void displayDashboard() {
         int action = -1;  // Initialize action with a default value
@@ -370,9 +436,12 @@ class ManagerUI implements UI {
         } while (action != 0);
     }
 
+    /**
+     * Approves pending loans for customers.
+     */
     private void approveLoans() {
         try {
-            List<Loan> pendingLoans = customerManager.getLoans();
+            List<Loan> pendingLoans = customerManager.getPendingLoans();
             for (Loan loan : pendingLoans) {
                 if (!loan.isApproved()) {
                     System.out.println("Approve loan: " + loan.getLoanAmount() + " for account " + loan.getAccountNumber() + "? (yes/no)");
@@ -396,6 +465,9 @@ class ManagerUI implements UI {
         }
     }
 
+    /**
+     * Adds a new customer to the system.
+     */
     private void addCustomer() {
         try {
             System.out.print("Enter customer name: ");
@@ -412,6 +484,9 @@ class ManagerUI implements UI {
         }
     }
 
+    /**
+     * Deletes a customer from the system by their customer ID.
+     */
     private void deleteCustomer() {
         try {
             System.out.print("Enter customer ID to delete: ");
@@ -427,6 +502,9 @@ class ManagerUI implements UI {
         }
     }
 
+    /**
+     * Generates a report for a customer by their customer ID.
+     */
     private void generateCustomerReport() {
         try {
             System.out.print("Enter customer ID for report: ");

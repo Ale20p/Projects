@@ -2,7 +2,21 @@ package org.example;
 
 import java.util.Scanner;
 
+/**
+ * The Main class serves as the entry point for the Bank Management System application.
+ * It provides functionalities to handle customer and manager logins, and initializes
+ * the necessary components for the system.
+ *
+ * @author Alessandro Pomponi
+ */
 public class Main {
+
+    /**
+     * The main method initializes the bank management system and handles the main menu
+     * for customer and manager logins.
+     *
+     * @param args the command line arguments
+     */
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         String customersFilePath = "customers.csv";
@@ -47,6 +61,14 @@ public class Main {
         }
     }
 
+    /**
+     * Handles customer login and registration.
+     *
+     * @param scanner the Scanner object for user input
+     * @param customerManager the CustomerManager object for managing customers
+     * @param accountManager the AccountManager object for managing accounts
+     * @param transactionManager the TransactionManager object for managing transactions
+     */
     private static void handleCustomerLogin(Scanner scanner, CustomerManager customerManager, AccountManager accountManager, TransactionManager transactionManager) {
         try {
             System.out.println("Are you a new customer?");
@@ -86,6 +108,15 @@ public class Main {
         }
     }
 
+    /**
+     * Handles manager login.
+     *
+     * @param scanner the Scanner object for user input
+     * @param bankManager the BankManager object for managing the bank
+     * @param transactionManager the TransactionManager object for managing transactions
+     * @param customerManager the CustomerManager object for managing customers
+     * @param accountManager the AccountManager object for managing accounts
+     */
     private static void handleManagerLogin(Scanner scanner, BankManager bankManager, TransactionManager transactionManager, CustomerManager customerManager, AccountManager accountManager) {
         try {
             System.out.print("Enter your manager ID: ");

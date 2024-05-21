@@ -1,14 +1,25 @@
 package org.example;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The AccountManager class is responsible for managing the accounts in the banking system.
+ * It provides functionalities to add, remove, and retrieve accounts, as well as to load and save account data.
+ *
+ * @author Alessandro Pomponi
+ */
 public class AccountManager {
     private List<Account> accounts;
     private String accountsFilePath;
     private TransactionManager transactionManager;
 
+    /**
+     * Constructs an AccountManager with the specified file path for account data and the transaction manager.
+     *
+     * @param accountsFilePath the file path where account data is stored
+     * @param transactionManager the transaction manager for logging transactions
+     */
     public AccountManager(String accountsFilePath, TransactionManager transactionManager) {
         this.accountsFilePath = accountsFilePath;
         this.transactionManager = transactionManager;
@@ -16,10 +27,20 @@ public class AccountManager {
         loadAccounts();
     }
 
+    /**
+     * Returns the list of all accounts.
+     *
+     * @return the list of all accounts
+     */
     public List<Account> getAccounts() {
         return accounts;
     }
 
+    /**
+     * Adds a new account to the list of accounts and saves the updated list to the file.
+     *
+     * @param account the account to be added
+     */
     public void addAccount(Account account) {
         try {
             account.setTransactionManager(transactionManager);
@@ -30,6 +51,12 @@ public class AccountManager {
         }
     }
 
+    /**
+     * Retrieves an account by its account number.
+     *
+     * @param accountNumber the account number
+     * @return the account with the specified account number, or null if not found
+     */
     public Account getAccount(String accountNumber) {
         try {
             for (Account account : accounts) {
@@ -43,6 +70,12 @@ public class AccountManager {
         return null;
     }
 
+    /**
+     * Retrieves a list of accounts associated with a specific customer ID.
+     *
+     * @param customerId the customer ID
+     * @return the list of accounts associated with the customer ID
+     */
     public List<Account> getAccountsByCustomerId(String customerId) {
         List<Account> customerAccounts = new ArrayList<>();
         try {
@@ -57,6 +90,11 @@ public class AccountManager {
         return customerAccounts;
     }
 
+    /**
+     * Removes all accounts associated with a specific customer ID and saves the updated list to the file.
+     *
+     * @param customerId the customer ID
+     */
     public void removeAccountsByCustomerId(String customerId) {
         try {
             accounts.removeIf(account -> account.getCustomerId().equals(customerId));
@@ -66,6 +104,11 @@ public class AccountManager {
         }
     }
 
+    /**
+     * Removes an account by its account number and saves the updated list to the file.
+     *
+     * @param accountNumber the account number
+     */
     public void removeAccount(String accountNumber) {
         try {
             accounts.removeIf(account -> account.getAccountNumber().equals(accountNumber));
@@ -75,6 +118,9 @@ public class AccountManager {
         }
     }
 
+    /**
+     * Loads accounts from the CSV file specified by the accountsFilePath.
+     */
     public void loadAccounts() {
         accounts.clear();
         try {
@@ -99,6 +145,9 @@ public class AccountManager {
         }
     }
 
+    /**
+     * Saves the current list of accounts to the CSV file specified by the accountsFilePath.
+     */
     public void saveAccounts() {
         List<String[]> data = new ArrayList<>();
         for (Account account : accounts) {
@@ -116,6 +165,11 @@ public class AccountManager {
         }
     }
 
+    /**
+     * Sets the transaction manager for all accounts.
+     *
+     * @param transactionManager the transaction manager to set
+     */
     public void setTransactionManager(TransactionManager transactionManager) {
         this.transactionManager = transactionManager;
         for (Account account : accounts) {

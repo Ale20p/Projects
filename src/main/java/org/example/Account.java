@@ -3,7 +3,14 @@ package org.example;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The Account class represents a generic bank account.
+ * It provides common functionalities for account management, including deposits, withdrawals, and transfers.
+ *
+ * @author Alessandro Pomponi
+ */
 abstract class Account implements Auditable {
+
     private String accountNumber;
     private String customerId;
     private double balance;
@@ -11,6 +18,15 @@ abstract class Account implements Auditable {
     private TransactionManager transactionManager;
     private List<Transaction> transactions;
 
+    /**
+     * Constructs an Account with the specified details.
+     *
+     * @param accountNumber       the unique identifier for the account
+     * @param customerId          the ID of the customer who owns the account
+     * @param balance             the initial balance of the account
+     * @param accountType         the type of the account (e.g., "Savings", "Checking")
+     * @param transactionManager  the transaction manager associated with the account
+     */
     public Account(String accountNumber, String customerId, double balance, String accountType, TransactionManager transactionManager) {
         this.accountNumber = accountNumber;
         this.customerId = customerId;
@@ -20,30 +36,66 @@ abstract class Account implements Auditable {
         this.transactions = new ArrayList<>();
     }
 
+    /**
+     * Returns the account number.
+     *
+     * @return the account number
+     */
     public String getAccountNumber() {
         return accountNumber;
     }
 
+    /**
+     * Returns the customer ID.
+     *
+     * @return the customer ID
+     */
     public String getCustomerId() {
         return customerId;
     }
 
+    /**
+     * Returns the current balance.
+     *
+     * @return the current balance
+     */
     public double getBalance() {
         return balance;
     }
 
+    /**
+     * Returns the account type.
+     *
+     * @return the account type
+     */
     public String getAccountType() {
         return accountType;
     }
 
+    /**
+     * Sets the transaction manager.
+     *
+     * @param transactionManager the transaction manager to set
+     */
     public void setTransactionManager(TransactionManager transactionManager) {
         this.transactionManager = transactionManager;
     }
 
+    /**
+     * Returns the transaction manager.
+     *
+     * @return the transaction manager
+     */
     public TransactionManager getTransactionManager() {
         return transactionManager;
     }
 
+    /**
+     * Deposits the specified amount into the account.
+     *
+     * @param amount the amount to deposit
+     * @throws IllegalArgumentException if the amount is less than or equal to zero
+     */
     public void deposit(double amount) {
         try {
             if (amount <= 0) {
@@ -60,6 +112,13 @@ abstract class Account implements Auditable {
         }
     }
 
+    /**
+     * Withdraws the specified amount from the account.
+     *
+     * @param amount the amount to withdraw
+     * @throws InsufficientFundsException if the balance is less than the amount to withdraw
+     * @throws IllegalArgumentException if the amount is less than or equal to zero
+     */
     public void withdraw(double amount) throws InsufficientFundsException {
         try {
             if (amount <= 0) {
@@ -85,6 +144,14 @@ abstract class Account implements Auditable {
         }
     }
 
+    /**
+     * Transfers the specified amount to another account.
+     *
+     * @param amount the amount to transfer
+     * @param destinationAccount the account to transfer to
+     * @throws InsufficientFundsException if the balance is less than the amount to transfer
+     * @throws IllegalArgumentException if the amount is less than or equal to zero
+     */
     public void transfer(double amount, Account destinationAccount) throws InsufficientFundsException {
         try {
             if (amount <= 0) {
@@ -111,14 +178,31 @@ abstract class Account implements Auditable {
         }
     }
 
+    /**
+     * Adjusts the balance by the specified amount.
+     *
+     * @param amount the amount to adjust the balance by
+     */
     protected void adjustBalance(double amount) {
         balance += amount;
     }
 
+    /**
+     * Returns the list of transactions.
+     *
+     * @return the list of transactions
+     */
     public List<Transaction> getTransactions() {
         return transactions;
     }
 
+    /**
+     * Returns the list of high-value transactions that exceed the specified threshold.
+     *
+     * @param threshold the threshold amount
+     * @return the list of high-value transactions
+     * @throws IllegalArgumentException if the threshold is less than or equal to zero
+     */
     @Override
     public List<Transaction> getHighValueTransactions(double threshold) {
         try {
@@ -133,8 +217,9 @@ abstract class Account implements Auditable {
     }
 }
 
-
-
+/**
+ * Exception thrown when an account has insufficient funds for a transaction.
+ */
 class InsufficientFundsException extends Exception {
     public InsufficientFundsException(String message) {
         super(message);
