@@ -12,7 +12,7 @@ import java.util.List;
 public class Loan {
     private String loanId;
     private double loanAmount;
-    private double interestRate;
+    private static final double interestRate = 0.05;
     private boolean approved;
     private boolean paidOff;
     private String accountNumber;
@@ -27,7 +27,6 @@ public class Loan {
     public Loan(double loanAmount, String accountNumber) {
         this.loanId = java.util.UUID.randomUUID().toString();
         this.loanAmount = loanAmount;
-        this.interestRate = 0.05; // Constant 5% interest rate
         this.accountNumber = accountNumber;
         this.approved = false;
         this.paidOff = false;
