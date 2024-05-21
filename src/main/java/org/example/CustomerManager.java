@@ -260,25 +260,6 @@ public class CustomerManager {
     }
 
     /**
-     * Updates the details of an existing loan and saves the updated list to the file.
-     *
-     * @param loan the loan to be updated
-     */
-    public void updateLoan(Loan loan) {
-        try {
-            for (int i = 0; i < loans.size(); i++) {
-                if (loans.get(i).getLoanId().equals(loan.getLoanId())) {
-                    loans.set(i, loan);
-                    break;
-                }
-            }
-            saveLoans();
-        } catch (Exception e) {
-            System.err.println("Error updating loan: " + e.getMessage());
-        }
-    }
-
-    /**
      * Retrieves the customer associated with a specific loan.
      *
      * @param loan the loan to find the associated customer
