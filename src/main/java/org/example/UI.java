@@ -371,6 +371,10 @@ class CustomerUI implements UI {
 
 /**
  * The ManagerUI class implements the UI interface and provides the manager dashboard functionality.
+ * It allows the bank manager to perform various actions such as approving loans, adding customers,
+ * deleting customers, generating customer reports, and viewing all customers.
+ *
+ * @author
  */
 class ManagerUI implements UI {
     private BankManager bankManager;
@@ -395,16 +399,19 @@ class ManagerUI implements UI {
 
     /**
      * Displays the manager dashboard and handles manager actions.
+     * The dashboard provides options for approving loans, adding customers, deleting customers,
+     * generating customer reports, and viewing all customers.
      */
     @Override
     public void displayDashboard() {
-        int action = -1;  // Initialize action with a default value
+        int action = -1;
         do {
             System.out.println("Manager Dashboard: " + bankManager.getManagerId());
             System.out.println("1. Approve Loans");
             System.out.println("2. Add Customer");
             System.out.println("3. Delete Customer");
             System.out.println("4. Generate Customer Report");
+            System.out.println("5. View All Customers");  // New option
             System.out.println("0. Logout");
             System.out.println("Choose an action:");
             try {
@@ -426,6 +433,9 @@ class ManagerUI implements UI {
                 case 4:
                     generateCustomerReport();
                     break;
+                case 5:
+                    viewAllCustomers();  // New case
+                    break;
                 case 0:
                     System.out.println("Logging out...");
                     return;
@@ -438,6 +448,8 @@ class ManagerUI implements UI {
 
     /**
      * Approves pending loans for customers.
+     * Prompts the manager to approve each pending loan. If approved, the loan amount is deposited into the
+     * associated account.
      */
     private void approveLoans() {
         try {
@@ -467,6 +479,7 @@ class ManagerUI implements UI {
 
     /**
      * Adds a new customer to the system.
+     * Prompts the manager to enter the new customer's name, password, and email.
      */
     private void addCustomer() {
         try {
@@ -486,6 +499,7 @@ class ManagerUI implements UI {
 
     /**
      * Deletes a customer from the system by their customer ID.
+     * Prompts the manager to enter the customer ID of the customer to be deleted.
      */
     private void deleteCustomer() {
         try {
@@ -504,6 +518,7 @@ class ManagerUI implements UI {
 
     /**
      * Generates a report for a customer by their customer ID.
+     * Prompts the manager to enter the customer ID and displays the generated report.
      */
     private void generateCustomerReport() {
         try {
@@ -515,4 +530,25 @@ class ManagerUI implements UI {
             System.err.println("Error generating customer report: " + e.getMessage());
         }
     }
+
+    /**
+     * Displays the list of all customers.
+     * Retrieves and displays the customer ID and name for each customer in the system.
+     */
+    private void viewAllCustomers() {  // New method
+        try {
+            List<Customer> customers = customerManager.getAllCustomers();
+            if (customers.isEmpty()) {
+                System.out.println("No customers found.");
+                return;
+            }
+            System.out.println("List of all customers:");
+            for (Customer customer : customers) {
+                System.out.println("Customer ID: " + customer.getCustomerID() + ", Name: " + customer.getName());
+            }
+        } catch (Exception e) {
+            System.err.println("Error viewing customers: " + e.getMessage());
+        }
+    }
 }
+

@@ -317,4 +317,13 @@ public class CustomerManager {
         }
         return null;
     }
+
+    /**
+     * Retrieves a list of all customers.
+     *
+     * @return a list of all customers
+     */
+    public List<Customer> getAllCustomers() {
+        return new ArrayList<>(customers);
+    }
 }
