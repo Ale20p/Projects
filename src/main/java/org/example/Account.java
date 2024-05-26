@@ -119,6 +119,7 @@ abstract class Account implements Auditable {
                 throw new InsufficientFundsException("Insufficient funds for withdrawal.");
             }
             adjustBalance(-amount);
+            validateBalance();
             Transaction transaction = new Transaction("Withdrawal", amount, accountNumber, null);
             transactions.add(transaction);
             if (transactionManager != null) {
@@ -152,6 +153,7 @@ abstract class Account implements Auditable {
                 throw new InsufficientFundsException("Insufficient funds for transfer.");
             }
             adjustBalance(-amount);
+            validateBalance();
             destinationAccount.deposit(amount);
             Transaction transaction = new Transaction("Transfer", amount, accountNumber, destinationAccount.getAccountNumber());
             transactions.add(transaction);
@@ -206,6 +208,12 @@ abstract class Account implements Auditable {
             return new ArrayList<>();
         }
     }
+
+    /**
+     * Validates the balance according to the account rules.
+     * @throws IllegalArgumentException if the balance is invalid.
+     */
+    public abstract void validateBalance() throws IllegalArgumentException;
 }
 
 /**
