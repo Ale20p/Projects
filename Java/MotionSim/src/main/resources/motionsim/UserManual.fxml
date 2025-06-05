@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+            <VBox alignment="TOP_CENTER" spacing="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="20">
+                    <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="User Guide" />
+            <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Game Explanation:" />
+            <TextArea fx:id="gameExplanation" editable="false" prefHeight="150" wrapText="true">
+                <text>
+        -The game uses the study of physics, specifically mechanics, to fire a ball with a spring.
+        -You are able to change the angle of the spring, the spring constant(k), the gravity(g), and you will be finally able to change the spring
+        by dragging the spring back and letting go.
+        -The velocity(v) that the ball is thrown with depends on how far back the spring has been pulled.</text>
+            </TextArea>
+                <Label style="-fx-font-size: 16px;-fx-font-weight: bold;" text="The Science Behind the Game " />
+            <Label style="-fx-font-size: 14px;-fx-font-weight:bold;" text="Science Explanation:" />
+                <TextArea fx:id="scienceExplanation" editable="false" prefHeight="100" wrapText="true">
+            <text>
+        -The launch velocity(v) depends on the energy stored in the compressed spring:-The game is based on 2 fundamental physics concepts:
+        Hooke's Law(Spring Motion) and Projectile Motion(2D Motion under Gravity)
+        -The force exerted by the spring follows the Hooke's Law: F = -kx and the launch velocity(v) depends on the energy stored in the compressed spring: U = 1/2kx²
+        Physics Behind The Game:
+        Hooke's Law: F = -kx
+        Energy In Spring: U = 1/2 kx²
+        Kinetic Energy: K = 1/2mv²
+        Gravitational Potential Energy: U = mgh</text>
+            </TextArea>
+                <Label style="-fx-font-size: 20; -fx-font-weight: bold;" text="How To Play The Game" />
+                <TextArea editable="false" text="Objective: &#10;The game simulates spring physics and projectile motion, where the goal is to adjust the spring and launch a projectile.                 &#10;Step 1: Adjust the String             &#10;-Use the spring slider in Game Menu to change stiffness. &#10;-Higher stiffness means a bigger and stronger launch. &#10;Step 2: Adjust Gravity             &#10;-Use the gravity slider to change how fast objects fall.                 &#10;Step 3: Set Difficulty             &#10;-Easy: Infinite time to hit a target. &#10;-Normal: 30 seconds to hit a target before it moves. &#10;-Hard: 15 seconds to hit a target before it moves.&#10;Step 4: Launch The Projectile&#10;-Drag the spring back and release it at launch. &#10;Step 5: Control Center Settings &#10;-Timer: You as the user, can turn the simulation timer ON and OFF                          &#10;-Music Volume: You as the user, can adjust the volume of the simultaion's music                 &#10;Step 6: Save, Exit, or Reset &#10;-Save: Store Settings             &#10;-Exit: Close settings menu and go back to the game            &#10;-Reset: Revert to default values " wrapText="true" />
+            </VBox>
+    </children>
+</AnchorPane>

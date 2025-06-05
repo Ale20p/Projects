@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="660.0" prefWidth="774.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.motionsim.Controller.StartingMenuController">
+
+   <!-- TOP SECTION -->
+   <top>
+      <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-padding: 10; -fx-background-color: #75b1e2;">
+         <children>
+            <Label prefHeight="30.0" prefWidth="163.0" text="TECH TITANS">
+               <font>
+                  <Font name="System Bold" size="20.0" />
+               </font>
+            </Label>
+         </children>
+      </HBox>
+   </top>
+
+   <!-- CENTER SECTION -->
+   <center>
+      <StackPane>
+         <VBox alignment="CENTER" spacing="20" style="-fx-background-color: #F0F8FF;">
+            <children>
+               <Label text="Spring Projectile Sim" textAlignment="CENTER" underline="true">
+                  <font>
+                     <Font name="System Bold" size="32.0" />
+                  </font>
+               </Label>
+               <Button fx:id="startButton" onAction="#handleGoToSimScene" style="-fx-border-color: BLACK; -fx-border-width: 2;" text="START" textAlignment="CENTER">
+                  <font>
+                     <Font size="18.0" />
+                  </font>
+               </Button>
+               <Button fx:id="settingsButton" onAction="#handleGoToSettings" style="-fx-border-color: BLACK; -fx-border-width: 2;" text="SETTINGS" textAlignment="CENTER">
+                  <font>
+                     <Font size="18.0" />
+                  </font>
+               </Button>
+               <Button fx:id="exitButton" onAction="#handleExit" style="-fx-border-color: BLACK; -fx-border-width: 2;" text="EXIT APPLICATION" textAlignment="CENTER">
+                  <font>
+                     <Font size="18.0" />
+                  </font>
+               </Button>
+            </children>
+         </VBox>
+      </StackPane>
+   </center>
+   <!-- BOTTOM SECTION -->
+   <bottom>
+      <HBox alignment="BOTTOM_LEFT" style="-fx-padding: 10; -fx-background-color: #F0F8FF;" />
+   </bottom>
+   <ImageView fx:id="backgroundImageView" fitHeight="800.0" fitWidth="1450.0" layoutX="0.0" layoutY="0.0" mouseTransparent="true" pickOnBounds="true" preserveRatio="false" />
+</BorderPane>
