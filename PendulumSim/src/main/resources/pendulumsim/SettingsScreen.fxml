@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: ffecc8;" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pendulumsim.Controller.SettingsScreenHandler">
+   <children>
+      <Text fill="#ffb0b0" layoutX="501.0" layoutY="80.0" strokeType="OUTSIDE" strokeWidth="0.0" text="SETTINGS" textAlignment="CENTER">
+         <font>
+            <Font name="Cambria" size="45.0" />
+         </font>
+      </Text>
+      <ButtonBar layoutX="14.0" layoutY="14.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="54.0" prefWidth="391.0">
+         <buttons>
+            <Button mnemonicParsing="false" onAction="#settingsevent" prefHeight="54.0" prefWidth="136.0" style="-fx-background-color: FFECC8; -fx-border-color: FFD09B; -fx-border-width: 4; -fx-border-radius: 4;" text="Settings" textFill="#ffb0b0">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Button>
+            <Button mnemonicParsing="false" onAction="#infoevent" prefHeight="54.0" prefWidth="136.0" style="-fx-background-color: FFECC8; -fx-border-color: FFD09B; -fx-border-width: 4; -fx-border-radius: 4;" text="Info" textFill="#ffb0b0">
+               <font>
+                  <Font size="22.0" />
+               </font>
+            </Button>
+            <Button fx:id="backButton" mnemonicParsing="false" onAction="#backToStartEvent" prefHeight="58.0" prefWidth="136.0" style="-fx-background-color: FFECC8; -fx-border-color: FFD09B; -fx-border-width: 4; -fx-border-radius: 4;" text="Back" textFill="#ffb0b0">
+               <font>
+                  <Font size="22.0" />
+               </font>
+            </Button>
+         </buttons>
+      </ButtonBar>
+      <HBox layoutX="144.0" layoutY="211.0" prefHeight="46.0" prefWidth="893.0" style="-fx-border-color: FFD09B; -fx-border-width: 4;">
+         <children>
+            <CheckBox fx:id="periodcheck" mnemonicParsing="false" prefHeight="46.0" prefWidth="178.0" text="Period" textFill="#ffb0b0">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+            </CheckBox>
+            <CheckBox fx:id="angularcheck" mnemonicParsing="false" prefHeight="46.0" prefWidth="178.0" text="Angular Frequency" textFill="#ffb0b0">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+            </CheckBox>
+            <CheckBox fx:id="displacementcheck" mnemonicParsing="false" prefHeight="46.0" prefWidth="178.0" text="Displacement" textFill="#ffb0b0">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+            </CheckBox>
+            <CheckBox fx:id="velocitycheck" mnemonicParsing="false" prefHeight="46.0" prefWidth="178.0" text="Velocity" textFill="#ffb0b0">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+            </CheckBox>
+            <CheckBox fx:id="accelerationcheck" mnemonicParsing="false" prefHeight="46.0" prefWidth="178.0" text="Acceleration" textFill="#ffb0b0">
+               <font>
+                  <Font name="System Bold" size="15.0" />
+               </font>
+            </CheckBox>
+         </children>
+      </HBox>
+      <Text fill="#ffb0b0" layoutX="144.0" layoutY="171.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Displayed Values Toggle:">
+         <font>
+            <Font name="System Bold" size="20.0" />
+         </font>
+      </Text>
+      <Text fill="#ffb0b0" layoutX="144.0" layoutY="408.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Music Settings:">
+         <font>
+            <Font name="System Bold" size="20.0" />
+         </font>
+      </Text>
+      <CheckBox fx:id="musictoggle" layoutX="144.0" layoutY="450.0" mnemonicParsing="false" onAction="#musiccheck" prefHeight="46.0" prefWidth="178.0" selected="true" text="Enabled" textFill="#ffb0b0">
+         <font>
+            <Font name="System Bold" size="15.0" />
+         </font>
+      </CheckBox>
+      <Slider fx:id="volumeslider" layoutX="349.0" layoutY="463.0" prefHeight="14.0" prefWidth="349.0" showTickLabels="true" />
+      <Text fill="#ffb0b0" layoutX="350.0" layoutY="445.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Volume:">
+         <font>
+            <Font name="System Bold" size="15.0" />
+         </font>
+      </Text>
+   </children>
+</AnchorPane>
