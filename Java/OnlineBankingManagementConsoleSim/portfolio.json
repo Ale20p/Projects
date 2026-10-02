@@ -1,0 +1,14 @@
+{
+  "title": "Online Banking Management Console Sim",
+  "description": "A console-based banking application in Java demonstrating account management, transaction logging, CSV data persistence, and loan operations.",
+  "tech": [
+    "Java",
+    "Maven",
+    "OOP",
+    "CSV"
+  ],
+  "date": "2024-03-15",
+  "featured": false,
+  "github": "https://github.com/Ale20p/Projects/tree/main/Java/OnlineBankingManagementConsoleSim",
+  "external": ""
+}

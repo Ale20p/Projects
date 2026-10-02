@@ -1,0 +1,13 @@
+{
+  "title": "Nuxt 3 Portfolio Website",
+  "description": "An interactive personal website built with Nuxt 3, Vue 3, and TypeScript featuring dynamic components, custom styling, and responsive layout.",
+  "tech": [
+    "Vue.js",
+    "Nuxt 3",
+    "TypeScript"
+  ],
+  "date": "2023-11-20",
+  "featured": false,
+  "github": "https://github.com/Ale20p/Projects/tree/main/Vue/OldPortfolio",
+  "external": ""
+}

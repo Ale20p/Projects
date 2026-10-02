@@ -1,0 +1,15 @@
+{
+  "title": "PendulumSim",
+  "description": "A JavaFX application that demonstrates the motion of a simple pendulum. Users can adjust parameters such as length, amplitude, gravity and mass, while observing values like period, angular frequency and displacement in real time. The interface also includes informational and settings screens.",
+  "tech": [
+    "Java",
+    "JavaFX",
+    "SceneBuilder",
+    "Gson"
+  ],
+  "featured": true,
+  "featuredOrder": 3,
+  "cover": "./cover.png",
+  "github": "https://github.com/Ale20p/Projects/tree/main/Java/PendulumSim",
+  "external": ""
+}

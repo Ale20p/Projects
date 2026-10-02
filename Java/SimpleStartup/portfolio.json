@@ -1,0 +1,13 @@
+{
+  "title": "Simple Startup",
+  "description": "A minimalist Java console game inspired by Battleship from Head First Java, featuring grid target evaluation, pseudo-random generation, and automated test drives.",
+  "tech": [
+    "Java",
+    "OOP",
+    "Game Logic"
+  ],
+  "date": "2024-02-10",
+  "featured": false,
+  "github": "https://github.com/Ale20p/Projects/tree/main/Java/SimpleStartup",
+  "external": ""
+}
