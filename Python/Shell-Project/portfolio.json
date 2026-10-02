@@ -1,0 +1,13 @@
+{
+  "title": "Shell Simulation Script",
+  "description": "A custom Python-based shell environment that simulates terminal operations, handling built-in commands, command history, aliases, and external program execution.",
+  "tech": [
+    "Python",
+    "CLI",
+    "Subprocess"
+  ],
+  "date": "2024-04-15",
+  "featured": false,
+  "github": "https://github.com/Ale20p/Projects/tree/main/Python/Shell-Project",
+  "external": ""
+}

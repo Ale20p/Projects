@@ -1,13 +1,3 @@
----
-title: Shell Simulation Script
-tech:
-  - Python
-  - CLI
-  - Subprocess
-date: '2024-04-15'
-featured: false
----
-
 # Shell Simulation Script
 
 This script simulates a basic shell environment that can handle built-in commands and execute external programs.
