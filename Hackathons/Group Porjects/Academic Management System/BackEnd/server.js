@@ -1,0 +1,39 @@
+require("dotenv").config({ path: "./BackEnd/.env" });
+const { auth, db } = require("./database/firebase");
+
+const express = require("express");
+const cors = require("cors");
+const testRoutes = require("./routes/testRoutes");
+const authRoutes = require("./routes/authRoutes");  
+const courseRoutes = require("./routes/courseRoutes");
+const studentRoutes = require("./routes/studentRoutes");
+const teacherRoutes = require("./routes/teacherRoutes");
+const majorRoutes = require("./routes/majorRoutes");
+const assignmentRoutes = require("./routes/assignmentRoutes");
+const gradesRoute = require("./routes/gradesRoute");
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Serve frontend
+app.use(express.static("FrontEnd"));
+
+// Test route
+app.use("/api", testRoutes);
+app.use("/api/auth", authRoutes); // Use auth routes
+app.use("/api/courses", courseRoutes); // Use course routes
+app.use("/api/assignments", assignmentRoutes); // Use assignment routes
+app.use("/api/student", studentRoutes);
+app.use("/api/teacher", teacherRoutes);
+app.use("/api/major", majorRoutes);
+app.use("/api/grades", gradesRoute);
+
+// Port
+const PORT = process.env.PORT || 5500;
+
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});
+

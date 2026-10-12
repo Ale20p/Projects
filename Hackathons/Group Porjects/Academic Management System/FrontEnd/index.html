@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <title>Academic Management System</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="courses/courses.css">
+    <link rel="stylesheet" href="schedule/schedule.css">
+    <link rel="stylesheet" href="Graph/graphStyles.css">
+    <link rel="stylesheet" href="Graph/gpaTable.css">
+    <script src="mainPage.js"></script>
+</head>
+
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="logo">
+            <img src="Images\concordia_logo.png">
+        </div>
+
+        <button id="sendReminderBtn">Send Deadline Reminders</button>
+
+        <div class="account">
+            <!--ADD HREF LINK FOR THE SIGNUP OR LOGIN OPTION-->
+            <a href="Auths/sign_in.html" class="login">Log In</a>
+            <a href="Auths/sign_up.html" class="signup">Sign Up</a>
+
+            <div class="profile">
+                <img src="Images\profile_icon.png" onclick="toggleProfileMenu()">
+            </div>
+        </div>
+    </header>
+
+    <div class="homePage">
+        <!-- Classes Displayer (Josh)-->
+        <div class="classesDisplay">
+
+            <!-- Title -->
+            <h3>Your Courses</h3>
+
+            <!-- Provides the white box with all the class boxes -->
+            <div class="coursesWrapper">
+
+                <!-- Search Bar-->
+                <div class="searchBar">
+                    <input type="text" id="searchBar" placeholder="Search courses..." />
+                </div>
+
+                <!-- Makes the box scrollable-->
+                <div class="coursesContainer">
+
+                    <!-- Add Course Button -->
+                    <div class="student-only">
+                        <div class="courseBox addCourseBox">
+                            <div class="plusIcon">+</div>
+                            <div>Enroll in a Course</div>
+                        </div>
+                    </div>
+
+
+                    <div class="teacher-only">
+                        <div class="courseBox addCourseBox">
+                            <div class="plusIcon">+</div>
+                            <div>Add Course</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End of Class Displayer -->
+
+        <!-- (Josh) Going to add a way to add courses later-->
+
+
+
+        <div class="schedule">
+            <!-- Schedule Display (Alessandro) -->
+            <div class="scheduleDisplay">
+                <!-- Title-->
+                <h3>Your Schedule</h3>
+
+                <div class="scheduleWrapper">
+
+                    <div class="scheduleContainer">
+                        <!-- For sorting feature for schedule-->
+                        <div class="sortSection">
+                            <label> Sort by:</label>
+
+                            <div class="sortOptions">
+                                <input type="radio" name="sortType" value="date" checked> Date
+                                <input type="radio" name="sortType" value="course"> Course
+                                <input type="radio" name="sortType" value="weight"> Weight
+                            </div>
+                        </div>
+
+
+                        <div class="assignmentsSection">
+                            <!-- <div class="assignmentBox">
+                                <div class="assignmentText">
+                                    <h4>Tuesday, 24 February 2026</h4>
+                                    <p>Assignment is due at: 23:99</p>
+                                    <h5>Deliverable #0</h5>
+                                    <p>SOEN 287 W 2254 (Winter 2026)</p>
+                                </div>
+
+                                <label>
+                                    Completed <input type="checkbox">
+                                </label>
+                            </div>
+
+                            <div class="assignmentBox">
+                                <div class="assignmentText">
+                                    <h4>Friday, 27 February 2026</h4>
+                                    <p>Assignment is due at: 23:99</p>
+                                    <h5>Deliverable #1</h5>
+                                    <p>SOEN 287 W 2254 (Winter 2026)</p>
+                                </div>
+
+                                <label>
+                                    Completed <input type="checkbox">
+                                </label>
+                            </div> -->
+                        </div>
+
+                        <!-- Will be used to display archived assignments -->
+                        <button id="archiveScheduleButton">View Archive</button>
+
+                        <div class="archiveSection hidden">
+                            <!-- <div class="assignmentBox">
+                                <div class="assignmentText">
+                                    <h4>Friday, 20 February 2026</h4>
+                                    <p>Assignment is due at: 23:99</p>
+                                    <h5>Assignment for the intro</h5>
+                                    <p>SOEN 287 W 2254 (Winter 2026)</p>
+                                </div>
+
+                                <label>
+                                    Completed <input type="checkbox" checked>
+                                </label>
+                            </div> -->
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+
+
+
+        <!-- Grades Graph (Sahon) -->
+        <div class="gradesGraph">
+            <h3>Your Grades</h3>
+
+            <p id="gpaEstimate">Estimated GPA: N/A</p>
+
+            <button id="exportCsvBtn">Export Grades to CSV</button>
+            <button id="exportPdfBtn">Export Grades to PDF</button>
+
+            <div class="graphContainer">
+                <canvas id="gradesChart"></canvas>
+            </div>
+
+            <div class="gpaBreakdown">
+                <h4>Course GPA Breakdown</h4>
+                <table id="gpaTable">
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Credits</th>
+                            <th>Final Grade</th>
+                            <th>GPA</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gpaTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!--<script src="script.js"></script> File has no use -->
+
+    <script src="courses/courseform.js"></script> <!-- This helps the course section -->
+    <script src="courses/roleToggle.js"></script>
+    <script src="userStatus.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0"></script> <!-- This is to importat Chart.js -->
+    <script src="Graph\gradesGraph.js"></script> <!-- This is the script for the grades graph -->
+    <script src="Graph/gpaEstimate.js"></script>
+    <script src="Graph/csvExporter.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> <!-- jsPDF library-->
+    <script src="Graph/pdfExporter.js"></script>
+
+    <script src="schedule/archiveAssignments.js"></script> <!-- This is for the display of the archived assignments -->
+    <script src="schedule/displayAssignments.js"></script> <!-- This is to display the assignments from the database -->
+    <script src="schedule/sortAssignments.js"></script>
+    <script src="schedule/applyAssignmentColorScheme.js"></script>
+</body>
+
+</html>

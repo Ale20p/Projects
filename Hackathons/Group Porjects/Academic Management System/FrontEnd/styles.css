@@ -1,0 +1,105 @@
+* {
+    /* This makes it so it zeroes out any padding or margin across all elements in the html file. By doing so, it makes it easier to align elements on the website.*/
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+header {
+    background-color: black;
+    color: whitesmoke;
+
+    display: flex; /* Makes elements in the header stay next to each other rather than one below the other*/
+    align-items: center;
+}
+
+body {
+    /* The following code expands the divs in the body vertically*/
+    /*height: 100vh;vh is the height relative to the windows size.*/
+    display: flex;
+    flex-direction: column;
+}
+
+.logo img {
+    max-width: 200px;
+}
+
+.account {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.login, .signup {
+    color: whitesmoke;
+    text-decoration: none; /* Removes any underlining of the hyperlink*/
+    font-size: 16px;
+}
+
+.profile {
+    margin-left: auto;
+}
+
+.profile img {
+    max-width: 40px;
+}
+
+.homePage {
+    /*flex: 1;*/
+    display: flex;
+    flex-direction: column;
+}
+
+.classesDisplay{
+    flex: 1;
+    background-color: lightblue;
+    border-radius: 8px;
+}
+
+.schedule {
+    flex: 1;
+    background-color: lightcoral;
+    border-radius: 8px;
+}
+
+.gradesGraph {
+    flex: 1;
+    background-color:lightgoldenrodyellow;
+    border-radius: 8px;
+}
+
+/* User Status & Auth */
+.user-name {
+    margin-right: 15px;
+    font-weight: bold;
+}
+
+.logout-btn {
+    padding: 5px 10px;
+    cursor: pointer;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+}
+
+.logout-btn:hover {
+    background-color: #cc0000;
+}
+
+/*Unenroll Button*/
+.unenrollBtn {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(200, 0, 0, 0.35);
+  background: rgba(255, 0, 0, 0.06);
+  font-weight: 700;
+  cursor: pointer;
+  color: #dc2626;
+}
+ 
+.unenrollBtn:hover {
+  background: rgba(255, 0, 0, 0.12);
+}

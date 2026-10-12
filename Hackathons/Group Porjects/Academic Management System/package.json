@@ -1,0 +1,24 @@
+{
+  "name": "Academic_Management_System",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node BackEnd/server.js",
+    "dev": "nodemon BackEnd/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "firebase-admin": "^13.6.1",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^8.0.4",
+    "nodemon": "^3.1.14",
+    "uuid": "^13.0.0"
+  }
+}

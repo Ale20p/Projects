@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Student Settings</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="settings.css">
+
+</head>
+
+<body>
+  <!-- HEADER -->
+  <header>
+
+    <div class="logo">
+      <img src="../Images/concordia_logo.png">
+    </div>
+
+    <nav>
+      <a href="../index.html" class="backLink">← Dashboard</a>
+    </nav>
+
+    <div class="account">
+
+      <a href="../Auths/sign_in.html" class="login">Log In</a>
+      <a href="../Auths/sign_up.html" class="signup">Sign Up</a>
+
+      <div class="profile">
+        <img src="../Images/profile_icon.png" onclick="toggleProfileMenu()">
+      </div>
+
+    </div>
+
+  </header>
+
+    <!-- Fields user -->
+    <div class="container">
+      <h2>Student Settings</h2>
+      
+      <!-- General Profile Summary (Read-only) -->
+      <div id="profile-summary" class="profile-summary">
+        <h3>General Profile</h3>
+        <div id="profile-details-grid">
+          <div class="summary-item">
+            <strong>Full Name</strong>
+            <span id="summary-name">Loading...</span>
+          </div>
+          <div class="summary-item">
+            <strong>Student ID</strong>
+            <span id="summary-id">Loading...</span>
+          </div>
+          <div class="summary-item">
+            <strong>Major</strong>
+            <span id="summary-major">Loading...</span>
+          </div>
+          <div class="summary-item">
+            <strong>Email Address</strong>
+            <span id="summary-email">Loading...</span>
+          </div>
+        </div>
+      </div>
+
+      <hr>
+
+      <h3>Update Information</h3>
+      <p><small>Leave fields empty if you do not want to change them.</small></p>
+      
+      <form id="settings-form">
+        <div class="form-group">
+          <label for="fname">First Name</label>
+          <input type="text" id="fname" name="fname" placeholder="Enter new first name">
+        </div>
+
+        <div class="form-group">
+          <label for="lname">Last Name</label>
+          <input type="text" id="lname" name="lname" placeholder="Enter new last name">
+        </div>
+
+        <div class="form-group">
+          <label for="major">Major</label>
+          <select id="major" name="major">
+            <option value="">Select a new major</option>
+            <!-- Majors will be populated by JS -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="password">New Password</label>
+          <input type="password" id="password" name="password" placeholder="Min 6 characters to update">
+        </div>
+
+        <div class="form-group-full">
+          <button class="submit-btn" type="submit">Update Profile</button>
+        </div>
+      </form>
+    </div>
+
+
+  <script src="../mainPage.js"></script>
+  <script src="../userStatus.js"></script>
+  <script src="settings_handler.js"></script>
+</body>
+
+</html>
