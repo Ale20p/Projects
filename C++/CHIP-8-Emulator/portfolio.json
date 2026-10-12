@@ -1,0 +1,17 @@
+{
+  "title": "CHIP-8 Emulator",
+  "description": "A modern, cycle-accurate CHIP-8 interpreter and virtual machine implemented in C++17 with hardware-accelerated rendering powered by SDL2. It features full 35-opcode instruction set coverage, configurable CPU clock frequency, and 60 Hz timer and frame pacing for smooth retro game emulation.",
+  "tech": [
+    "C++17",
+    "SDL2",
+    "CMake"
+  ],
+  "date": "2026-09-29",
+  "featured": false,
+  "featuredOrder": 1,
+  "cover": "",
+  "github": "https://github.com/Ale20p/CHIP-8-Emulator",
+  "external": "",
+  "company": "",
+  "showInProjects": true
+}
