@@ -1,0 +1,24 @@
+{
+  "title": "Maternily",
+  "description": "Offline-first WhatsApp agent that digitizes paper maternal health registries in low-resource settings into structured, midwife-verified records. Combines free local PaddleOCR and form templates with selective Claude AI fallback, handling uncertainty through interactive review conversations and linking multi-page visits to patient profiles. Enables midwives to continue working on paper without accounts or continuous signal, while clinic supervisors gain access to encrypted records, health analytics, and audit logs.",
+  "tech": [
+    "TypeScript",
+    "React",
+    "Node.js",
+    "Express",
+    "SQLite",
+    "PaddleOCR",
+    "Python",
+    "Claude API",
+    "WhatsApp API",
+    "Zod"
+  ],
+  "date": "2026-10-04",
+  "featured": false,
+  "featuredOrder": 1,
+  "cover": "./cover.png",
+  "github": "https://github.com/Ale20p/Projects/tree/main/Hackathons-Group Projects/maternily",
+  "external": "",
+  "company": "",
+  "showInProjects": true
+}

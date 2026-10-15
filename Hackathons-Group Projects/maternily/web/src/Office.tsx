@@ -1,0 +1,464 @@
+import { useCallback, useEffect, useState } from "react";
+import { FIELD_BY_KEY, SECTIONS, SECTION_LABELS, fieldLabel } from "../../shared/catalog.ts";
+import { STATE_LABELS } from "../../shared/lifecycle.ts";
+import { formatValue } from "../../shared/normalize.ts";
+import { FIELD_STATUS_LABELS, type FieldValue } from "../../shared/status.ts";
+import { localStorageGet, localStorageSet } from "./App.tsx";
+import { Dashboard } from "./Dashboard.tsx";
+import { t, type UiLang } from "./i18n.ts";
+import { createReportPdf, downloadReport } from "./report.ts";
+import type { DocumentReport } from "../../shared/messages.ts";
+
+const TOKENS = { supervisor: "supervisor-demo", analyst: "analyst-demo" } as const;
+type Role = keyof typeof TOKENS;
+type Tab = "overview" | "patients" | "registries" | "dashboard" | "ai";
+
+export function useApi(role: Role) {
+  return useCallback(
+    async <T,>(path: string, init?: RequestInit): Promise<T> => {
+      const r = await fetch(path, { ...init, headers: { "Content-Type": "application/json", "x-role-token": TOKENS[role], ...(init?.headers ?? {}) } });
+      if (r.status === 403) throw new Error("forbidden");
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json() as Promise<T>;
+    },
+    [role],
+  );
+}
+
+export function Office({ lang }: { lang: UiLang }) {
+  const [role, setRole] = useState<Role>(() => (localStorageGet("office-role") as Role) || "supervisor");
+  const TABS: Tab[] = ["overview", "patients", "registries", "dashboard", "ai"];
+  const [tab, setTab] = useState<Tab>(() => (TABS as string[]).includes(location.hash.slice(1)) ? (location.hash.slice(1) as Tab) : "overview");
+  useEffect(() => history.replaceState(null, "", tab === "overview" ? location.pathname : `#${tab}`), [tab]);
+  const [patientId, setPatientId] = useState<string | null>(null);
+  const [docId, setDocId] = useState<string | null>(null);
+  useEffect(() => localStorageSet("office-role", role), [role]);
+
+  const tabIcons: Record<Tab, string> = {
+    overview: "🏡",
+    patients: "👩‍🍼",
+    registries: "📒",
+    dashboard: "🌼",
+    ai: "🌿",
+  };
+  const tabs: [Tab, string][] = [
+    ["overview", t(lang, "overview")],
+    ["patients", t(lang, "patients")],
+    ["registries", t(lang, "registries")],
+    ["dashboard", t(lang, "dashboard")],
+    ["ai", t(lang, "aiUsage")],
+  ];
+  return (
+    <div className="office">
+      <div className="office-header-row row">
+        <nav className="tabs office-tabs">
+          {tabs.map(([k, label]) => (
+            <button key={k} className={`tab ${tab === k ? "active" : ""}`} onClick={() => { setTab(k); setPatientId(null); setDocId(null); }}>
+              <span className="tab-icon">{tabIcons[k]}</span>
+              <span>{label}</span>
+            </button>
+          ))}
+        </nav>
+        <span className="spacer" />
+        <label className="role-selector row small">
+          <span className="role-icon">👤</span>
+          <span className="role-label">{t(lang, "role")} :</span>
+          <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
+            <option value="supervisor">{t(lang, "supervisor")}</option>
+            <option value="analyst">{t(lang, "analyst")}</option>
+          </select>
+        </label>
+      </div>
+      <div key={`${role}-${tab}-${patientId}-${docId}`}>
+        {tab === "overview" && <Overview role={role} lang={lang} />}
+        {tab === "patients" && (patientId ? <PatientView role={role} lang={lang} id={patientId} onBack={() => setPatientId(null)} openDoc={(d) => { setTab("registries"); setDocId(d); }} /> : <Patients role={role} lang={lang} open={setPatientId} />)}
+        {tab === "registries" && (docId ? <DocumentView role={role} lang={lang} id={docId} onBack={() => setDocId(null)} /> : <Documents role={role} lang={lang} open={setDocId} />)}
+        {tab === "dashboard" && <Dashboard role={role} lang={lang} />}
+        {tab === "ai" && <AiUsage role={role} lang={lang} />}
+      </div>
+    </div>
+  );
+}
+
+function useLoad<T>(role: Role, path: string, deps: unknown[] = []) {
+  const api = useApi(role);
+  const [data, setData] = useState<T | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const reload = useCallback(() => {
+    api<T>(path).then(setData).catch((e: Error) => setError(e.message));
+  }, [api, path]);
+  useEffect(() => {
+    reload();
+    const timer = setInterval(reload, 4000);
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reload, ...deps]);
+  return { data, error, reload };
+}
+
+function Forbidden({ lang }: { lang: UiLang }) {
+  return <div className="locked">🔒 {t(lang, "forbidden")}</div>;
+}
+
+/** Plain words for the record states; the official state name stays in the tooltip and the transition log. */
+const FRIENDLY_STATE: Record<string, [string, string]> = {
+  CAPTURED: ["Photo reçue", "Photo received"],
+  PENDING_AI: ["En lecture", "Being read"],
+  AI_PROCESSED: ["Lu", "Read"],
+  NEEDS_REVIEW: ["À vérifier", "To check"],
+  VALIDATED: ["Vérifié", "Checked"],
+  PATIENT_MATCHED: ["Patiente reliée", "Patient linked"],
+  REGISTERED: ["Enregistré", "Saved"],
+  SYNCED: ["Confirmé à la sage-femme", "Confirmed to the midwife"],
+  PROCESSING_FAILED: ["Lecture impossible", "Could not read"],
+  SYNC_FAILED: ["Envoi à réessayer", "Send will retry"],
+  DUPLICATE_SUSPECTED: ["Doublon possible", "Possible duplicate"],
+  MANUAL_REVIEW_REQUIRED: ["Pour le bureau", "For the office"],
+};
+
+function StateBadge({ state, lang }: { state: string; lang: UiLang }) {
+  const bad = ["PROCESSING_FAILED", "SYNC_FAILED"].includes(state);
+  const warn = ["NEEDS_REVIEW", "DUPLICATE_SUSPECTED", "MANUAL_REVIEW_REQUIRED", "PENDING_AI"].includes(state);
+  const friendly = FRIENDLY_STATE[state]?.[lang === "fr" ? 0 : 1];
+  return (
+    <span className={`chip ${bad ? "bad" : warn ? "warn" : "ok"}`} title={STATE_LABELS[state as keyof typeof STATE_LABELS]?.[lang] ?? state}>
+      <span className="chip-dot" />
+      <span>{friendly ?? state}</span>
+    </span>
+  );
+}
+
+// ------------------------------------------------------------------ overview
+interface OverviewData {
+  docStates: { state: string; n: number }[];
+  pageStates: { state: string; n: number }[];
+  patients: number;
+  ai: { calls: number; cached: number; failed: number; cost: number; input: number; output: number; cacheRead: number };
+  extractor: string;
+  aiFallback?: string;
+  allowReset?: boolean;
+}
+
+/** What actually read the pages, said plainly: local OCR, and whether anything goes to Claude. */
+function readerNote(data: OverviewData, L: (fr: string, en: string) => string) {
+  if (data.extractor === "template") {
+    return data.aiFallback && data.aiFallback !== "none"
+      ? L("PaddleOCR local ; Claude seulement pour les cases douteuses", "Local PaddleOCR; Claude only for doubtful cells")
+      : L("PaddleOCR local ; aucune donnée envoyée à Claude", "Local PaddleOCR; no data sent to Claude");
+  }
+  if (data.extractor === "mock") return L("démo (vérité terrain)", "demo (ground truth)");
+  return `${Math.round((data.ai.cacheRead ?? 0) / 1000)}k ${L("jetons en cache", "cached tokens")}`;
+}
+function Overview({ role, lang }: { role: Role; lang: UiLang }) {
+  const { data, error, reload } = useLoad<OverviewData>(role, "/api/office/overview");
+  const api = useApi(role);
+  if (error === "forbidden") return <Forbidden lang={lang} />;
+  if (!data) return null;
+  const docs = Object.fromEntries(data.docStates.map((d) => [d.state, d.n]));
+  const total = data.docStates.reduce((s, d) => s + d.n, 0);
+  const done = (docs.REGISTERED ?? 0) + (docs.SYNCED ?? 0);
+  const waiting = (docs.NEEDS_REVIEW ?? 0) + (docs.AI_PROCESSED ?? 0) + (docs.PENDING_AI ?? 0) + (docs.VALIDATED ?? 0);
+  const L = (fr: string, en: string) => (lang === "fr" ? fr : en);
+  const hour = new Date().getHours();
+  const hello = hour < 12 ? L("Bonjour", "Good morning") : hour < 18 ? L("Bon après-midi", "Good afternoon") : L("Bonsoir", "Good evening");
+  return (
+    <div className="stack">
+      <section className="welcome">
+        <div>
+          <p className="welcome-hello">{hello} 🌸</p>
+          <h2>{L("Chaque page photographiée devient un dossier qui suit la maman, de visite en visite.", "Every photographed page becomes a record that follows the mother, visit after visit.")}</h2>
+          <p>{L("Les sages-femmes gardent leur registre papier et envoient les pages sur WhatsApp. Maternily les lit, demande quand il doute, et relie les visites.", "Midwives keep their paper registry and send the pages on WhatsApp. Maternily reads them, asks when it is unsure, and links the visits.")}</p>
+          <p className="welcome-today">
+            {total
+              ? L(`${total} registre(s) reçu(s) · ${done} enregistré(s) · ${waiting} en cours de vérification`, `${total} registr${total === 1 ? "y" : "ies"} received · ${done} saved · ${waiting} being checked`)
+              : L("Aucun registre pour l'instant : la première photo envoyée sur WhatsApp apparaîtra ici.", "No registry yet: the first photo sent on WhatsApp will appear here.")}
+          </p>
+          <div className="steps">
+            <span className="step"><span className="step-n">1</span>📸 {L("Photographier", "Photograph")}</span>
+            <span className="step"><span className="step-n">2</span>💬 {L("Vérifier ensemble", "Check together")}</span>
+            <span className="step"><span className="step-n">3</span>🤝 {L("Relier les visites", "Link the visits")}</span>
+          </div>
+        </div>
+        <div className="welcome-art"><img src="/logo-mark.png" alt="" /></div>
+      </section>
+      <div className="tiles">
+        <Tile label={L("Patientes", "Patients")} value={data.patients} icon="👥" variant="teal" />
+        <Tile label={L("Registres enregistrés", "Registries saved")} value={done} sub={`${total} ${L("reçus", "received")}`} icon="📒" variant="emerald" />
+        <Tile label={L("En cours de vérification", "Being checked")} value={waiting} icon="💬" variant="amber" />
+        <Tile label={L("À relier par le bureau", "For the office to link")} value={docs.MANUAL_REVIEW_REQUIRED ?? 0} icon="🤝" variant="indigo" />
+        <Tile label={L("Pages lues", "Pages read")} value={data.ai.calls ?? 0} sub={`${data.ai.cached ?? 0} ${L("depuis le cache", "from cache")} · ${data.ai.failed ?? 0} ${L("échecs", "failed")}`} icon="📖" variant="purple" />
+        <Tile label={L("Coût Claude estimé", "Estimated Claude cost")} value={`$${(data.ai.cost ?? 0).toFixed(2)}`} sub={readerNote(data, L)} icon="🌿" variant="rose" />
+      </div>
+      <div className="panel lifecycle-panel">
+        <div className="panel-header-row">
+          <h2>{L("Où en sont les registres", "Where the registries are")}</h2>
+          <span className="panel-sub-tag">{L("Mis à jour en direct", "Live")}</span>
+        </div>
+        <div className="row lifecycle-row">
+          {data.docStates.map((d) => <span key={d.state} className="row small state-counter"><StateBadge state={d.state} lang={lang} /> <span className="counter-val">{d.n}</span></span>)}
+          {!data.docStates.length && <span className="muted small">{L("Rien pour l'instant, tout est calme.", "Nothing yet, all is calm.")}</span>}
+        </div>
+        <h3 className="section-subhead">{L("Pages", "Pages")}</h3>
+        <div className="row lifecycle-row">
+          {data.pageStates.map((d) => <span key={d.state} className="row small state-counter"><StateBadge state={d.state} lang={lang} /> <span className="counter-val">{d.n}</span></span>)}
+        </div>
+      </div>
+      {data.allowReset && role === "supervisor" && (
+        <div className="row">
+          <span className="spacer" />
+          <button
+            className="btn quiet"
+            onClick={async () => {
+              if (!window.confirm(L("Effacer TOUS les registres, patientes, photos et messages de cette démo ? Action irréversible.", "Erase ALL registries, patients, photos and messages in this demo? This cannot be undone."))) return;
+              await api("/api/office/reset", { method: "POST" });
+              reload();
+            }}
+          >
+            🧹 {L("Effacer les données de démo", "Erase demo data")}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Empty({ title, text }: { title: string; text: string }) {
+  return (
+    <div className="empty-state">
+      <img src="/logo-mark.png" alt="" />
+      <strong>{title}</strong>
+      <span>{text}</span>
+    </div>
+  );
+}
+
+function Tile({ label, value, sub, icon, variant }: { label: string; value: string | number; sub?: string; icon?: string; variant?: string }) {
+  return (
+    <div className={`tile ${variant ? `tile-${variant}` : ""}`}>
+      <div className="tile-header">
+        <div className="label">{label}</div>
+        {icon && <span className="tile-icon-badge">{icon}</span>}
+      </div>
+      <div className="value">{value}</div>
+      {sub && <div className="sub">{sub}</div>}
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------ patients
+interface PatientRow { id: string; code: string | null; created_at: string; descriptor: string; fields: number; toReview: number; documents: number }
+function Patients({ role, lang, open }: { role: Role; lang: UiLang; open: (id: string) => void }) {
+  const { data, error } = useLoad<PatientRow[]>(role, "/api/office/patients");
+  if (error === "forbidden") return <Forbidden lang={lang} />;
+  if (!data) return null;
+  const L = (fr: string, en: string) => (lang === "fr" ? fr : en);
+  const exportCsv = async () => {
+    const r = await fetch("/api/office/export.csv", { headers: { "x-role-token": TOKENS[role] } });
+    if (!r.ok) return;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(await r.blob());
+    a.download = /filename="([^"]+)"/.exec(r.headers.get("Content-Disposition") ?? "")?.[1] ?? "maternily-export.csv";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+  return (
+    <div className="stack">
+    <div className="row">
+      <span className="muted">{L("Une ligne par patiente enregistrée, au format du CSV DayOne (31 colonnes, sans identifiant).", "One row per registered patient, in DayOne's CSV format (31 columns, no identifiers).")}</span>
+      <span className="spacer" />
+      <button className="btn primary" onClick={() => void exportCsv()}>⬇️ {L("Exporter en CSV", "Export CSV")}</button>
+    </div>
+    <div className="panel table-wrap">
+      <table>
+        <thead><tr><th>{L("N° de fiche", "Form number")}</th><th>{L("Résumé (sans identifiant)", "Summary (no identifiers)")}</th><th className="num">{L("Valeurs", "Values")}</th><th className="num">{L("À vérifier", "To check")}</th><th className="num">{L("Registres", "Registries")}</th><th>{L("Créée", "Created")}</th></tr></thead>
+        <tbody>
+          {data.map((p) => (
+            <tr key={p.id} className="click" onClick={() => open(p.id)}>
+              <td><strong>{p.code ?? "—"}</strong></td><td>{p.descriptor}</td><td className="num">{p.fields}</td><td className="num">{p.toReview}</td><td className="num">{p.documents}</td><td className="small muted">{p.created_at.slice(0, 16).replace("T", " ")}</td>
+            </tr>
+          ))}
+          {!data.length && <tr><td colSpan={6}><Empty title={L("Aucune patiente pour l'instant", "No patients yet")} text={L("Une patiente apparaît ici dès qu'une sage-femme a vérifié et enregistré son registre.", "A patient appears here once a midwife has checked and saved her registry.")} /></td></tr>}
+        </tbody>
+      </table>
+    </div>
+    </div>
+  );
+}
+
+interface PatientDetail { patient: { id: string; code: string | null; created_at: string }; fields: FieldValue[]; documents: { id: string; state: string; opened_at: string; midwife_id: string }[] }
+function PatientView({ role, lang, id, onBack, openDoc }: { role: Role; lang: UiLang; id: string; onBack: () => void; openDoc: (id: string) => void }) {
+  const { data, error } = useLoad<PatientDetail>(role, `/api/office/patients/${id}`);
+  if (error === "forbidden") return <Forbidden lang={lang} />;
+  if (!data) return null;
+  const L = (fr: string, en: string) => (lang === "fr" ? fr : en);
+  const byKey = new Map(data.fields.map((f) => [f.key, f]));
+  return (
+    <div className="stack">
+      <div className="row"><button className="btn" onClick={onBack}>← {L("Retour", "Back")}</button><h2 style={{ margin: 0 }}>{L("Fiche", "Form")} {data.patient.code ?? "—"}</h2><span className="muted small">ID {data.patient.id.slice(0, 8)}… ({L("aléatoire", "random")})</span></div>
+      <div className="panel">
+        <h3>{L("Registres sources", "Source registries")}</h3>
+        <div className="row">{data.documents.map((d) => <button key={d.id} className="btn small" onClick={() => openDoc(d.id)}>{d.opened_at.slice(0, 10)} · {d.midwife_id} · <StateBadge state={d.state} lang={lang} /></button>)}</div>
+      </div>
+      {SECTIONS.map((s) => {
+        const rows = [...FIELD_BY_KEY.values()].filter((f) => f.section === s && byKey.has(f.key));
+        if (!rows.length) return null;
+        return (
+          <details key={s} className="panel" open={s !== "CURRENT_PREGNANCY"}>
+            <summary><strong>{SECTION_LABELS[s][lang]}</strong> <span className="muted small">({rows.length})</span></summary>
+            <div className="table-wrap">
+              <table>
+                <thead><tr><th>{L("Champ", "Field")}</th><th>{L("Valeur", "Value")}</th><th>{L("Écrit", "Written")}</th><th>{L("Statut", "Status")}</th><th className="num">{L("Confiance", "Confidence")}</th><th>{L("Validé par", "Confirmed by")}</th></tr></thead>
+                <tbody>
+                  {rows.map((def) => {
+                    const f = byKey.get(def.key)!;
+                    return (
+                      <tr key={def.key}>
+                        <td>{fieldLabel(def.key, lang)}</td>
+                        <td>{f.value !== null ? formatValue(def.key, f.value, lang) : "—"}</td>
+                        <td className="muted small">{f.raw ?? ""}</td>
+                        <td><span className={`status ${f.status}`}>{FIELD_STATUS_LABELS[f.status][lang]}</span></td>
+                        <td className="num">{Math.round(f.confidence * 100)}%</td>
+                        <td className="small">{f.confirmedBy}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </details>
+        );
+      })}
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------ registries (documents)
+interface DocRow { id: string; midwife_id: string; state: string; opened_at: string; code: string | null; patient_code: string | null; pages: number; note: string | null }
+function Documents({ role, lang, open }: { role: Role; lang: UiLang; open: (id: string) => void }) {
+  const { data, error } = useLoad<DocRow[]>(role, "/api/office/documents");
+  if (error === "forbidden") return <Forbidden lang={lang} />;
+  if (!data) return null;
+  const L = (fr: string, en: string) => (lang === "fr" ? fr : en);
+  return (
+    <div className="panel table-wrap">
+      <table>
+        <thead><tr><th>{L("Reçu", "Received")}</th><th>{L("Sage-femme", "Midwife")}</th><th className="num">Pages</th><th>{L("État", "State")}</th><th>{L("Patiente", "Patient")}</th></tr></thead>
+        <tbody>
+          {data.map((d) => (
+            <tr key={d.id} className="click" onClick={() => open(d.id)}>
+              <td className="small">{d.opened_at.slice(0, 16).replace("T", " ")}</td><td>{d.midwife_id}</td><td className="num">{d.pages}</td><td><StateBadge state={d.state} lang={lang} /></td><td>{d.patient_code ?? d.code ?? "—"}</td>
+            </tr>
+          ))}
+          {!data.length && <tr><td colSpan={5}><Empty title={L("Aucun registre reçu", "No registry received yet")} text={L("Les pages envoyées sur WhatsApp arrivent ici, même celles prises hors connexion.", "Pages sent on WhatsApp arrive here, even those taken offline.")} /></td></tr>}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+interface DocDetail {
+  doc: { id: string; state: string; midwife_id: string; code: string | null; note: string | null; patient_id: string | null };
+  pages: { capture_id: string; page_no: number; state: string; section: string | null; fields: Record<string, FieldValue> | null; quality: { usable: boolean; issues: string[] } | null; replaced_by: string | null; entry: string; reader: string | null; captured_at: string; received_at: string; error: string | null }[];
+  transitions: { subject_type: string; subject_id: string; from_state: string | null; to_state: string; at: string; reason: string }[];
+}
+function DocumentView({ role, lang, id, onBack }: { role: Role; lang: UiLang; id: string; onBack: () => void }) {
+  const { data, error, reload } = useLoad<DocDetail>(role, `/api/office/documents/${id}`);
+  const api = useApi(role);
+  const [candidates, setCandidates] = useState<{ id: string; code: string | null; descriptor: string }[]>([]);
+  useEffect(() => {
+    if (data?.doc.state === "MANUAL_REVIEW_REQUIRED") void api<typeof candidates>("/api/office/candidates").then(setCandidates);
+  }, [data?.doc.state, api]);
+  if (error === "forbidden") return <Forbidden lang={lang} />;
+  if (!data) return null;
+  const L = (fr: string, en: string) => (lang === "fr" ? fr : en);
+  const link = async (patientId: string | null) => {
+    await api(`/api/office/documents/${id}/link`, { method: "POST", body: JSON.stringify({ patientId }) });
+    reload();
+  };
+  const canReport = role === "supervisor" && (data.doc.state === "REGISTERED" || data.doc.state === "SYNCED");
+  const pdf = async () => {
+    const report = await api<DocumentReport>(`/api/office/documents/${id}/report?lang=${lang}`);
+    downloadReport(await createReportPdf(report, lang));
+  };
+  return (
+    <div className="stack">
+      <div className="row"><button className="btn" onClick={onBack}>← {L("Retour", "Back")}</button><h2 style={{ margin: 0 }}>{L("Registre", "Registry")} {data.doc.code ?? ""}</h2><StateBadge state={data.doc.state} lang={lang} /><span className="spacer" />{canReport && <button className="btn primary" onClick={() => void pdf()}>📄 {t(lang, "reportDownload")}</button>}</div>
+      {data.doc.state === "MANUAL_REVIEW_REQUIRED" && (
+        <div className="panel">
+          <h2>🔗 {L("La sage-femme n'était pas sûre de la patiente. Rattacher à :", "The midwife was unsure of the patient. Link to:")}</h2>
+          <div className="stack">
+            {candidates.map((c) => <button key={c.id} className="btn" onClick={() => void link(c.id)}>{c.code ?? "—"} — {c.descriptor}</button>)}
+            <button className="btn primary" onClick={() => void link(null)}>{L("Nouvelle patiente", "New patient")}</button>
+          </div>
+        </div>
+      )}
+      <div className="pages">
+        {data.pages.map((p) => {
+          const vals = p.fields ? Object.values(p.fields) : [];
+          const doubt = vals.filter((f) => f.status === "NEEDS_REVIEW" || f.status === "ILLEGIBLE").length;
+          return (
+            <div key={p.capture_id} className="page-card small">
+              <PageImage role={role} cid={p.capture_id} lang={lang} />
+              <div className="row"><strong>Page {p.page_no}</strong><StateBadge state={p.state} lang={lang} />{p.replaced_by && <span className="chip">{L("remplacée", "replaced")}</span>}</div>
+              <div>{p.section ? SECTION_LABELS[p.section as keyof typeof SECTION_LABELS]?.[lang] ?? p.section : "—"}</div>
+              <div className="muted">{vals.filter((f) => f.status !== "NOT_PROVIDED").length} {L("valeurs", "values")} · {doubt} {L("à vérifier", "to check")} · {p.entry === "manual" ? L("saisie manuelle", "manual entry") : p.reader?.startsWith("paddleocr-") ? "PaddleOCR" : p.reader === "mock-ground-truth" ? L("vérité terrain (démo)", "ground truth (demo)") : p.reader ?? L("lecture automatisée", "automated extraction")}</div>
+              <div className="muted">{L("Capturée", "Captured")} {p.captured_at.slice(0, 16).replace("T", " ")} · {L("reçue", "received")} {p.received_at.slice(11, 16)}</div>
+              {p.error && <div style={{ color: "var(--bad)" }}>{p.error}</div>}
+            </div>
+          );
+        })}
+      </div>
+      <div className="panel">
+        <h2>{L("Journal des transitions", "Transition log")}</h2>
+        <ul className="timeline">
+          {data.transitions.map((tr, i) => (
+            <li key={i}>
+              <span className="muted">{tr.at.slice(11, 19)}</span> · {tr.subject_type === "document" ? L("registre", "registry") : `page ${data.pages.find((p) => p.capture_id === tr.subject_id)?.page_no ?? "?"}`} : {tr.from_state ?? "∅"} → <strong>{tr.to_state}</strong> <span className="muted">({tr.reason})</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function PageImage({ role, cid, lang }: { role: Role; cid: string; lang: UiLang }) {
+  const [url, setUrl] = useState<string | null>(null);
+  const [denied, setDenied] = useState(false);
+  useEffect(() => {
+    let revoke: string | null = null;
+    fetch(`/api/office/pages/${cid}/image`, { headers: { "x-role-token": TOKENS[role] } }).then(async (r) => {
+      if (!r.ok) return setDenied(true);
+      revoke = URL.createObjectURL(await r.blob());
+      setUrl(revoke);
+    });
+    return () => { if (revoke) URL.revokeObjectURL(revoke); };
+  }, [cid, role]);
+  if (denied) return <div className="locked small">🔒 {lang === "fr" ? "Photo réservée au superviseur" : "Photo restricted to supervisors"}</div>;
+  return url ? <img src={url} alt="" /> : null;
+}
+
+// ------------------------------------------------------------------ AI usage
+interface AiCall { id: number; capture_id: string | null; model: string; cached: number; ok: number; error: string | null; input_tokens: number | null; output_tokens: number | null; cache_read_tokens: number | null; cost_usd: number; latency_ms: number | null; at: string }
+function AiUsage({ role, lang }: { role: Role; lang: UiLang }) {
+  const { data, error } = useLoad<AiCall[]>(role, "/api/office/ai-calls");
+  if (error === "forbidden") return <Forbidden lang={lang} />;
+  if (!data) return null;
+  const L = (fr: string, en: string) => (lang === "fr" ? fr : en);
+  return (
+    <div className="panel table-wrap">
+      <p className="small muted">{L("Chaque ligne est une exécution d'extraction ; le nom du modèle indique le moteur réellement utilisé. Un appel Claude apparaît dans les colonnes de jetons et de coût.", "Each row is an extraction run; the model name identifies the engine actually used. Claude usage appears in the token and cost columns.")}</p>
+      <table>
+        <thead><tr><th>{L("Heure", "Time")}</th><th>{L("Modèle", "Model")}</th><th>Cache</th><th>OK</th><th className="num">{L("Entrée", "Input")}</th><th className="num">{L("Sortie", "Output")}</th><th className="num">{L("Lu en cache", "Cache read")}</th><th className="num">$</th><th className="num">ms</th></tr></thead>
+        <tbody>
+          {data.map((c) => (
+            <tr key={c.id}>
+              <td className="small">{c.at.slice(11, 19)}</td><td className="small">{c.model}</td><td>{c.cached ? "✓" : ""}</td><td>{c.ok ? "✓" : <span title={c.error ?? ""}>✗</span>}</td>
+              <td className="num">{c.input_tokens ?? ""}</td><td className="num">{c.output_tokens ?? ""}</td><td className="num">{c.cache_read_tokens ?? ""}</td><td className="num">{c.cost_usd ? c.cost_usd.toFixed(4) : ""}</td><td className="num">{c.latency_ms ?? ""}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
