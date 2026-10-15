@@ -1,7 +1,7 @@
 # Academic Management System
 
 ## Credits & Contributors
-A special thank you to all our team members for their hard work, dedication, and collaboration in building this project:
+A special thank you to all my team members for their hard work, dedication, and collaboration in building this project:
 
 - **Sahon Shaha** 
 - **Ahmet Yildirim** 
