@@ -1,0 +1,21 @@
+{
+  "title": "CareWorkspace",
+  "description": "An async-first virtual care platform designed to eliminate bottlenecked live-video queues by triaging patient requests through deterministic safety gates. Cases are routed into live consultations, pending document holds, or async-ready queues where Google Gemini synthesizes patient intake into structured decision briefs. Clinicians can safely review grouped cases and attest to close care episodes in under a minute while maintaining full medical oversight.",
+  "tech": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "Tailwind CSS",
+    "Google Gemini API",
+    "Node.js",
+    "Biome"
+  ],
+  "date": "2026-05-31",
+  "featured": false,
+  "featuredOrder": 1,
+  "cover": "./cover.png",
+  "github": "https://github.com/Ale20p/Projects/tree/main/Hackathons-Group Projects/CareWorkspace",
+  "external": "",
+  "company": "",
+  "showInProjects": true
+}
